@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Online Tasks Execution System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="page">
+        <div id="loginScreen" class="screen">
+            <h1>Online Tasks Execution<br>System</h1>
+            <p class="subTitle">Please login to continue</p>
+
+            <form class="card" onsubmit="return checkLogin()">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+
+                <p id="loginMessage" class="message"></p>
+
+                <input type="submit" value="Login" class="button mainButton">
+                <a href="#" class="link">Forgot Password?</a>
+
+                <div class="line">
+                    <span>or</span>
+                </div>
+
+                <input type="button" value="Sign Up" class="button secondButton" onclick="showScreen('signupScreen')">
+            </form>
+        </div>
+
+        <div id="signupScreen" class="screen">
+            <input type="button" value="< Back" class="backButton" onclick="showScreen('loginScreen')">
+
+            <h2>Sign Up</h2>
+            <p class="subTitle">Create your account</p>
+
+            <form class="card wideCard" onsubmit="return checkSignup()">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your full name">
+
+                <label>Birth Date</label>
+                <input type="date" id="birthDate">
+
+                <label>ID Number</label>
+                <input type="text" id="idNumber" placeholder="Enter your ID number" maxlength="9">
+
+                <label>Gender</label>
+                <select id="gender">
+                    <option value="">Select gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label>Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+
+                <label>Register As</label>
+                <select id="role">
+                    <option value="">Select account type</option>
+                    <option value="Requester">Requester</option>
+                    <option value="Performer">Performer</option>
+                </select>
+
+                <label>Profile Picture</label>
+                <input type="file" id="profilePicture">
+
+                <p id="signupMessage" class="message"></p>
+
+                <input type="submit" value="Continue" class="button mainButton">
+            </form>
+        </div>
+        <div id="homeScreen" class="screen">
+            <div class="card successCard">
+                <h2>Welcome</h2>
+                <p>You entered the website successfully.</p>
+                <input type="button" value="Logout" class="button mainButton" onclick="showScreen('loginScreen')">
+            </div>
+        </div>
+
+
+        <div id="paymentScreen" class="screen">
+            <input type="button" value="< Back" class="backButton" onclick="showScreen('signupScreen')">
+
+            <h2>Payment Information</h2>
+            <p class="subTitle">Enter your credit card details</p>
+
+            <form class="card wideCard" onsubmit="return checkPayment()">
+                <label>Card Holder Name</label>
+                <input type="text" id="cardHolder" placeholder="Name on card">
+
+                <label>Card Number</label>
+                <input type="text" id="cardNumber" placeholder="1234567890123456" maxlength="16">
+
+                <label>Expiry Date</label>
+                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+
+                <label>CVV</label>
+                <input type="password" id="cvv" placeholder="123" maxlength="4">
+
+                <p id="paymentMessage" class="message"></p>
+
+                <input type="submit" value="Continue" class="button mainButton">
+            </form>
+        </div>
+
+        <div id="termsScreen" class="screen">
+            <input type="button" value="< Back" class="backButton" onclick="showScreen('paymentScreen')">
+
+            <h2>Permissions &amp; Terms</h2>
+            <p class="subTitle">Please review and accept</p>
+
+            <form class="card termsCard" onsubmit="return checkTerms()">
+                <label class="checkLine">
+                    <input type="checkbox" id="receipts">
+                    I agree to receive receipts via email and phone
+                </label>
+
+                <label class="checkLine">
+                    <input type="checkbox" id="notifications">
+                    I agree to receive notifications from the application via email and phone
+                </label>
+
+                <hr>
+
+                <label class="checkLine">
+                    <input type="checkbox" id="policy">
+                    I have read and agree to the company policy
+                </label>
+
+                <p id="termsMessage" class="message"></p>
+
+                <input type="submit" value="Complete Registration" class="button mainButton">
+            </form>
+        </div>
+
+        <div id="successScreen" class="screen">
+            <div class="card successCard">
+                <h2>Registration Completed</h2>
+                <p>Your account was created successfully.</p>
+                <input type="button" value="Back to Login" class="button mainButton" onclick="showScreen('loginScreen')">
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>

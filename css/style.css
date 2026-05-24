@@ -1,0 +1,178 @@
+ body {
+            margin: 0;
+            background-color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #6a5946;
+        }
+
+        #page {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #fff1db;
+            padding-top: 45px;
+            padding-bottom: 45px;
+        }
+
+        .screen {
+            display: none;
+            text-align: center;
+        }
+
+        #loginScreen {
+            display: block;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 42px;
+            color: #6a5946;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 38px;
+            color: #6a5946;
+        }
+
+        .subTitle {
+            margin-top: 12px;
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: #907c62;
+        }
+
+        .card {
+            width: 360px;
+            margin: auto;
+            padding: 32px;
+            background-color: #fffdfb;
+            border-radius: 16px;
+            box-shadow: 0 0 20px #e6cda8;
+            text-align: left;
+        }
+
+        .wideCard {
+            width: 500px;
+        }
+
+        .termsCard {
+            width: 620px;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 7px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            height: 48px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border: 2px solid #efd5ad;
+            border-radius: 12px;
+            background-color: #fff4e4;
+            color: #6a5946;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            padding-top: 12px;
+        }
+
+        .button {
+            width: 100%;
+            height: 50px;
+            margin-top: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mainButton {
+            background-color: #e3be84;
+            color: white;
+        }
+
+        .secondButton {
+            background-color: #fff4e4;
+            color: #6a5946;
+            border: 2px solid #efd5ad;
+        }
+
+        .backButton {
+            width: 100px;
+            height: 38px;
+            margin-bottom: 22px;
+            border: none;
+            border-radius: 10px;
+            background-color: white;
+            color: #6a5946;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .link {
+            display: block;
+            margin-top: 24px;
+            text-align: center;
+            color: #a98555;
+            font-weight: bold;
+        }
+
+        .line {
+            margin-top: 24px;
+            margin-bottom: 8px;
+            border-top: 1px solid #efd5ad;
+            text-align: center;
+        }
+
+        .line span {
+            position: relative;
+            top: -10px;
+            padding-left: 15px;
+            padding-right: 15px;
+            background-color: #fffdfb;
+            color: #907c62;
+        }
+
+        .message {
+            min-height: 22px;
+            margin-top: 14px;
+            margin-bottom: 0;
+            color: #df4a5a;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .checkLine {
+            font-size: 17px;
+            line-height: 24px;
+            font-weight: normal;
+        }
+
+        .checkLine input {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #efd5ad;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .successCard {
+            margin-top: 100px;
+            text-align: center;
+        }
