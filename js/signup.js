@@ -1,3 +1,4 @@
+//yarden shriki, lior zahavi
 function setSignupError(inputName, errorName, text) {
     document.getElementById(inputName).style.borderColor = "red";
     document.getElementById(errorName).innerHTML = "* " + text;

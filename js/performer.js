@@ -1,3 +1,4 @@
+//yarden shriki, lior zahavi
 var performerTasks = [];
 var sortNewestFirst = true;
 
