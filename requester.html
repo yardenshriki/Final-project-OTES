@@ -8,16 +8,19 @@
 
 <body>
     <div id="page">
+        <div id="menuOverlay" onclick="closeMenu()"></div>
+
         <div id="sideMenu">
             <div class="menuHeader">
                 <h3>Menu</h3>
-                <input type="button" value="X" onclick="closeMenu()">
+                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">×</button>
             </div>
-            <input type="button" value="Home Page" onclick="openHomeByRole()">
-            <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-            <input type="button" value="Edit Profile" onclick="showScreen('profileScreen')">
-            <input type="button" value="Report" onclick="showScreen('reportScreen')">
-            <input type="button" value="Company Policy" onclick="showScreen('policyScreen')">
+            <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()"><span class="menuIcon"></span>Home Page</button>
+            <button type="button" class="sideMenuItem tasksIcon" onclick="scrollToAllTasks()"><span class="menuIcon"></span>My Tasks</button>
+            <button type="button" class="sideMenuItem profileMenuIcon"><span class="menuIcon"></span>Edit Profile</button>
+            <button type="button" class="sideMenuItem reportIcon"><span class="menuIcon"></span>Report</button>
+            <button type="button" class="sideMenuItem policyIcon"><span class="menuIcon"></span>Company Policy</button>
+            <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'"><span class="menuIcon"></span>Exit</button>
         </div>
 
         <div id="appHeader">
@@ -68,13 +71,14 @@
                     </select>
                 </div>
 
+                <div id="allTasksSection" class="scrollAnchor"></div>
                 <h3>All Tasks</h3>
                 <div class="taskList" id="requesterTaskList">
                 </div>
             </div>
         </div>
 
-<div id="myTasksScreen" class="screen">
+<!--<div id="myTasksScreen" class="screen">
             <div class="topBar">
                 <span>Online Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
@@ -103,92 +107,7 @@
                 <div class="taskList" id="myTasksList">
                 </div>
             </div>
-        </div>
-
-
-<div id="reportScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <h2>Report an Issue</h2>
-            <p class="subTitle">Submit a problem or task report</p>
-
-            <form class="card taskCard" onsubmit="return checkReport()">
-                <label>Report Type</label>
-                <select id="reportType">
-                    <option value="">Select report type</option>
-                    <option value="System Issue">System Issue</option>
-                    <option value="User Report">User Report</option>
-                    <option value="Task Report">Task Report</option>
-                </select>
-
-                <label>Full Name</label>
-                <input type="text" id="reportName" placeholder="Enter your name">
-
-                <label>Email</label>
-                <input type="email" id="reportEmail" placeholder="Enter your email">
-
-                <label>Description</label>
-                <textarea id="reportDescription" placeholder="Describe the issue"></textarea>
-
-                <p id="reportMessage" class="message"></p>
-
-                <input type="submit" value="Submit Report" class="button mainButton">
-                <input type="button" value="Cancel" class="button secondButton" onclick="showScreen('requesterHomeScreen')">
-            </form>
-        </div>
-
-<div id="policyScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="systemBox">
-                <h2>Company Policy</h2>
-                <div class="policyBox">
-                    <h3>Privacy Policy</h3>
-                    <p>All personal details are used only for task execution and communication.</p>
-                    <h3>Payment Terms</h3>
-                    <p>Payment is transferred after the requester approves task completion.</p>
-                    <h3>Report Guidelines</h3>
-                    <p>Users can report system problems, user problems, or task problems.</p>
-                </div>
-            </div>
-        </div>
-
-<div id="paymentSuccessScreen" class="screen">
-            <div class="card successCard">
-                <h2>Payment Successful</h2>
-                <p>The payment confirmation was sent by email.</p>
-                <input type="button" value="Rate Performer" class="button mainButton" onclick="showScreen('ratingScreen')">
-            </div>
-        </div>
-
-<div id="ratingScreen" class="screen">
-            <div class="card successCard">
-                <h2>Rate the Performer</h2>
-                <p>Performer: Sarah Johnson</p>
-                <p class="stars">* * * * *</p>
-                <textarea placeholder="Additional comments"></textarea>
-                <input type="button" value="Submit Rating" class="button mainButton" onclick="showScreen('requesterHomeScreen')">
-            </div>
-        </div>
-
-        <div id="taskSuccessScreen" class="screen">
-            <div class="card successCard">
-                <h2>Task Created</h2>
-                <p>Your task was created successfully.</p>
-                <input type="button" value="Back Home" class="button mainButton" onclick="showScreen('requesterHomeScreen')">
-            </div>
-        </div>
+        </div>-->
 
         <div id="welcomePopup" class="popupOverlay">
             <div class="welcomeBox">

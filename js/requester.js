@@ -1,6 +1,15 @@
 var requesterTasks = [];
 var selectedTaskState = "all";
 
+function scrollToAllTasks() {
+    closeMenu();
+    showScreen("requesterHomeScreen");
+
+    document.getElementById("allTasksSection").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
 function loadRequesterTasks() {
     fetch("data/tasks.json")
         .then(function (response) {
@@ -55,6 +64,14 @@ function connectRequesterFilters() {
 
     if (categorySelect != null) {
         categorySelect.onchange = filterRequesterTasks;
+    }
+
+    for (var i = 0; i < statButtons.length; i++) {
+        statButtons[i].onclick = function () {
+            selectedTaskState = this.getAttribute("data-state");
+            markActiveStat(this);
+            filterRequesterTasks();
+        };
     }
 }
 
@@ -246,7 +263,7 @@ function checkTask() {
         return false;
     }
 
-    showScreen("taskSuccessScreen");
+    /* showScreen("taskSuccessScreen"); */
     return false;
 }
 
@@ -273,6 +290,6 @@ function checkReport() {
 }
 
 function checkPayment() {
-    showScreen("profileScreen");
+    /* showScreen("profileScreen"); */
     return false;
 }

@@ -8,16 +8,19 @@
 
 <body>
     <div id="page">
+        <div id="menuOverlay" onclick="closeMenu()"></div>
+
         <div id="sideMenu">
             <div class="menuHeader">
                 <h3>Menu</h3>
-                <input type="button" value="X" onclick="closeMenu()">
+                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">×</button>
             </div>
-            <input type="button" value="Home Page" onclick="openHomeByRole()">
-            <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-            <input type="button" value="Edit Profile" onclick="showScreen('profileScreen')">
-            <input type="button" value="Report" onclick="showScreen('reportScreen')">
-            <input type="button" value="Company Policy" onclick="showScreen('policyScreen')">
+            <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()"><span class="menuIcon"></span>Home Page</button>
+            <button type="button" class="sideMenuItem tasksIcon"><span class="menuIcon"></span>My Tasks</button>
+            <button type="button" class="sideMenuItem profileMenuIcon"><span class="menuIcon"></span>Edit Profile</button>
+            <button type="button" class="sideMenuItem reportIcon"><span class="menuIcon"></span>Report</button>
+            <button type="button" class="sideMenuItem policyIcon"><span class="menuIcon"></span>Company Policy</button>
+            <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'"><span class="menuIcon"></span>Exit</button>
         </div>
 
         <div id="appHeader">
@@ -59,7 +62,7 @@
                                 <span class="searchIcon"></span>
                                 <input type="text" id="performerSearchInput" placeholder="Search available tasks...">
                             </div>
-                            <button type="button" id="sortDateButton" class="sortDateButton" title="Sort by creation date">↑</button>
+                            <button type="button" id="sortDateButton" class="sortDateButton" title="Newest tasks first">&#8593;</button>
                             <button type="button" class="performerFilterButton">
                                 <span class="filterIcon"></span>
                                 Filter
@@ -74,7 +77,7 @@
             </div>
         </div>
 
-<div id="myTasksScreen" class="screen">
+<!--<div id="myTasksScreen" class="screen">
             <div class="topBar">
                 <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
@@ -99,23 +102,8 @@
                         <option>Performer</option>
                     </select>
                 </div>
-
-              <!-- <div class="taskList">
-                    <div class="taskItem">
-                        <h4>Design a Logo</h4>
-                        <p>Category: Design</p>
-                        <span class="statusProgress">Status: In Progress</span>
-                        <input type="button" value="Open" onclick="showScreen('requesterTaskDetailsScreen')">
-                    </div>
-                    <div class="taskItem">
-                        <h4>Video Editing</h4>
-                        <p>Category: Video</p>
-                        <span class="statusOpen">Status: Available</span>
-                        <input type="button" value="Open">
-                    </div>
-                </div>-->
             </div>
-        </div>
+        </div>-->
 
 <div id="profileScreen" class="screen">
             <div class="topBar">
@@ -126,104 +114,7 @@
                 <input type="button" value="Policy" onclick="showScreen('policyScreen')">
             </div>
 
-          <!-- <div class="systemBox">
-                <h2>Profile</h2>
-                <div class="detailsGrid">
-                    <div class="sideCard">
-                        <div class="avatar">JD</div>
-                        <h3>John Doe</h3>
-                        <p>Rating: 4.8</p>
-                        <input type="button" value="Edit Profile" class="button mainButton">
-                        <input type="button" value="Add Credit Card" class="button secondButton" onclick="showScreen('addCardScreen')">
-                    </div>
-                    <div class="detailsMain">
-                        <h3>Statistics</h3>
-                        <p>Completed Tasks: 12</p>
-                        <p>Open Tasks: 3</p>
-                        <p>Total Earnings: 950</p>
-                        <h3>Task History</h3>
-                        <p>Design a Logo - Completed</p>
-                        <p>Write Product Description - In Progress</p>
-                    </div>
-                </div>
-            </div>-->
         </div>
-
-<!--<div id="addCardScreen" class="screen">
-            <input type="button" value="< Back" class="backButton" onclick="showScreen('profileScreen')">
-            <h2>Add Credit Card Details</h2>
-            <form class="card wideCard" onsubmit="return checkPayment()">
-                <label>Card Holder Name</label>
-                <input type="text" id="profileCardHolder" placeholder="Name on card">
-                <label>Card Number</label>
-                <input type="text" id="profileCardNumber" placeholder="1234567890123456">
-                <label>Expiry Date</label>
-                <input type="text" id="profileExpiryDate" placeholder="MM/YY">
-                <label>CVV</label>
-                <input type="password" id="profileCvv" placeholder="123">
-                <input type="button" value="Save Card" class="button mainButton" onclick="showScreen('profileScreen')">
-            </form>
-        </div>-->
-
-<!--<div id="reportScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <h2>Report an Issue</h2>
-            <p class="subTitle">Submit a problem or task report</p>
-
-            <form class="card taskCard" onsubmit="return checkReport()">
-                <label>Report Type</label>
-                <select id="reportType">
-                    <option value="">Select report type</option>
-                    <option value="System Issue">System Issue</option>
-                    <option value="User Report">User Report</option>
-                    <option value="Task Report">Task Report</option>
-                </select>
-
-                <label>Full Name</label>
-                <input type="text" id="reportName" placeholder="Enter your name">
-
-                <label>Email</label>
-                <input type="email" id="reportEmail" placeholder="Enter your email">
-
-                <label>Description</label>
-                <textarea id="reportDescription" placeholder="Describe the issue"></textarea>
-
-                <p id="reportMessage" class="message"></p>
-
-                <input type="submit" value="Submit Report" class="button mainButton">
-                <input type="button" value="Cancel" class="button secondButton" onclick="showScreen('requesterHomeScreen')">
-            </form>
-        </div>
-
-<div id="policyScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="systemBox">
-                <h2>Company Policy</h2>
-                <div class="policyBox">
-                    <h3>Privacy Policy</h3>
-                    <p>All personal details are used only for task execution and communication.</p>
-                    <h3>Payment Terms</h3>
-                    <p>Payment is transferred after the requester approves task completion.</p>
-                    <h3>Report Guidelines</h3>
-                    <p>Users can report system problems, user problems, or task problems.</p>
-                </div>
-            </div>
-        </div>
-    </div>-->
-
         <footer class="appFooter">
             <h2>Contact Us</h2>
             <p>If you have any questions about our policies, please contact us:</p>

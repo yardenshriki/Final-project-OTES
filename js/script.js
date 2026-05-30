@@ -24,6 +24,10 @@ function openMenu() {
     }
 
     document.getElementById("sideMenu").style.display = "block";
+
+    if (document.getElementById("menuOverlay") != null) {
+        document.getElementById("menuOverlay").style.display = "block";
+    }
 }
 
 function closeMenu() {
@@ -32,6 +36,10 @@ function closeMenu() {
     }
 
     document.getElementById("sideMenu").style.display = "none";
+
+    if (document.getElementById("menuOverlay") != null) {
+        document.getElementById("menuOverlay").style.display = "none";
+    }
 }
 
 function showHeader(screenName) {
@@ -158,6 +166,25 @@ function chooseWelcomeRole(roleName) {
         showScreen("requesterHomeScreen");
     }
 }
+
+document.addEventListener("click", function (event) {
+    var sideMenu = document.getElementById("sideMenu");
+    var menuButton = document.getElementsByClassName("menuButton")[0];
+
+    if (sideMenu == null || sideMenu.style.display != "block") {
+        return;
+    }
+
+    if (sideMenu.contains(event.target)) {
+        return;
+    }
+
+    if (menuButton != null && menuButton.contains(event.target)) {
+        return;
+    }
+
+    closeMenu();
+});
 
 window.onload = function () {
     var screens = document.getElementsByClassName("screen");
