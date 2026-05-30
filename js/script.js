@@ -130,6 +130,35 @@ function openHomeByRole() {
     }
 }
 
+function showWelcomePopup() {
+    if (document.getElementById("welcomePopup") == null) {
+        return;
+    }
+
+    document.getElementById("welcomePopup").style.display = "block";
+}
+
+function hideWelcomePopup() {
+    if (document.getElementById("welcomePopup") == null) {
+        return;
+    }
+
+    document.getElementById("welcomePopup").style.display = "none";
+}
+
+function chooseWelcomeRole(roleName) {
+    localStorage.removeItem("showWelcomePopup");
+    userRole = roleName;
+    localStorage.setItem("userRole", userRole);
+    hideWelcomePopup();
+
+    if (roleName == "Performer") {
+        showScreen("performerHomeScreen");
+    } else {
+        showScreen("requesterHomeScreen");
+    }
+}
+
 window.onload = function () {
     var screens = document.getElementsByClassName("screen");
 
@@ -145,5 +174,9 @@ window.onload = function () {
 
     if (screens.length > 0) {
         showScreen(screens[0].id);
+    }
+
+    if (localStorage.getItem("showWelcomePopup") == "yes") {
+        showWelcomePopup();
     }
 };

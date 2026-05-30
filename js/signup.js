@@ -14,7 +14,6 @@ function clearSignupErrors() {
     clearSignupError("idNumber", "idNumberError");
     clearSignupError("gender", "genderError");
     clearSignupError("email", "emailError");
-    clearSignupError("role", "roleError");
     clearSignupError("profilePicture", "profilePictureError");
 }
 
@@ -88,6 +87,7 @@ function fillExpiryMonths() {
         return;
     }
 
+    var selectedMonth = expiryMonth.value;
     clearSelect("expiryMonth", "Choose Month");
 
     var today = new Date();
@@ -106,6 +106,10 @@ function fillExpiryMonths() {
         option.value = monthText;
         option.innerHTML = monthText;
         expiryMonth.appendChild(option);
+
+        if (monthText == selectedMonth) {
+            expiryMonth.value = selectedMonth;
+        }
     }
 }
 
@@ -115,7 +119,6 @@ function checkSignup() {
     var idNumber = document.getElementById("idNumber").value;
     var gender = document.getElementById("gender").value;
     var email = document.getElementById("email").value;
-    var role = document.getElementById("role").value;
     var profilePicture = document.getElementById("profilePicture").value;
     var hasError = false;
 
@@ -172,11 +175,6 @@ function checkSignup() {
         }
     }
 
-    if (role == "") {
-        setSignupError("role", "roleError", "Account type is required");
-        hasError = true;
-    }
-
     if (profilePicture == "") {
         setSignupError("profilePicture", "profilePictureError", "Profile picture is required");
         hasError = true;
@@ -187,8 +185,6 @@ function checkSignup() {
         return false;
     }
 
-    userRole = role;
-    localStorage.setItem("userRole", userRole);
     showScreen("paymentScreen");
     return false;
 }
@@ -199,6 +195,9 @@ function checkPayment() {
     var expiryMonth = document.getElementById("expiryMonth").value;
     var expiryYear = document.getElementById("expiryYear").value;
     var cvv = document.getElementById("cvv").value;
+    var receipts = document.getElementById("receipts").checked;
+    var notifications = document.getElementById("notifications").checked;
+    var policy = document.getElementById("policy").checked;
     var hasError = false;
 
     clearMessage("paymentMessage");
@@ -249,29 +248,23 @@ function checkPayment() {
         }
     }
 
-    if (hasError == true) {
-        showMessage("paymentMessage", "Please fix the fields marked in red");
-        return false;
-    }
-
-    showScreen("termsScreen");
-    return false;
-}
-
-function checkTerms() {
-    var receipts = document.getElementById("receipts").checked;
-    var notifications = document.getElementById("notifications").checked;
-    var policy = document.getElementById("policy").checked;
-
-    clearMessage("termsMessage");
-
     if (receipts == false || notifications == false || policy == false) {
-        showMessage("termsMessage", "Please approve all permissions and terms");
+        showMessage("paymentMessage", "Please approve all permissions and terms");
+        hasError = true;
+    }
+
+    if (hasError == true) {
+        if (document.getElementById("paymentMessage").innerHTML == "") {
+            showMessage("paymentMessage", "Please fix the fields marked in red");
+        }
+
         return false;
     }
 
+    userRole = "Requester";
     localStorage.setItem("userRole", userRole);
-    openHomeByRole();
+    localStorage.setItem("showWelcomePopup", "yes");
+    showScreen("requesterHomeScreen");
     return false;
 }
 

@@ -10,7 +10,7 @@
 <body class="authBody">
     <div id="page">
 <div id="signupScreen" class="screen">
-    <input type="button" value="< Back" class="backButton" onclick="window.location.href='index.html'">
+    <input type="button" value="← Back" class="backButton" onclick="window.location.href='index.html'">
 
             <h2>Sign Up</h2>
             <p class="subTitle">Create your account</p>
@@ -41,14 +41,6 @@
                 <input type="text" id="email" placeholder="Enter your email">
                 <p id="emailError" class="fieldError"></p>
 
-                <label>Register As</label>
-                <select id="role">
-                    <option value="">Select account type</option>
-                    <option value="Requester">Requester</option>
-                    <option value="Performer">Performer</option>
-                </select>
-                <p id="roleError" class="fieldError"></p>
-
                 <label>Profile Picture</label>
                 <input type="file" id="profilePicture">
                 <p id="profilePictureError" class="fieldError"></p>
@@ -60,7 +52,7 @@
         </div>
 
 <div id="paymentScreen" class="screen">
-            <input type="button" value="< Back" class="backButton" onclick="showScreen('signupScreen')">
+            <input type="button" value="← Back" class="backButton" onclick="showScreen('signupScreen')">
 
             <h2>Payment Information</h2>
             <p class="subTitle">Enter your credit card details</p>
@@ -95,19 +87,7 @@
                 <input type="password" id="cvv" placeholder="123" maxlength="3">
                 <p id="cvvError" class="fieldError"></p>
 
-                <p id="paymentMessage" class="message"></p>
-
-                <input type="submit" value="Continue" class="button mainButton">
-            </form>
-        </div>
-
-<div id="termsScreen" class="screen">
-            <input type="button" value="< Back" class="backButton" onclick="showScreen('paymentScreen')">
-
-            <h2>Permissions &amp; Terms</h2>
-            <p class="subTitle">Please review and accept</p>
-
-            <form class="card termsCard" onsubmit="return checkTerms()">
+                <h3>Permissions &amp; Terms</h3>
                 <label class="checkLine">
                     <input type="checkbox" id="receipts">
                     I agree to receive receipts via email and phone
@@ -125,7 +105,7 @@
                     I have read and agree to the company policy
                 </label>
 
-                <p id="termsMessage" class="message"></p>
+                <p id="paymentMessage" class="message"></p>
 
                 <input type="submit" value="Complete Registration" class="button mainButton">
             </form>

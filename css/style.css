@@ -127,6 +127,14 @@ input[type="file"] {
     color: white;
 }
 
+.authBody .mainButton:hover {
+    background-color: #c99f63;
+}
+
+.authBody .secondButton:hover {
+    background-color: #efd5ad;
+}
+
 .secondButton {
     background-color: #fff4e4;
     color: #6a5946;
@@ -134,15 +142,25 @@ input[type="file"] {
 }
 
 .backButton {
-    width: 100px;
-    height: 38px;
+    width: 112px;
+    height: 42px;
     margin-bottom: 22px;
-    border: none;
-    border-radius: 10px;
-    background-color: white;
+    border: 2px solid #efd5ad;
+    border-radius: 12px;
+    background-color: #fffdfb;
     color: #6a5946;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 3px 8px #ead3b2;
+}
+
+.authBody .backButton:hover {
+    background-color: #efd5ad;
+}
+
+.authBody .backButton:active {
+    background-color: #d0a66b;
+    color: white;
 }
 
 .link {
@@ -462,6 +480,53 @@ hr {
     background-color: #fffdfb;
     border: 1px solid #efd5ad;
     border-radius: 10px;
+}
+
+.popupOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 55px;
+    padding-bottom: 35px;
+    background-color: rgba(0, 0, 0, 0.55);
+    z-index: 50;
+    box-sizing: border-box;
+}
+
+.welcomeBox {
+    width: 620px;
+    margin: auto;
+    padding: 30px;
+    background-color: #fffdfb;
+    border: 2px solid #e3be84;
+    border-radius: 16px;
+    box-shadow: 0 0 25px #5c4b39;
+    color: #6a5946;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.welcomeBox h2,
+.welcomeBox h3 {
+    text-align: center;
+}
+
+.welcomeBox h2 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.welcomeBox h3 {
+    margin-top: 0;
+    color: #907c62;
+}
+
+.welcomeBox p {
+    font-size: 16px;
+    line-height: 24px;
 }
 
 #sideMenu {
@@ -810,6 +875,20 @@ hr {
     .authBody select,
     .authBody textarea {
         font-size: 15px;
+    }
+
+    .welcomeBox {
+        width: 90%;
+        padding: 22px;
+    }
+
+    .welcomeBox h2 {
+        font-size: 26px;
+    }
+
+    .welcomeBox p {
+        font-size: 15px;
+        line-height: 22px;
     }
 }
 
