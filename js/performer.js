@@ -21,20 +21,6 @@ function connectPerformerActions() {
     if (searchInput != null) {
         searchInput.oninput = renderPerformerAvailableTasks;
     }
-
-    if (sortButton != null) {
-        sortButton.onclick = function () {
-            sortNewestFirst = !sortNewestFirst;
-
-            if (sortNewestFirst == true) {
-                sortButton.innerHTML = "↑";
-            } else {
-                sortButton.innerHTML = "↓";
-            }
-
-            renderPerformerAvailableTasks();
-        };
-    }
 }
 
 function renderPerformerActiveTasks() {
@@ -48,7 +34,7 @@ function renderPerformerActiveTasks() {
 
     for (var i = 0; i < performerTasks.length; i++) {
         if (performerTasks[i].assignedToPerformer == true && performerTasks[i].state != "completed") {
-            activeTasksList.innerHTML += createPerformerTaskCard(performerTasks[i], "Open");
+            activeTasksList.innerHTML += createPerformerTaskCard(performerTasks[i], "View");
         }
     }
 }
@@ -88,7 +74,7 @@ function renderPerformerAvailableTasks() {
     availableTasksList.innerHTML = "";
 
     for (var i = 0; i < availableTasks.length; i++) {
-        availableTasksList.innerHTML += createPerformerTaskCard(availableTasks[i], "View");
+        availableTasksList.innerHTML += createPerformerAvailableTaskCard(availableTasks[i]);
     }
 }
 
@@ -100,9 +86,37 @@ function createPerformerTaskCard(task, buttonText) {
         '<p>Location: ' + task.location + '</p>' +
         '<p>Created: ' + task.creationDate + '</p>' +
         '<p>Payment: <b>$' + task.payment + '</b></p>' +
-        '<span class="' + getPerformerStatusClass(task.state) + '">' + task.workStatus + '</span>' +
         '<input type="button" value="' + buttonText + '">' +
         '</div>';
+}
+
+function createPerformerAvailableTaskCard(task) {
+    return '<div class="taskItem performerAvailableCard">' +
+        '<span class="difficultyBadge">' + task.difficultyLevel + '</span>' +
+        '<h4>' + task.taskTitle + '</h4>' +
+        '<p class="taskDescription">' + task.description + '</p>' +
+        '<div class="taskMeta"><span>Category:</span><b>' + task.categories + '</b></div>' +
+        '<div class="taskMeta"><span>Payment:</span><b>$' + task.payment + '</b></div>' +
+        '<div class="taskMeta"><span>Created:</span><b>' + task.creationDate + '</b></div>' +
+        '<div class="taskMeta"><span>Location:</span><b>' + task.location + '</b></div>' +
+        '<input type="button" value="View Details">' +
+        '</div>';
+}
+
+function getPerformerStatusText(state) {
+    if (state == "open") {
+        return "Available";
+    }
+
+    if (state == "in-progress") {
+        return "Working";
+    }
+
+    if (state == "completed") {
+        return "Completed";
+    }
+
+    return state;
 }
 
 function getPerformerStatusClass(state) {

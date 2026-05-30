@@ -22,7 +22,7 @@
 
         <div id="appHeader">
             <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
-            <span class="systemTitle">Task Execution System</span>
+            <span class="systemTitle">Online Task Execution System</span>
 
             <button type="button" class="profileButton" aria-label="Profile">
                 <span class="profileIcon"></span>
@@ -56,7 +56,7 @@
                 <h3>Task History</h3>
                 <div class="statsRow">
                     <button type="button" class="statBox activeStat" data-state="all"><span>Total Tasks</span><b id="totalTasks">0</b></button>
-                    <button type="button" class="statBox" data-state="open"><span>Open Tasks</span><b id="openTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="open"><span>Available Tasks</span><b id="openTasks">0</b></button>
                     <button type="button" class="statBox" data-state="in-progress"><span>In Progress</span><b id="progressTasks">0</b></button>
                     <button type="button" class="statBox" data-state="completed"><span>Completed</span><b id="completedTasks">0</b></button>
                 </div>
@@ -76,7 +76,7 @@
 
 <div id="myTasksScreen" class="screen">
             <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
+                <span>Online Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
                 <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
                 <input type="button" value="Profile" onclick="showScreen('profileScreen')">
@@ -189,6 +189,18 @@
                 <input type="button" value="Back Home" class="button mainButton" onclick="showScreen('requesterHomeScreen')">
             </div>
         </div>
+
+        <footer class="appFooter">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about our policies, please contact us:</p>
+            <p>Email: <span>support@taskexecution.com</span></p>
+            <p class="lastUpdated">Last updated: February 2, 2026</p>
+            <div class="footerSocials">
+                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
+                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
+                <button type="button" aria-label="Instagram" data-tooltip="Instagram">◉</button>
+            </div>
+        </footer>
     </div>
 
     <script src="js/script.js"></script>

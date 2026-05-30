@@ -22,7 +22,7 @@
 
         <div id="appHeader">
             <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
-            <span class="systemTitle">Task Execution System</span>
+            <span class="systemTitle">Online Task Execution System</span>
 
             <button type="button" class="profileButton" aria-label="Profile">
                 <span class="profileIcon"></span>
@@ -36,7 +36,7 @@
 
 <div id="performerHomeScreen" class="screen">
             <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
+                <span>Online Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
                 <input type="button" value="Home" onclick="showScreen('performerHomeScreen')">
                 <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
@@ -100,7 +100,7 @@
                     </select>
                 </div>
 
-                <div class="taskList">
+              <!-- <div class="taskList">
                     <div class="taskItem">
                         <h4>Design a Logo</h4>
                         <p>Category: Design</p>
@@ -113,7 +113,7 @@
                         <span class="statusOpen">Status: Available</span>
                         <input type="button" value="Open">
                     </div>
-                </div>
+                </div>-->
             </div>
         </div>
 
@@ -126,7 +126,7 @@
                 <input type="button" value="Policy" onclick="showScreen('policyScreen')">
             </div>
 
-            <div class="systemBox">
+          <!-- <div class="systemBox">
                 <h2>Profile</h2>
                 <div class="detailsGrid">
                     <div class="sideCard">
@@ -146,10 +146,10 @@
                         <p>Write Product Description - In Progress</p>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
 
-<div id="addCardScreen" class="screen">
+<!--<div id="addCardScreen" class="screen">
             <input type="button" value="< Back" class="backButton" onclick="showScreen('profileScreen')">
             <h2>Add Credit Card Details</h2>
             <form class="card wideCard" onsubmit="return checkPayment()">
@@ -163,9 +163,9 @@
                 <input type="password" id="profileCvv" placeholder="123">
                 <input type="button" value="Save Card" class="button mainButton" onclick="showScreen('profileScreen')">
             </form>
-        </div>
+        </div>-->
 
-<div id="reportScreen" class="screen">
+<!--<div id="reportScreen" class="screen">
             <div class="topBar">
                 <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
@@ -222,7 +222,19 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>-->
+
+        <footer class="appFooter">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about our policies, please contact us:</p>
+            <p>Email: <span>support@taskexecution.com</span></p>
+            <p class="lastUpdated">Last updated: February 2, 2026</p>
+            <div class="footerSocials">
+                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
+                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
+                <button type="button" aria-label="Instagram" data-tooltip="Instagram">◉</button>
+            </div>
+        </footer>
 
     <script src="js/script.js"></script>
     <script src="js/performer.js"></script>

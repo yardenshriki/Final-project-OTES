@@ -6,11 +6,12 @@ body {
 }
 
 #page {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     min-height: 100vh;
     background-color: #faead3;
     padding-top: 75px;
-    padding-bottom: 45px;
 }
 
 .screen {
@@ -120,6 +121,17 @@ input[type="file"] {
     font-size: 17px;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.button:hover,
+.button:focus {
+    box-shadow: 0 3px 8px #d2ad74;
+    transform: translateY(-1px);
+}
+
+.button:active {
+    transform: translateY(1px);
 }
 
 .mainButton {
@@ -287,6 +299,19 @@ hr {
     cursor: pointer;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.statBox:hover,
+.statBox:focus {
+    background-color: #f6dfbd;
+    border-color: #c99f63;
+    box-shadow: 0 3px 8px #ead3b2;
+    transform: translateY(-1px);
+}
+
+.statBox:active {
+    transform: translateY(1px);
 }
 
 .statBox span {
@@ -332,6 +357,35 @@ hr {
     clear: both;
 }
 
+#requesterTaskList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+#requesterTaskList .taskItem {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    min-height: 285px;
+    margin: 0;
+    padding-top: 42px;
+}
+
+#requesterTaskList .statusTop {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    float: none;
+    margin: 0;
+}
+
+#requesterTaskList .taskItem input {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
 .taskItem {
     display: inline-block;
     width: 47%;
@@ -369,6 +423,21 @@ hr {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.taskItem input:hover,
+.taskItem input:focus,
+.smallButton:hover,
+.smallButton:focus {
+    background-color: #d6ad6c;
+    box-shadow: 0 3px 7px #d7bc91;
+    transform: translateY(-1px);
+}
+
+.taskItem input:active,
+.smallButton:active {
+    transform: translateY(1px);
 }
 
 .detailsGrid {
@@ -450,6 +519,93 @@ hr {
     background-color: #fffdfb;
     border: 1px solid #efd5ad;
     border-radius: 10px;
+}
+
+.appFooter {
+    width: 100%;
+    margin: 28px 0 0 0;
+    padding: 10px 28px;
+    background-color: #f0cf9d;
+    border-top: 2px solid #d3aa70;
+    color: #3f3327;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.appFooter h2 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #3f3327;
+}
+
+.appFooter p {
+    margin: 0 0 3px 0;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.appFooter span,
+.appFooter .lastUpdated {
+    color: #6a5946;
+}
+
+.footerSocials {
+    margin-top: 6px;
+}
+
+.footerSocials button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+    padding: 0;
+    border: 2px solid #6a5946;
+    border-radius: 50%;
+    background-color: #f8e8d0;
+    color: #3f3327;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.1s;
+}
+
+.footerSocials button:hover,
+.footerSocials button:focus {
+    border-color: #3f3327;
+    background-color: #fffdfb;
+    color: #3f3327;
+    box-shadow: 0 3px 8px #9f7b4d;
+    transform: scale(1.15);
+}
+
+.footerSocials button:active {
+    transform: scale(1.05);
+}
+
+.footerSocials button::after {
+    content: attr(data-tooltip);
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background-color: #6a5946;
+    color: #fff4e4;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 14px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.footerSocials button:hover::after,
+.footerSocials button:focus::after {
+    display: block;
 }
 
 #sideMenu {
@@ -845,6 +1001,19 @@ hr {
     font-weight: bold;
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.performerFilterButton:hover,
+.performerFilterButton:focus {
+    background-color: #ffe8c4;
+    border-color: #c99f63;
+    box-shadow: 0 3px 7px #d7bc91;
+    transform: translateY(-1px);
+}
+
+.performerFilterButton:active {
+    transform: translateY(1px);
 }
 
 .sortDateButton {
@@ -859,6 +1028,19 @@ hr {
     font-weight: bold;
     line-height: 36px;
     cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.sortDateButton:hover,
+.sortDateButton:focus {
+    background-color: #ffe8c4;
+    border-color: #c99f63;
+    box-shadow: 0 3px 7px #d7bc91;
+    transform: translateY(-1px);
+}
+
+.sortDateButton:active {
+    transform: translateY(1px);
 }
 
 .filterIcon {
@@ -906,6 +1088,71 @@ hr {
     margin-right: 0;
 }
 
+#performerAvailableTasks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.performerAvailableCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 390px;
+    margin: 0;
+    padding: 16px;
+    background-color: #fffdfb;
+    border: 1px solid #efd5ad;
+    border-radius: 8px;
+}
+
+.performerAvailableCard h4 {
+    padding-right: 80px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    min-height: 44px;
+}
+
+.performerAvailableCard .taskDescription {
+    min-height: 74px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #6a5946;
+    line-height: 21px;
+}
+
+.difficultyBadge {
+    align-self: flex-end;
+    margin-top: 0;
+    padding: 5px 12px;
+    background-color: #f0cf9d;
+    color: #3f3327;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.taskMeta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    margin-top: 6px;
+    color: #6a5946;
+}
+
+.taskMeta b {
+    color: #3f3327;
+}
+
+.performerAvailableCard input {
+    width: 100%;
+    height: 38px;
+    margin-top: auto;
+    flex-shrink: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #3f3327;
+}
+
 .taskItem .statusTop {
     display: inline-block;
     float: right;
@@ -930,6 +1177,11 @@ hr {
 
     .statsRow {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    #requesterTaskList,
+    #performerAvailableTasks {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     #appHeader {
@@ -994,6 +1246,11 @@ hr {
 
 @media screen and (max-width: 560px) {
     .statsRow {
+        grid-template-columns: 1fr;
+    }
+
+    #requesterTaskList,
+    #performerAvailableTasks {
         grid-template-columns: 1fr;
     }
 
@@ -1079,5 +1336,25 @@ hr {
         height: 36px;
         font-size: 18px;
         line-height: 30px;
+    }
+
+    .appFooter {
+        padding: 9px 16px;
+    }
+
+    .appFooter h2 {
+        font-size: 16px;
+    }
+
+    .appFooter p {
+        font-size: 11px;
+        line-height: 15px;
+    }
+
+    .footerSocials button {
+        width: 25px;
+        height: 25px;
+        font-size: 13px;
+        line-height: 19px;
     }
 }

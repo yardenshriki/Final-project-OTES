@@ -56,14 +56,6 @@ function connectRequesterFilters() {
     if (categorySelect != null) {
         categorySelect.onchange = filterRequesterTasks;
     }
-
-    for (var i = 0; i < statButtons.length; i++) {
-        statButtons[i].onclick = function () {
-            selectedTaskState = this.getAttribute("data-state");
-            markActiveStat(this);
-            filterRequesterTasks();
-        };
-    }
 }
 
 function filterRequesterTasks() {
