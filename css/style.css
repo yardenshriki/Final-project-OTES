@@ -179,6 +179,23 @@ input[type="file"] {
     text-align: center;
 }
 
+
+
+.expiryRow {
+    overflow: hidden;
+    margin-top: 0;
+}
+
+.expiryBox {
+    float: left;
+    width: 49%;
+}
+
+
+.expiryBoxRight {
+    float: right;
+}
+
 .checkLine {
     font-size: 17px;
     line-height: 24px;
@@ -752,5 +769,133 @@ hr {
         float: none;
         width: 100%;
         margin-top: 8px;
+    }
+}
+@media screen and (max-width: 700px) {
+    .authBody #page {
+        padding-top: 30px;
+        padding-left: 14px;
+        padding-right: 14px;
+        box-sizing: border-box;
+    }
+
+    .authBody h1 {
+        font-size: 32px;
+        line-height: 40px;
+    }
+
+    .authBody h2 {
+        font-size: 30px;
+        line-height: 38px;
+    }
+
+    .authBody .subTitle {
+        font-size: 16px;
+        margin-bottom: 22px;
+    }
+
+    .authBody .card,
+    .authBody .wideCard,
+    .authBody .termsCard {
+        width: 100%;
+        padding: 22px;
+        box-sizing: border-box;
+    }
+
+    .authBody .backButton {
+        margin-left: 0;
+    }
+
+    .authBody input,
+    .authBody select,
+    .authBody textarea {
+        font-size: 15px;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .authBody h1 {
+        font-size: 28px;
+        line-height: 35px;
+    }
+
+    .authBody .card,
+    .authBody .wideCard,
+    .authBody .termsCard {
+        padding: 18px;
+    }
+
+    .authBody .expiryBox {
+        float: none;
+        width: 100%;
+    }
+
+    .authBody .expiryBoxRight {
+        float: none;
+        margin-top: 10px;
+    }
+}
+@media screen and (max-width: 700px) {
+    .authBody #page {
+        padding-top: 30px;
+        padding-left: 14px;
+        padding-right: 14px;
+        box-sizing: border-box;
+    }
+
+    .authBody h1 {
+        font-size: 32px;
+        line-height: 40px;
+    }
+
+    .authBody h2 {
+        font-size: 30px;
+        line-height: 38px;
+    }
+
+    .authBody .subTitle {
+        font-size: 16px;
+        margin-bottom: 22px;
+    }
+
+    .authBody .card,
+    .authBody .wideCard,
+    .authBody .termsCard {
+        width: 100%;
+        padding: 22px;
+        box-sizing: border-box;
+    }
+
+    .authBody .backButton {
+        margin-left: 0;
+    }
+
+    .authBody input,
+    .authBody select,
+    .authBody textarea {
+        font-size: 15px;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .authBody h1 {
+        font-size: 28px;
+        line-height: 35px;
+    }
+
+    .authBody .card,
+    .authBody .wideCard,
+    .authBody .termsCard {
+        padding: 18px;
+    }
+
+    .authBody .expiryBox {
+        float: none;
+        width: 100%;
+    }
+
+    .authBody .expiryBoxRight {
+        float: none;
+        margin-top: 10px;
     }
 }
