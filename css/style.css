@@ -282,6 +282,10 @@ hr {
     border: 1px solid #efd5ad;
     border-radius: 4px;
     box-sizing: border-box;
+    color: #6a5946;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: left;
 }
 
 .statBox span {
@@ -532,7 +536,7 @@ hr {
 
 .roleSwitch {
     float: right;
-    margin-right: 70px;
+    margin-right: 12px;
     padding: 3px;
     border: 2px solid #d0a66b;
     border-radius: 24px;
@@ -557,13 +561,48 @@ hr {
 
 .profileButton {
     float: right;
-    width: 72px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
     border: none;
-    background-color: #f0cf9d;
-    color: #3f3327;
-    font-weight: bold;
+    border-radius: 50%;
+    background-color: transparent;
     cursor: pointer;
+    overflow: hidden;
+}
+
+.profileIcon {
+    display: block;
+    position: relative;
+    width: 34px;
+    height: 34px;
+    margin: 2px auto;
+    border-radius: 50%;
+    background-color: #6a5946;
+}
+
+.profileIcon::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #f8e8d0;
+    transform: translateX(-50%);
+}
+
+.profileIcon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: 28px;
+    height: 17px;
+    border-radius: 50% 50% 0 0;
+    background-color: #f8e8d0;
+    transform: translateX(-50%);
 }
 
 .statusOpen,

@@ -24,12 +24,14 @@
             <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
             <span class="systemTitle">Task Execution System</span>
 
+            <button type="button" class="profileButton" aria-label="Profile">
+                <span class="profileIcon"></span>
+            </button>
             <div class="roleSwitch">
                 <input type="button" id="requesterButton" value="Requester" onclick="switchRole('Requester')">
                 <input type="button" id="performerButton" value="Performer" onclick="switchRole('Performer')">
             </div>
 
-            <input type="button" value="Profile" class="profileButton" onclick="showScreen('profileScreen')">
         </div>
 
 <div id="requesterHomeScreen" class="screen">
@@ -48,20 +50,20 @@
                 <div class="createBox">
                     <h3>Create New Task</h3>
                     <p>Post a new task and find the perfect performer for your needs</p>
-                    <input type="button" value="+  Create New Task" class="button mainButton shortButton" onclick="showScreen('taskScreen')">
+                    <input type="button" value="+  Create New Task" class="button mainButton shortButton" >
                 </div>
 
                 <h3>Task History</h3>
                 <div class="statsRow">
-                    <div class="statBox activeStat"><span>Total Tasks</span><b>5</b></div>
-                    <div class="statBox"><span>Open Tasks</span><b>2</b></div>
-                    <div class="statBox"><span>In Progress</span><b>2</b></div>
-                    <div class="statBox"><span>Completed</span><b>1</b></div>
+                    <button type="button" class="statBox activeStat" data-state="all"><span>Total Tasks</span><b id="totalTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="open"><span>Open Tasks</span><b id="openTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="in-progress"><span>In Progress</span><b id="progressTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="completed"><span>Completed</span><b id="completedTasks">0</b></button>
                 </div>
 
                 <div class="filterRow">
-                    <input type="text" placeholder="Search tasks...">
-                    <select>
+                    <input type="text" id="taskSearch" placeholder="Search tasks...">
+                    <select id="categoryFilter">
                         <option>All Categories</option>
                         <option>Design</option>
                         <option>Writing</option>
@@ -70,144 +72,7 @@
                 </div>
 
                 <h3>All Tasks</h3>
-                <div class="taskList">
-                    <div class="taskItem">
-                        <span class="statusProgress statusTop">in-progress</span>
-                        <h4>Design a Logo</h4>
-                        <p>Need a modern logo for my startup company</p>
-                        <p>Category: Design</p>
-                        <p>Payment: <b>$150</b></p>
-                        <input type="button" value="View" onclick="showScreen('requesterTaskDetailsScreen')">
-                    </div>
-                    <div class="taskItem">
-                        <span class="statusOpen statusTop">open</span>
-                        <h4>Write Product Description</h4>
-                        <p>Write compelling product descriptions for e-commerce site</p>
-                        <p>Category: Writing</p>
-                        <p>Payment: <b>$75</b></p>
-                        <input type="button" value="View" onclick="showScreen('requesterTaskDetailsScreen')">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<div id="taskScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Home" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="pageTitle">
-                <input type="button" value="< Back to Dashboard" onclick="showScreen('requesterHomeScreen')">
-                <h2>Create New Task</h2>
-            </div>
-
-            <form class="card taskCard taskFormCard" onsubmit="return checkTask()">
-                <div class="noteBox">
-                    <b>Note:</b> All fields marked with * are required to publish your task.
-                </div>
-
-                <label>Task Title *</label>
-                <input type="text" id="taskTitle" placeholder="Enter a clear, descriptive title">
-
-                <label>Description *</label>
-                <textarea id="taskDescription" placeholder="Provide detailed information about the task, requirements, and expected deliverables"></textarea>
-
-                <div class="formColumn">
-                    <label>Location *</label>
-                    <select id="taskLocation">
-                        <option value="">Select location</option>
-                        <option value="Remote">Remote</option>
-                        <option value="Tel Aviv">Tel Aviv</option>
-                        <option value="Jerusalem">Jerusalem</option>
-                    </select>
-                </div>
-
-                <div class="formColumn rightColumn">
-                    <label>Difficulty Level *</label>
-                    <select id="difficultyLevel">
-                        <option value="">Select difficulty</option>
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </select>
-                </div>
-
-                <div class="clear"></div>
-
-                <label>Payment ($) *</label>
-                <input type="text" id="taskPayment" placeholder="0.00">
-
-                <label>Additional Details</label>
-                <textarea id="additionalDetails" placeholder="Add more details"></textarea>
-
-                <label>Attachments (Optional)</label>
-                <div class="uploadArea">
-                    <p>Click to upload files</p>
-                    <p>or drag and drop</p>
-                    <p>PDF, DOC, PNG, JPG (max 10MB)</p>
-                    <input type="file" id="taskAttachment">
-                </div>
-
-                <p id="taskMessage" class="message"></p>
-
-                <input type="submit" value="Create Task" class="button mainButton">
-                <input type="button" value="Cancel" class="button secondButton" onclick="showScreen('requesterHomeScreen')">
-            </form>
-
-            <div class="tipsBox">
-                <h3>Tips for Creating a Great Task</h3>
-                <p>- Be specific about your requirements and expectations</p>
-                <p>- Provide examples or references when possible</p>
-                <p>- Set a realistic deadline and fair payment</p>
-                <p>- Include all necessary files and materials</p>
-                <p>- Respond promptly to performer questions</p>
-            </div>
-        </div>
-
-<div id="requesterTaskDetailsScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Home" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="systemBox">
-                <input type="button" value="< Back" class="backButton pageBack" onclick="showScreen('requesterHomeScreen')">
-                <h2>Design a Logo</h2>
-                <p class="taskSub">Posted 2 days ago</p>
-                <div class="detailsGrid">
-                    <div class="detailsMain">
-                        <h3>Task Description</h3>
-                        <p>I need a modern, minimal logo for my new startup company. The company is in the tech industry, focusing on AI solutions. I'm looking for something clean, professional, and memorable. Please include different formats and colors.</p>
-                        <div class="infoRow">
-                            <div><b>Category</b><br>Design</div>
-                            <div><b>Location</b><br>Remote</div>
-                            <div><b>Difficulty</b><br>Medium</div>
-                        </div>
-                        <div class="chatBox">
-                            <h4>Communication</h4>
-                            <p>Send questions and clarifications to the task performer.</p>
-                            <input type="text" placeholder="Write a message">
-                            <input type="button" value="Send" class="smallButton">
-                        </div>
-                    </div>
-
-                    <div class="sideCard">
-                        <h3>Task Performer</h3>
-                        <div class="avatar">SJ</div>
-                        <p>Sarah Johnson</p>
-                        <p>Rating: 4.9</p>
-                        <h3>Task Details</h3>
-                        <p>Status: <span class="statusProgress">In Progress</span></p>
-                        <p>Payment: <b>$150</b></p>
-                        <p>Due Date: 21/5/2026</p>
-                        <input type="button" value="Approve Completion" class="button mainButton" onclick="showScreen('paymentSuccessScreen')">
-                        <input type="button" value="Report Issue" class="button secondButton" onclick="showScreen('reportScreen')">
-                    </div>
+                <div class="taskList" id="requesterTaskList">
                 </div>
             </div>
         </div>
@@ -238,70 +103,11 @@
                     </select>
                 </div>
 
-                <div class="taskList">
-                    <div class="taskItem">
-                        <h4>Design a Logo</h4>
-                        <p>Category: Design</p>
-                        <span class="statusProgress">Status: In Progress</span>
-                        <input type="button" value="Open" onclick="showScreen('requesterTaskDetailsScreen')">
-                    </div>
-                    <div class="taskItem">
-                        <h4>Video Editing</h4>
-                        <p>Category: Video</p>
-                        <span class="statusOpen">Status: Available</span>
-                        <input type="button" value="Open" onclick="showScreen('availableTaskDetailsScreen')">
-                    </div>
+                <div class="taskList" id="myTasksList">
                 </div>
             </div>
         </div>
 
-<div id="profileScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
-                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Policy" onclick="showScreen('policyScreen')">
-            </div>
-
-            <div class="systemBox">
-                <h2>Profile</h2>
-                <div class="detailsGrid">
-                    <div class="sideCard">
-                        <div class="avatar">JD</div>
-                        <h3>John Doe</h3>
-                        <p>Rating: 4.8</p>
-                        <input type="button" value="Edit Profile" class="button mainButton">
-                        <input type="button" value="Add Credit Card" class="button secondButton" onclick="showScreen('addCardScreen')">
-                    </div>
-                    <div class="detailsMain">
-                        <h3>Statistics</h3>
-                        <p>Completed Tasks: 12</p>
-                        <p>Open Tasks: 3</p>
-                        <p>Total Earnings: 950</p>
-                        <h3>Task History</h3>
-                        <p>Design a Logo - Completed</p>
-                        <p>Write Product Description - In Progress</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<div id="addCardScreen" class="screen">
-            <input type="button" value="< Back" class="backButton" onclick="showScreen('profileScreen')">
-            <h2>Add Credit Card Details</h2>
-            <form class="card wideCard" onsubmit="return checkPayment()">
-                <label>Card Holder Name</label>
-                <input type="text" id="profileCardHolder" placeholder="Name on card">
-                <label>Card Number</label>
-                <input type="text" id="profileCardNumber" placeholder="1234567890123456">
-                <label>Expiry Date</label>
-                <input type="text" id="profileExpiryDate" placeholder="MM/YY">
-                <label>CVV</label>
-                <input type="password" id="profileCvv" placeholder="123">
-                <input type="button" value="Save Card" class="button mainButton" onclick="showScreen('profileScreen')">
-            </form>
-        </div>
 
 <div id="reportScreen" class="screen">
             <div class="topBar">
