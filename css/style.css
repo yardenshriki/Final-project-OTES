@@ -191,6 +191,23 @@ input[type="file"] {
     text-align: center;
 }
 
+
+
+.expiryRow {
+    overflow: hidden;
+    margin-top: 0;
+}
+
+.expiryBox {
+    float: left;
+    width: 49%;
+}
+
+
+.expiryBoxRight {
+    float: right;
+}
+
 .checkLine {
     font-size: 17px;
     line-height: 24px;

@@ -3,26 +3,30 @@
 
 <head>
     <title>Sign Up - Online Tasks Execution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
+<body class="authBody">
     <div id="page">
 <div id="signupScreen" class="screen">
-            <input type="button" value="< Back" class="backButton" onclick="showScreen('loginScreen')">
+    <input type="button" value="< Back" class="backButton" onclick="window.location.href='index.html'">
 
             <h2>Sign Up</h2>
             <p class="subTitle">Create your account</p>
 
             <form class="card wideCard" onsubmit="return checkSignup()">
-                <label>Full Name</label>
+   <label>Full Name</label>
                 <input type="text" id="fullName" placeholder="Enter your full name">
+                <p id="fullNameError" class="fieldError"></p>
 
                 <label>Birth Date</label>
                 <input type="date" id="birthDate">
+                <p id="birthDateError" class="fieldError"></p>
 
                 <label>ID Number</label>
                 <input type="text" id="idNumber" placeholder="Enter your ID number" maxlength="9">
+                <p id="idNumberError" class="fieldError"></p>
 
                 <label>Gender</label>
                 <select id="gender">
@@ -31,9 +35,11 @@
                     <option value="Male">Male</option>
                     <option value="Other">Other</option>
                 </select>
+                <p id="genderError" class="fieldError"></p>
 
                 <label>Email</label>
-                <input type="email" id="email" placeholder="Enter your email">
+                <input type="text" id="email" placeholder="Enter your email">
+                <p id="emailError" class="fieldError"></p>
 
                 <label>Register As</label>
                 <select id="role">
@@ -41,9 +47,11 @@
                     <option value="Requester">Requester</option>
                     <option value="Performer">Performer</option>
                 </select>
+                <p id="roleError" class="fieldError"></p>
 
                 <label>Profile Picture</label>
                 <input type="file" id="profilePicture">
+                <p id="profilePictureError" class="fieldError"></p>
 
                 <p id="signupMessage" class="message"></p>
 
@@ -58,17 +66,34 @@
             <p class="subTitle">Enter your credit card details</p>
 
             <form class="card wideCard" onsubmit="return checkPayment()">
-                <label>Card Holder Name</label>
+  <label>Card Holder Name</label>
                 <input type="text" id="cardHolder" placeholder="Name on card">
+                <p id="cardHolderError" class="fieldError"></p>
 
                 <label>Card Number</label>
                 <input type="text" id="cardNumber" placeholder="1234567890123456" maxlength="16">
+                <p id="cardNumberError" class="fieldError"></p>
 
                 <label>Expiry Date</label>
-                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                <div class="expiryRow">
+                    <div class="expiryBox">
+                        <select id="expiryMonth">
+                            <option value="">Choose Month</option>
+                        </select>
+                        <p id="expiryMonthError" class="fieldError"></p>
+                    </div>
+
+                    <div class="expiryBox expiryBoxRight">
+                        <select id="expiryYear" onchange="fillExpiryMonths()">
+                            <option value="">Choose Year</option>
+                        </select>
+                        <p id="expiryYearError" class="fieldError"></p>
+                    </div>
+                </div>
 
                 <label>CVV</label>
-                <input type="password" id="cvv" placeholder="123" maxlength="4">
+                <input type="password" id="cvv" placeholder="123" maxlength="3">
+                <p id="cvvError" class="fieldError"></p>
 
                 <p id="paymentMessage" class="message"></p>
 
