@@ -182,7 +182,7 @@
             </div>
         </div>
 
-<div id="taskSuccessScreen" class="screen">
+        <div id="taskSuccessScreen" class="screen">
             <div class="card successCard">
                 <h2>Task Created</h2>
                 <p>Your task was created successfully.</p>
@@ -190,17 +190,23 @@
             </div>
         </div>
 
-        <footer class="appFooter">
-            <h2>Contact Us</h2>
-            <p>If you have any questions about our policies, please contact us:</p>
-            <p>Email: <span>support@taskexecution.com</span></p>
-            <p class="lastUpdated">Last updated: February 2, 2026</p>
-            <div class="footerSocials">
-                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
-                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
-                <button type="button" aria-label="Instagram" data-tooltip="Instagram">◉</button>
+        <div id="welcomePopup" class="popupOverlay">
+            <div class="welcomeBox">
+                <h2>Welcome to OTES! 🎉</h2>
+                <h3>Your registration was successful.</h3>
+
+                <p>We are thrilled to have you with us!</p>
+
+                <p>OTES (Online Tasks Execution System) is a community platform that connects people who need a helping hand with everyday physical tasks, with individuals looking to earn extra income on a flexible schedule-with no experience required and zero commitment.</p>
+
+                <p>The best part? You are in full control. You can switch between posting tasks or performing them whenever you like.</p>
+
+                <p><b>To get started, what would you like to do today?</b></p>
+
+                <input type="button" value="I want to post a task (Requester)" class="button mainButton" onclick="chooseWelcomeRole('Requester')">
+                <input type="button" value="I want to earn extra income (Performer)" class="button secondButton" onclick="chooseWelcomeRole('Performer')">
             </div>
-        </footer>
+        </div>
     </div>
 
     <script src="js/script.js"></script>

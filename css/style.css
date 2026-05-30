@@ -139,6 +139,14 @@ input[type="file"] {
     color: white;
 }
 
+.authBody .mainButton:hover {
+    background-color: #c99f63;
+}
+
+.authBody .secondButton:hover {
+    background-color: #efd5ad;
+}
+
 .secondButton {
     background-color: #fff4e4;
     color: #6a5946;
@@ -146,15 +154,25 @@ input[type="file"] {
 }
 
 .backButton {
-    width: 100px;
-    height: 38px;
+    width: 112px;
+    height: 42px;
     margin-bottom: 22px;
-    border: none;
-    border-radius: 10px;
-    background-color: white;
+    border: 2px solid #efd5ad;
+    border-radius: 12px;
+    background-color: #fffdfb;
     color: #6a5946;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0 3px 8px #ead3b2;
+}
+
+.authBody .backButton:hover {
+    background-color: #efd5ad;
+}
+
+.authBody .backButton:active {
+    background-color: #d0a66b;
+    color: white;
 }
 
 .link {
@@ -538,91 +556,51 @@ hr {
     border-radius: 10px;
 }
 
-.appFooter {
+.popupOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    margin: 28px 0 0 0;
-    padding: 10px 28px;
-    background-color: #f0cf9d;
-    border-top: 2px solid #d3aa70;
-    color: #3f3327;
+    min-height: 100vh;
+    padding-top: 55px;
+    padding-bottom: 35px;
+    background-color: rgba(0, 0, 0, 0.55);
+    z-index: 50;
+    box-sizing: border-box;
+}
+
+.welcomeBox {
+    width: 620px;
+    margin: auto;
+    padding: 30px;
+    background-color: #fffdfb;
+    border: 2px solid #e3be84;
+    border-radius: 16px;
+    box-shadow: 0 0 25px #5c4b39;
+    color: #6a5946;
     text-align: left;
     box-sizing: border-box;
 }
 
-.appFooter h2 {
-    margin: 0 0 5px 0;
-    font-size: 18px;
-    color: #3f3327;
+.welcomeBox h2,
+.welcomeBox h3 {
+    text-align: center;
 }
 
-.appFooter p {
-    margin: 0 0 3px 0;
-    font-size: 12px;
-    line-height: 16px;
+.welcomeBox h2 {
+    font-size: 32px;
+    margin-bottom: 8px;
 }
 
-.appFooter span,
-.appFooter .lastUpdated {
-    color: #6a5946;
+.welcomeBox h3 {
+    margin-top: 0;
+    color: #907c62;
 }
 
-.footerSocials {
-    margin-top: 6px;
-}
-
-.footerSocials button {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    margin-right: 8px;
-    padding: 0;
-    border: 2px solid #6a5946;
-    border-radius: 50%;
-    background-color: #f8e8d0;
-    color: #3f3327;
-    font-size: 15px;
-    font-weight: bold;
-    line-height: 1;
-    cursor: pointer;
-    transition: color 0.2s, transform 0.1s;
-}
-
-.footerSocials button:hover,
-.footerSocials button:focus {
-    border-color: #3f3327;
-    background-color: #fffdfb;
-    color: #3f3327;
-    box-shadow: 0 3px 8px #9f7b4d;
-    transform: scale(1.15);
-}
-
-.footerSocials button:active {
-    transform: scale(1.05);
-}
-
-.footerSocials button::after {
-    content: attr(data-tooltip);
-    display: none;
-    position: absolute;
-    left: 50%;
-    bottom: 26px;
-    padding: 5px 8px;
-    border-radius: 4px;
-    background-color: #6a5946;
-    color: #fff4e4;
-    font-size: 11px;
-    font-weight: normal;
-    line-height: 14px;
-    white-space: nowrap;
-    transform: translateX(-50%);
-}
-
-.footerSocials button:hover::after,
-.footerSocials button:focus::after {
-    display: block;
+.welcomeBox p {
+    font-size: 16px;
+    line-height: 24px;
 }
 
 #sideMenu {
@@ -1229,6 +1207,21 @@ hr {
         width: 34px;
         height: 34px;
     }
+
+    .welcomeBox {
+        width: 90%;
+        padding: 22px;
+    }
+
+    .welcomeBox h2 {
+        font-size: 26px;
+    }
+
+    .welcomeBox p {
+        font-size: 15px;
+        line-height: 22px;
+    }
+}
 
     .profileIcon {
         width: 30px;
