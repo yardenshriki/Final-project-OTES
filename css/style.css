@@ -392,6 +392,12 @@ hr {
     clear: both;
 }
 
+.scrollAnchor {
+    position: relative;
+    top: -80px;
+    height: 1px;
+}
+
 #requesterTaskList {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -403,7 +409,7 @@ hr {
     flex-direction: column;
     position: relative;
     width: 100%;
-    min-height: 285px;
+    min-height: 250px;
     margin: 0;
     padding-top: 42px;
 }
@@ -418,7 +424,7 @@ hr {
 
 #requesterTaskList .taskItem input {
     align-self: flex-start;
-    margin-top: auto;
+    margin-top: 10px;
 }
 
 .taskItem {
@@ -603,6 +609,16 @@ hr {
     line-height: 24px;
 }
 
+#requesterTaskList .taskItem h4 {
+    margin-bottom: 8px;
+}
+
+#requesterTaskList .taskItem p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    line-height: 20px;
+}
+
 .appFooter {
     width: 100%;
     margin: 28px 0 0 0;
@@ -649,7 +665,7 @@ hr {
     background-color: #f8e8d0;
     color: #3f3327;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: 600;
     line-height: 1;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
@@ -724,10 +740,193 @@ hr {
     background-color: #d8b06f;
 }
 
+.sideMenuItem {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 46px;
+    margin-top: 7px;
+    padding-left: 6px;
+    border: none;
+    border-radius: 6px;
+    background-color: #f4d6a8;
+    color: #1f1b16;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.sideMenuItem:hover,
+.sideMenuItem:focus {
+    background-color: #d8b06f;
+}
+
+.menuIcon {
+    display: inline-block;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin-right: 14px;
+    color: #3f3327;
+}
+
+.homeIcon .menuIcon::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 10px;
+    width: 16px;
+    height: 12px;
+    border: 2px solid #3f3327;
+    border-top: none;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.homeIcon .menuIcon::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 3px;
+    width: 15px;
+    height: 15px;
+    border-left: 2px solid #3f3327;
+    border-top: 2px solid #3f3327;
+    transform: rotate(45deg);
+    box-sizing: border-box;
+}
+
+.tasksIcon .menuIcon::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 6px;
+    width: 20px;
+    height: 16px;
+    border: 2px solid #3f3327;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.tasksIcon .menuIcon::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 12px;
+    height: 7px;
+    border: 2px solid #3f3327;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    box-sizing: border-box;
+}
+
+.profileMenuIcon .menuIcon::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 3px;
+    width: 8px;
+    height: 8px;
+    border: 2px solid #3f3327;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.profileMenuIcon .menuIcon::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 15px;
+    width: 16px;
+    height: 9px;
+    border: 2px solid #3f3327;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    box-sizing: border-box;
+}
+
+.reportIcon .menuIcon::before {
+    content: "!";
+    position: absolute;
+    left: 2px;
+    top: 1px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #3f3327;
+    border-radius: 50%;
+    color: #3f3327;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 17px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.policyIcon .menuIcon::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 2px;
+    width: 16px;
+    height: 20px;
+    border: 2px solid #3f3327;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.policyIcon .menuIcon::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    width: 11px;
+    height: 2px;
+    background-color: #3f3327;
+    transform: rotate(-45deg);
+    box-shadow: -3px 3px 0 -1px #3f3327;
+}
+
+.exitIcon .menuIcon::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 11px;
+    width: 16px;
+    height: 2px;
+    background-color: #3f3327;
+}
+
+.exitIcon .menuIcon::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #3f3327;
+    border-right: 2px solid #3f3327;
+    transform: rotate(45deg);
+}
+
 .menuHeader {
+    position: relative;
     overflow: hidden;
     border-bottom: none;
     margin-bottom: 12px;
+}
+
+#menuOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: rgba(63, 51, 39, 0.32);
+    z-index: 18;
 }
 
 .menuHeader h3 {
@@ -735,10 +934,28 @@ hr {
     margin-top: 8px;
 }
 
-.menuHeader input {
-    float: right;
-    width: 42px;
+.closeMenuButton {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: transparent;
+    color: #5c4b39;
+    font-size: 24px;
+    line-height: 26px;
+    font-weight: bold;
     text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.closeMenuButton:hover,
+.closeMenuButton:focus {
+    transform: scale(1.2);
 }
 
 #appHeader {
@@ -1180,9 +1397,9 @@ hr {
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 390px;
+    min-height: 305px;
     margin: 0;
-    padding: 16px;
+    padding: 14px;
     background-color: #fffdfb;
     border: 1px solid #efd5ad;
     border-radius: 8px;
@@ -1190,17 +1407,18 @@ hr {
 
 .performerAvailableCard h4 {
     padding-right: 80px;
-    margin-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 4px;
     font-size: 18px;
-    min-height: 44px;
+    min-height: 34px;
 }
 
 .performerAvailableCard .taskDescription {
-    min-height: 74px;
+    min-height: 46px;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     color: #6a5946;
-    line-height: 21px;
+    line-height: 18px;
 }
 
 .difficultyBadge {
@@ -1215,20 +1433,30 @@ hr {
 
 .taskMeta {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
     margin-top: 6px;
+    line-height: 18px;
     color: #6a5946;
 }
 
+.taskMeta span {
+    display: inline;
+    margin: 0;
+    color: #6a5946;
+    font-weight: bold;
+}
+
 .taskMeta b {
+    display: inline;
     color: #3f3327;
+    text-align: right;
 }
 
 .performerAvailableCard input {
     width: 100%;
-    height: 38px;
-    margin-top: auto;
+    height: 36px;
+    margin-top: 16px;
     flex-shrink: 0;
     font-size: 16px;
     font-weight: bold;

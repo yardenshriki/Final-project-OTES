@@ -21,6 +21,22 @@ function connectPerformerActions() {
     if (searchInput != null) {
         searchInput.oninput = renderPerformerAvailableTasks;
     }
+
+    if (sortButton != null) {
+        sortButton.onclick = function () {
+            sortNewestFirst = !sortNewestFirst;
+
+            if (sortNewestFirst == true) {
+                sortButton.innerHTML = "&#8593;";
+                sortButton.title = "Newest tasks first";
+            } else {
+                sortButton.innerHTML = "&#8595;";
+                sortButton.title = "Oldest tasks first";
+            }
+
+            renderPerformerAvailableTasks();
+        };
+    }
 }
 
 function renderPerformerActiveTasks() {
