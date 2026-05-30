@@ -12,6 +12,7 @@ body {
     min-height: 100vh;
     background-color: #faead3;
     padding-top: 75px;
+    box-sizing: border-box;
 }
 
 .authBody #page {
@@ -23,7 +24,43 @@ body {
 }
 
 .authBody #loginScreen {
+    margin-top: 34px;
+}
+
+.authBody #loginScreen h1 {
+    font-size: 34px;
+}
+
+.authBody #loginScreen .subTitle {
+    margin-top: 8px;
+    margin-bottom: 18px;
+}
+
+.authBody #loginScreen .card {
+    width: 340px;
+    padding: 24px;
+}
+
+.authBody #loginScreen label {
     margin-top: 12px;
+    margin-bottom: 5px;
+}
+
+.authBody #loginScreen input {
+    height: 42px;
+}
+
+.authBody #loginScreen .button {
+    height: 44px;
+    margin-top: 14px;
+}
+
+.authBody #loginScreen .link {
+    margin-top: 16px;
+}
+
+.authBody #loginScreen .line {
+    margin-top: 18px;
 }
 
 .authBody #signupScreen,
@@ -1843,5 +1880,29 @@ hr {
         height: 25px;
         font-size: 13px;
         line-height: 19px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .authBody #loginScreen h1 {
+        font-size: 30px;
+        white-space: normal;
+    }
+}
+
+@media screen and (max-width: 560px) {
+    .authBody #loginScreen {
+        margin-top: 22px;
+    }
+
+    .authBody #loginScreen h1 {
+        font-size: 24px;
+        line-height: 30px;
+        white-space: normal;
+    }
+
+    .authBody #loginScreen .card {
+        width: 88%;
+        padding: 18px;
     }
 }
