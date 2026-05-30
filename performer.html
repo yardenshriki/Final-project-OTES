@@ -48,175 +48,29 @@
 
             <div class="systemBox">
                 <h3>My Active Tasks</h3>
-                <div class="taskList">
-                    <div class="taskItem">
-                        <span class="statusProgress statusTop">active</span>
-                        <h4>Design a Logo</h4>
-                        <p>Need a modern logo for my startup company</p>
-                        <p>Payment: <b>$150</b></p>
-                        <span class="statusProgress">Working</span>
-                        <input type="button" value="Open" onclick="showScreen('performerTaskDetailsScreen')">
-                    </div>
-                    <div class="taskItem">
-                        <span class="statusProgress statusTop">active</span>
-                        <h4>Website Development</h4>
-                        <p>Build a landing page for a small business</p>
-                        <p>Payment: <b>$300</b></p>
-                        <span class="statusProgress">In Progress</span>
-                        <input type="button" value="Open" onclick="showScreen('performerTaskDetailsScreen')">
-                    </div>
+                <div class="taskList" id="performerActiveTasks">
                 </div>
 
                 <h3>Available Tasks</h3>
                 <div class="performerLayout">
                     <div class="availableList">
-                        <div class="filterRow">
-                            <input type="text" placeholder="Search task">
-                            <select>
-                                <option>All categories</option>
-                                <option>Design</option>
-                                <option>Development</option>
-                                <option>Writing</option>
-                            </select>
+                        <div class="performerFilterBar">
+                            <div class="performerSearchBox">
+                                <span class="searchIcon"></span>
+                                <input type="text" id="performerSearchInput" placeholder="Search available tasks...">
+                            </div>
+                            <button type="button" id="sortDateButton" class="sortDateButton" title="Sort by creation date">↑</button>
+                            <button type="button" class="performerFilterButton">
+                                <span class="filterIcon"></span>
+                                Filter
+                            </button>
                         </div>
 
-                        <div class="taskItem fullTask">
-                            <span class="statusOpen statusTop">open</span>
-                            <h4>Video Editing</h4>
-                            <p>Edit a short video for social media.</p>
-                            <p>Location: Remote</p>
-                            <p>Payment: <b>$200</b></p>
-                            <input type="button" value="View" onclick="showScreen('availableTaskDetailsScreen')">
-                        </div>
-                        <div class="taskItem fullTask">
-                            <span class="statusOpen statusTop">open</span>
-                            <h4>Data Entry</h4>
-                            <p>Enter data into a table.</p>
-                            <p>Location: Remote</p>
-                            <p>Payment: <b>$100</b></p>
-                            <input type="button" value="View" onclick="showScreen('availableTaskDetailsScreen')">
+                        <div id="performerAvailableTasks">
                         </div>
                     </div>
 
-                    <div class="filterPanel">
-                        <h3>Filter Tasks</h3>
-                        <label>Category</label>
-                        <select>
-                            <option>All Categories</option>
-                            <option>Design</option>
-                            <option>Development</option>
-                            <option>Writing</option>
-                        </select>
-                        <label>Difficulty</label>
-                        <select>
-                            <option>Any Difficulty</option>
-                            <option>Easy</option>
-                            <option>Medium</option>
-                            <option>Hard</option>
-                        </select>
-                        <label>Location</label>
-                        <select>
-                            <option>Any Location</option>
-                            <option>Remote</option>
-                            <option>Tel Aviv</option>
-                        </select>
-                        <label>Payment Range</label>
-                        <input type="text" placeholder="Minimum payment">
-                    </div>
                 </div>
-            </div>
-        </div>
-
-<div id="availableTaskDetailsScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Home" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="systemBox">
-                <input type="button" value="< Back" class="backButton pageBack" onclick="showScreen('performerHomeScreen')">
-                <h2>Video Editing</h2>
-                <p class="taskSub">Posted by Anna Smith</p>
-                <div class="detailsGrid">
-                    <div class="detailsMain">
-                        <h3>Task Description</h3>
-                        <p>Edit a short video, add music, subtitles, and simple transitions.</p>
-                        <div class="infoRow">
-                            <div><b>Location</b><br>Remote</div>
-                            <div><b>Difficulty</b><br>Medium</div>
-                            <div><b>Payment</b><br>$200</div>
-                        </div>
-                    </div>
-                    <div class="sideCard">
-                        <h3>Task Requester</h3>
-                        <div class="avatar">AS</div>
-                        <p>Anna Smith</p>
-                        <p>Rating: 4.8</p>
-                        <p>Open Tasks: 3</p>
-                        <input type="button" value="Take a Task" class="button mainButton" onclick="showScreen('performerHomeScreen')">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<div id="performerTaskDetailsScreen" class="screen">
-            <div class="topBar">
-                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
-                <input type="button" value="Home" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-            </div>
-
-            <div class="systemBox">
-                <input type="button" value="< Back" class="backButton pageBack" onclick="showScreen('performerHomeScreen')">
-                <h2>Design a Logo</h2>
-                <p class="taskSub">Current task details</p>
-                <div class="progressLine">
-                    <span>Task accepted</span>
-                    <span>In progress</span>
-                    <span>Waiting approval</span>
-                    <span>Completed</span>
-                </div>
-
-                <div class="detailsGrid">
-                    <div class="detailsMain">
-                        <h3>Task Description</h3>
-                        <p>Create a clean, minimal logo for a new online company.</p>
-                        <div class="infoRow">
-                            <div><b>Payment</b><br>$150</div>
-                            <div><b>Due Date</b><br>21/5/2026</div>
-                            <div><b>Status</b><br>Working</div>
-                        </div>
-                        <div class="chatBox">
-                            <h4>Communication</h4>
-                            <input type="text" placeholder="Write a message">
-                            <input type="button" value="Send" class="smallButton">
-                        </div>
-                        <input type="button" value="Finish Task" class="button mainButton" onclick="showScreen('finishTaskScreen')">
-                    </div>
-
-                    <div class="sideCard">
-                        <h3>Task Requester</h3>
-                        <div class="avatar">AS</div>
-                        <p>Anna Smith</p>
-                        <p>Rating: 4.8</p>
-                        <h3>Task Details</h3>
-                        <p>Category: Design</p>
-                        <p>Location: Remote</p>
-                        <p>Status: <span class="statusProgress">Working</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<div id="finishTaskScreen" class="screen">
-            <div class="card successCard">
-                <h2>Task Completion</h2>
-                <p>Are you sure this task is finished properly?</p>
-                <input type="button" value="Yes, Finish" class="button mainButton" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="Not Yet" class="button secondButton" onclick="showScreen('performerTaskDetailsScreen')">
             </div>
         </div>
 
@@ -257,7 +111,7 @@
                         <h4>Video Editing</h4>
                         <p>Category: Video</p>
                         <span class="statusOpen">Status: Available</span>
-                        <input type="button" value="Open" onclick="showScreen('availableTaskDetailsScreen')">
+                        <input type="button" value="Open">
                     </div>
                 </div>
             </div>

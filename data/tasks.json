@@ -8,7 +8,10 @@
         "payment": 150,
         "additionalDetails": "Include different formats and color versions.",
         "categories": "Design",
-        "state": "in-progress"
+        "state": "in-progress",
+        "assignedToPerformer": true,
+        "workStatus": "Working",
+        "creationDate": "2026-05-18"
     },
     {
         "id": 2,
@@ -19,7 +22,10 @@
         "payment": 75,
         "additionalDetails": "Descriptions should be short, clear, and sales focused.",
         "categories": "Writing",
-        "state": "open"
+        "state": "open",
+        "assignedToPerformer": false,
+        "workStatus": "Available",
+        "creationDate": "2026-05-21"
     },
     {
         "id": 3,
@@ -30,7 +36,10 @@
         "payment": 300,
         "additionalDetails": "The page should include contact details and service information.",
         "categories": "Development",
-        "state": "in-progress"
+        "state": "in-progress",
+        "assignedToPerformer": true,
+        "workStatus": "In Progress",
+        "creationDate": "2026-05-20"
     },
     {
         "id": 4,
@@ -41,7 +50,10 @@
         "payment": 90,
         "additionalDetails": "Use warm colors and leave space for short marketing text.",
         "categories": "Design",
-        "state": "completed"
+        "state": "completed",
+        "assignedToPerformer": true,
+        "workStatus": "Completed",
+        "creationDate": "2026-05-15"
     },
     {
         "id": 5,
@@ -52,6 +64,37 @@
         "payment": 120,
         "additionalDetails": "Fix grammar, flow, and headline suggestions.",
         "categories": "Writing",
-        "state": "open"
+        "state": "open",
+        "assignedToPerformer": false,
+        "workStatus": "Available",
+        "creationDate": "2026-05-24"
+    },
+    {
+        "id": 6,
+        "taskTitle": "Video Editing",
+        "description": "Edit a short video for social media.",
+        "location": "Remote",
+        "difficultyLevel": "Medium",
+        "payment": 200,
+        "additionalDetails": "Add music, subtitles, and simple transitions.",
+        "categories": "Video",
+        "state": "open",
+        "assignedToPerformer": false,
+        "workStatus": "Available",
+        "creationDate": "2026-05-25"
+    },
+    {
+        "id": 7,
+        "taskTitle": "Data Entry",
+        "description": "Enter data into a table.",
+        "location": "Remote",
+        "difficultyLevel": "Easy",
+        "payment": 100,
+        "additionalDetails": "Copy data carefully into the provided spreadsheet.",
+        "categories": "Data",
+        "state": "open",
+        "assignedToPerformer": false,
+        "workStatus": "Available",
+        "creationDate": "2026-05-22"
     }
 ]

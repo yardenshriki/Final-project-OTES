@@ -2,12 +2,13 @@ var requesterTasks = [];
 var selectedTaskState = "all";
 
 function loadRequesterTasks() {
-    fetch("data/requesterTasks.json")
+    fetch("data/tasks.json")
         .then(function (response) {
             return response.json();
         })
         .then(function (tasks) {
             requesterTasks = tasks;
+            renderCategoryOptions(requesterTasks);
             renderRequesterTasks(requesterTasks);
             renderMyTasks(requesterTasks);
             renderProfileTaskHistory(requesterTasks);
@@ -15,6 +16,32 @@ function loadRequesterTasks() {
             updateRequesterStats(requesterTasks);
             connectRequesterFilters();
         });
+}
+
+function renderCategoryOptions(tasks) {
+    var categorySelect = document.getElementById("categoryFilter");
+
+    if (categorySelect == null) {
+        return;
+    }
+
+    categorySelect.innerHTML = "<option>All Categories</option>";
+
+    for (var i = 0; i < tasks.length; i++) {
+        if (categoryExists(tasks[i].categories, categorySelect) == false) {
+            categorySelect.innerHTML += "<option>" + tasks[i].categories + "</option>";
+        }
+    }
+}
+
+function categoryExists(categoryName, categorySelect) {
+    for (var i = 0; i < categorySelect.options.length; i++) {
+        if (categorySelect.options[i].value == categoryName) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function connectRequesterFilters() {
