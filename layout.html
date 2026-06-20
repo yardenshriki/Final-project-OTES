@@ -1,0 +1,80 @@
+<div id="menuOverlay" onclick="closeMenu()"></div>
+
+<div id="sideMenu">
+  <div class="menuHeader">
+    <h3>Menu</h3>
+    <button
+      type="button"
+      class="closeMenuButton"
+      onclick="closeMenu()"
+      aria-label="Close menu"
+    >
+      x
+    </button>
+  </div>
+
+  <button
+    type="button"
+    class="sideMenuItem homeIcon"
+    onclick="window.location.href = 'requester.html'"
+  >
+    <span class="menuIcon"></span>Home Page
+  </button>
+
+  <button
+    type="button"
+    class="sideMenuItem tasksIcon"
+    onclick="window.location.href = 'requester.html#allTasksSection'"
+  >
+    <span class="menuIcon"></span>My Tasks
+  </button>
+
+  <button type="button" class="sideMenuItem profileMenuIcon">
+    <span class="menuIcon"></span>Edit Profile
+  </button>
+
+  <button type="button" class="sideMenuItem reportIcon">
+    <span class="menuIcon"></span>Report
+  </button>
+
+  <button type="button" class="sideMenuItem policyIcon">
+    <span class="menuIcon"></span>Company Policy
+  </button>
+
+  <button
+    type="button"
+    class="sideMenuItem exitIcon"
+    onclick="window.location.href = 'index.html'"
+  >
+    <span class="menuIcon"></span>Exit
+  </button>
+</div>
+
+<div id="appHeader">
+  <input
+    type="button"
+    value="&#9776;"
+    class="menuButton"
+    onclick="openMenu()"
+  />
+  <span class="systemTitle">Task Execution System</span>
+
+  <button type="button" class="profileButton" aria-label="Profile">
+    <span class="profileIcon"></span>
+  </button>
+
+  <div class="roleSwitch">
+    <input
+      type="button"
+      id="requesterButton"
+      value="Requester"
+      onclick="switchRole('Requester')"
+    />
+    <input
+      type="button"
+      id="performerButton"
+      value="Performer"
+      onclick="switchRole('Performer')"
+    />
+  </div>
+</div>
