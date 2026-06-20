@@ -177,14 +177,14 @@
                      }
                  ],
     "software":  {
-                     "versionName":  "OTES Admin v1.0",
-                     "versionDate":  "2026-05-26",
+                     "versionName":  "v2.5.0",
+                     "versionDate":  "2026-02-01",
                      "changes":  [
-                                     "Admin dashboard added",
-                                     "Reports and anomalies views",
-                                     "User restrictions flow",
-                                     "Pending payments view",
-                                     "Analytics placeholders"
+                                     "Improved system performance and load times",
+                                     "Enhanced security features for user data protection",
+                                     "Added new reporting and analytics dashboard",
+                                     "Fixed bugs in payment processing system",
+                                     "Updated user interface with modern design elements"
                                  ]
                  },
     "dashboardCards":  [
