@@ -17,7 +17,7 @@ var screenPages = {
     availableTaskDetailsScreen: "performer.html",
     performerTaskDetailsScreen: "performer.html",
     finishTaskScreen: "performer.html",
-    adminHomeScreen: "admin.html"
+    adminHomeScreen: "admin/"
 };
 
 function openMenu() {
@@ -218,4 +218,5 @@ window.onload = function () {
         showWelcomePopup();
     }
 };
+
 
