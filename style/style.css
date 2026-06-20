@@ -1174,7 +1174,7 @@ hr {
   display: inline-block;
   position: relative;
   margin-left: 14px;
-  max-width: calc(100% - 340px);
+  max-width: calc(100% - 390px);
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
@@ -1695,7 +1695,7 @@ hr {
   }
 
   .systemTitle {
-    max-width: calc(100% - 260px);
+    max-width: calc(100% - 310px);
     margin-left: 8px;
     font-size: 16px;
   }
@@ -1804,7 +1804,7 @@ hr {
   }
 
   .systemTitle {
-    max-width: calc(100% - 215px);
+    max-width: calc(100% - 255px);
     font-size: 13px;
     color: transparent;
   }
