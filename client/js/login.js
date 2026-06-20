@@ -14,11 +14,11 @@ function checkLogin() {
     if (username.toUpperCase().indexOf("ADMIN") == 0) {
         localStorage.setItem("userRole", "Admin");
         localStorage.setItem("adminUsername", username);
-        window.location.href = "admin/";
+        window.location.href = "admin.html";
         return false;
     }
 
-    fetch("admin/data/admin-data.json")
+    fetch("data/admin-data.json")
         .then(function (response) {
             return response.json();
         })
@@ -90,3 +90,4 @@ function getBlockedLoginMessage(user) {
 
     return "Access denied: this user is blocked.";
 }
+

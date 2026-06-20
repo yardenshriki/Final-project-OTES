@@ -61,7 +61,7 @@ function getAdminDataSourceText() {
         return "Local DATA mock: admin-data + saved browser updates";
     }
 
-    return "Local DATA file: client/admin/data/admin-data.json";
+    return "Local DATA file: client/data/admin-data.json";
 }
 
 function countAdminExceptions() {
@@ -196,7 +196,7 @@ function loadAdminData() {
             updateAdminWelcomeName();
 
             if (dataSource == ADMIN_DATA_FILE) {
-                setAdminDataStatus("Data source: client/admin/data/admin-data.json. Replace ADMIN_API_URL in admin/js/admin.js when the external API is ready.");
+                setAdminDataStatus("Data source: client/data/admin-data.json. Replace ADMIN_API_URL in js/admin.js when the external API is ready.");
             } else {
                 setAdminDataStatus("Data source: external database API connected.");
             }
@@ -1300,4 +1300,5 @@ function renderAnalyticsCharts() {
     renderUserReportsSummary();
     renderUserReportsAreaChart();
 }
+
 
