@@ -234,11 +234,31 @@ function connectNextStepButton(selectedTask) {
         saveLocalTaskWorkStatus(selectedTask.id, selectedTask.workStatus);
         updateTaskStateByWorkStatus(selectedTask);
 
+        if (selectedTask.workStatus == "Task completed") {
+            createTaskCompletionNotification(selectedTask);
+        }
+
         document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
         document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
         renderPerformerProgress(selectedTask);
         updateTaskPageByRole(selectedTask);
     };
+}
+
+function createTaskCompletionNotification(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    addNotification({
+        toRole: "Requester",
+        type: "task-completion",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        performerName: selectedTask.performerName || "John Designer",
+        title: "Task completion",
+        message: selectedTask.taskTitle + " has been marked as finished."
+    });
 }
 
 function updateTaskPageByRole(selectedTask) {
