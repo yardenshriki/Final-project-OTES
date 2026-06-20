@@ -1,6 +1,13 @@
 //yarden shriki, lior zahavi
 var requesterTasks = [];
 var selectedTaskState = "all";
+var taskProgressSteps = [
+    "Task accepted",
+    "On my way",
+    "Task in progress",
+    "Finalizing the task",
+    "Task completed"
+];
 
 function scrollToAllTasks() {
     closeMenu();
@@ -17,7 +24,7 @@ function loadRequesterTasks() {
             return response.json();
         })
         .then(function (tasks) {
-            requesterTasks = tasks.concat(getLocalCreatedTasks());
+            requesterTasks = applyLocalTaskAssignments(tasks.concat(getLocalCreatedTasks()));
             renderCategoryOptions(requesterTasks);
             renderRequesterTasks(requesterTasks);
             renderTaskPage();
@@ -27,22 +34,6 @@ function loadRequesterTasks() {
             updateRequesterStats(requesterTasks);
             connectRequesterFilters();
         });
-}
-
-function getLocalCreatedTasks() {
-    var savedTasks = localStorage.getItem("createdTasks");
-
-    if (savedTasks == null || savedTasks == "") {
-        return [];
-    }
-
-    return JSON.parse(savedTasks);
-}
-
-function saveLocalCreatedTask(task) {
-    var localTasks = getLocalCreatedTasks();
-    localTasks.push(task);
-    localStorage.setItem("createdTasks", JSON.stringify(localTasks));
 }
 
 function renderCategoryOptions(tasks) {
@@ -174,6 +165,135 @@ function renderTaskPage() {
     document.getElementById("taskDetailsCategory").innerHTML = selectedTask.categories;
     document.getElementById("taskDetailsDifficulty").innerHTML = selectedTask.difficultyLevel;
     document.getElementById("taskDetailsPostedDate").innerHTML = selectedTask.creationDate;
+    connectTakeTaskButton(selectedTask);
+    connectNextStepButton(selectedTask);
+    renderPerformerProgress(selectedTask);
+    updateTaskPageByRole(selectedTask);
+}
+
+function getTaskProgressIndex(workStatus) {
+    for (var i = 0; i < taskProgressSteps.length; i++) {
+        if (taskProgressSteps[i] == workStatus) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+function renderPerformerProgress(selectedTask) {
+    var progressTrack = document.getElementById("performerProgressTrack");
+    var nextStepButton = document.getElementById("performerNextStepButton");
+
+    if (progressTrack == null || nextStepButton == null) {
+        return;
+    }
+
+    var currentStepIndex = getTaskProgressIndex(selectedTask.workStatus);
+    progressTrack.innerHTML = "";
+
+    for (var i = 0; i < taskProgressSteps.length; i++) {
+        var stepClass = "progressStep";
+        var stepMark = "";
+
+        if (i <= currentStepIndex) {
+            stepClass += " completedStep";
+            stepMark = "✓";
+        }
+
+        progressTrack.innerHTML += '<div class="' + stepClass + '">' +
+            '<span>' + stepMark + '</span>' +
+            '<b>' + taskProgressSteps[i] + '</b>' +
+            '</div>';
+    }
+
+    if (currentStepIndex >= taskProgressSteps.length - 1) {
+        nextStepButton.innerHTML = "Task completed";
+        nextStepButton.disabled = true;
+    } else {
+        nextStepButton.innerHTML = taskProgressSteps[currentStepIndex + 1];
+        nextStepButton.disabled = false;
+    }
+}
+
+function connectNextStepButton(selectedTask) {
+    var nextStepButton = document.getElementById("performerNextStepButton");
+
+    if (nextStepButton == null) {
+        return;
+    }
+
+    nextStepButton.onclick = function () {
+        var currentStepIndex = getTaskProgressIndex(selectedTask.workStatus);
+
+        if (currentStepIndex >= taskProgressSteps.length - 1) {
+            return;
+        }
+
+        selectedTask.workStatus = taskProgressSteps[currentStepIndex + 1];
+        saveLocalTaskWorkStatus(selectedTask.id, selectedTask.workStatus);
+        updateTaskStateByWorkStatus(selectedTask);
+
+        document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+        document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
+        renderPerformerProgress(selectedTask);
+        updateTaskPageByRole(selectedTask);
+    };
+}
+
+function updateTaskPageByRole(selectedTask) {
+    var performerItems = document.getElementsByClassName("performerOnly");
+    var activeItems = document.getElementsByClassName("performerActiveOnly");
+    var availableItems = document.getElementsByClassName("performerAvailableOnly");
+    var requesterItems = document.getElementsByClassName("requesterOnly");
+    var isPerformerTaskPage = userRole == "Performer";
+    var isTakenTask = selectedTask.assignedToPerformer == true;
+
+    for (var i = 0; i < performerItems.length; i++) {
+        if (isPerformerTaskPage) {
+            performerItems[i].style.display = getTaskElementDisplay(performerItems[i]);
+        } else {
+            performerItems[i].style.display = "none";
+        }
+    }
+
+    for (var j = 0; j < activeItems.length; j++) {
+        activeItems[j].style.display = isPerformerTaskPage && isTakenTask ? getTaskElementDisplay(activeItems[j]) : "none";
+    }
+
+    for (var k = 0; k < availableItems.length; k++) {
+        availableItems[k].style.display = isPerformerTaskPage && isTakenTask == false ? getTaskElementDisplay(availableItems[k]) : "none";
+    }
+
+    for (var m = 0; m < requesterItems.length; m++) {
+        requesterItems[m].style.display = isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
+    }
+}
+
+function getTaskElementDisplay(element) {
+    if (element.className.indexOf("performerProgressPanel") != -1) {
+        return "grid";
+    }
+
+    if (element.className.indexOf("communicationPanel") != -1) {
+        return "flex";
+    }
+
+    return "block";
+}
+
+function connectTakeTaskButton(selectedTask) {
+    var takeTaskButton = document.getElementById("performerTakeTaskButton");
+
+    if (takeTaskButton == null) {
+        return;
+    }
+
+    takeTaskButton.onclick = function () {
+        takeLocalTask(selectedTask.id);
+        localStorage.setItem("userRole", "Performer");
+        window.location.href = "performer.html";
+    };
 }
 
 function renderMyTasks(tasks) {
