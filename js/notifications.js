@@ -320,6 +320,15 @@ function addPaymentSuccessNotification(taskCompletionNotification) {
         title: "Payment successful",
         message: "The payment for " + taskCompletionNotification.taskTitle + " has been successfully transferred. A confirmation has been sent to your email."
     });
+
+    addNotification({
+        toRole: "Performer",
+        type: "payment-success",
+        taskId: taskCompletionNotification.taskId,
+        taskTitle: taskCompletionNotification.taskTitle,
+        title: "Payment received",
+        message: "The payment for " + taskCompletionNotification.taskTitle + " has been successfully transferred to you. A confirmation has been sent to your email."
+    });
 }
 
 function getSavedRatings() {
