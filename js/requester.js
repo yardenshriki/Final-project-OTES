@@ -234,6 +234,10 @@ function connectNextStepButton(selectedTask) {
         saveLocalTaskWorkStatus(selectedTask.id, selectedTask.workStatus);
         updateTaskStateByWorkStatus(selectedTask);
 
+        if (typeof addTaskChatSystemMessage == "function") {
+            addTaskChatSystemMessage(selectedTask, "Performer finished the step of: " + selectedTask.workStatus);
+        }
+
         if (selectedTask.workStatus == "Task completed") {
             createTaskCompletionNotification(selectedTask);
         }
@@ -268,6 +272,7 @@ function updateTaskPageByRole(selectedTask) {
     var requesterItems = document.getElementsByClassName("requesterOnly");
     var isPerformerTaskPage = userRole == "Performer";
     var isTakenTask = selectedTask.assignedToPerformer == true;
+    var hasChatParticipants = taskHasChatParticipants(selectedTask);
 
     for (var i = 0; i < performerItems.length; i++) {
         if (isPerformerTaskPage) {
@@ -286,8 +291,19 @@ function updateTaskPageByRole(selectedTask) {
     }
 
     for (var m = 0; m < requesterItems.length; m++) {
-        requesterItems[m].style.display = isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
+        if (requesterItems[m].className.indexOf("communicationPanel") != -1) {
+            requesterItems[m].style.display = hasChatParticipants ? getTaskElementDisplay(requesterItems[m]) : "none";
+        } else {
+            requesterItems[m].style.display = isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
+        }
     }
+}
+
+function taskHasChatParticipants(task) {
+    return task.requesterName != null &&
+        task.requesterName != "" &&
+        task.performerName != null &&
+        task.performerName != "";
 }
 
 function getTaskElementDisplay(element) {
@@ -304,6 +320,15 @@ function getTaskElementDisplay(element) {
 
 function connectTakeTaskButton(selectedTask) {
     var takeTaskButton = document.getElementById("performerTakeTaskButton");
+    var taskChatButton = document.getElementById("taskChatButton");
+
+    if (taskChatButton != null) {
+        taskChatButton.onclick = function () {
+            if (taskHasChatParticipants(selectedTask) && typeof openCurrentTaskChat == "function") {
+                openCurrentTaskChat(selectedTask);
+            }
+        };
+    }
 
     if (takeTaskButton == null) {
         return;
@@ -311,6 +336,17 @@ function connectTakeTaskButton(selectedTask) {
 
     takeTaskButton.onclick = function () {
         takeLocalTask(selectedTask.id);
+        selectedTask.assignedToPerformer = true;
+        selectedTask.requesterName = selectedTask.requesterName || "Sarah Johnson";
+        selectedTask.performerName = selectedTask.performerName || "John Designer";
+        saveLocalTaskParticipants(selectedTask.id, selectedTask.requesterName, selectedTask.performerName);
+        selectedTask.workStatus = "Task accepted";
+        updateTaskStateByWorkStatus(selectedTask);
+
+        if (typeof createTaskChat == "function") {
+            createTaskChat(selectedTask);
+        }
+
         localStorage.setItem("userRole", "Performer");
         window.location.href = "performer.html";
     };
@@ -505,6 +541,8 @@ function createTaskFromForm() {
         payment: parseFloat(document.getElementById("taskPayment").value),
         additionalDetails: document.getElementById("additionalDetails").value,
         categories: "General",
+        requesterName: "Sarah Johnson",
+        performerName: "",
         state: "open",
         assignedToPerformer: false,
         workStatus: "Available",
