@@ -10,7 +10,7 @@
         "categories": "Design",
         "state": "in-progress",
         "assignedToPerformer": true,
-        "workStatus": "Working",
+        "workStatus": "Task in progress",
         "creationDate": "2026-05-18"
     },
     {
@@ -38,7 +38,7 @@
         "categories": "Development",
         "state": "in-progress",
         "assignedToPerformer": true,
-        "workStatus": "In Progress",
+        "workStatus": "On my way",
         "creationDate": "2026-05-20"
     },
     {
@@ -52,7 +52,7 @@
         "categories": "Design",
         "state": "completed",
         "assignedToPerformer": true,
-        "workStatus": "Completed",
+        "workStatus": "Task completed",
         "creationDate": "2026-05-15"
     },
     {
