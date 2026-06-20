@@ -1,0 +1,169 @@
+/* Create task page */
+.createTaskPage {
+  padding-bottom: 28px;
+}
+
+.createTaskTitle h2 {
+  font-size: 24px;
+}
+
+.taskFormCard {
+  width: 740px;
+  border: 2px solid #d9b37c;
+  background-color: #fff0dc;
+}
+
+.taskFormCard textarea {
+  height: 110px;
+  background-color: #fffdfb;
+}
+
+.taskFormCard input,
+.taskFormCard select {
+  background-color: #fffdfb;
+}
+
+.taskFormCard .mainButton {
+  background-color: #e3be84;
+  color: white;
+}
+
+.taskFormCard .secondButton {
+  background-color: #fff4e4;
+  color: #6a5946;
+}
+
+.noteBox {
+  padding: 16px;
+  margin-bottom: 24px;
+  background-color: #f3d6a6;
+  border-radius: 6px;
+}
+
+.formColumn {
+  float: left;
+  width: 48%;
+}
+
+.rightColumn {
+  float: right;
+}
+
+.clear {
+  clear: both;
+}
+
+.paymentField {
+  width: 48%;
+}
+
+.paymentInputBox {
+  position: relative;
+}
+
+.paymentInputBox input {
+  padding-right: 42px;
+}
+
+.paymentStepper {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 30px;
+  height: 42px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  overflow: hidden;
+  border-left: 1px solid #efd5ad;
+}
+
+.paymentStepper button {
+  width: 30px;
+  height: 21px;
+  padding: 0;
+  border: none;
+  background-color: #fffdfb;
+  color: #6a5946;
+  font-size: 10px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.paymentStepper button:hover,
+.paymentStepper button:focus {
+  background-color: #f3d6a6;
+}
+
+.uploadArea {
+  padding: 34px;
+  border: 2px dashed #d9b37c;
+  background-color: white;
+  text-align: center;
+}
+
+.uploadArea p {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.uploadArea span,
+.uploadArea small {
+  display: block;
+  color: #907c62;
+}
+
+.uploadArea input[type="file"] {
+  margin-top: 14px;
+  background-color: transparent;
+  border: none;
+}
+
+.uploadIcon {
+  color: #6a5946;
+  font-size: 42px;
+  font-weight: bold;
+  line-height: 32px;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.formActions .button {
+  margin-top: 0;
+}
+
+.tipsBox {
+  width: 740px;
+  margin: 24px auto 0 auto;
+  padding: 22px;
+  background-color: #f3d6a6;
+  border: 2px solid #d9b37c;
+  border-radius: 8px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 900px) {
+  .taskFormCard,
+  .tipsBox,
+  .pageTitle {
+    width: 86%;
+  }
+}
+
+@media screen and (max-width: 560px) {
+  .formColumn,
+  .rightColumn,
+  .paymentField {
+    float: none;
+    width: 100%;
+  }
+
+  .formActions {
+    grid-template-columns: 1fr;
+  }
+}

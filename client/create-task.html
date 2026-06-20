@@ -1,0 +1,141 @@
+<!--yarden shriki, lior zahavi-->
+<!doctype html>
+<html>
+  <head>
+    <title>Create Task - Online Tasks Execution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/layout.css" />
+    <link rel="stylesheet" href="style/create-task.css" />
+  </head>
+
+  <body>
+    <div id="page">
+      <div id="sharedLayout"></div>
+
+      <main id="createTaskScreen" class="screen createTaskPage">
+        <div class="pageTitle createTaskTitle">
+          <input
+            type="button"
+            value="<  Back to Dashboard"
+            onclick="window.location.href = 'requester.html'"
+          />
+          <h2>Create New Task</h2>
+        </div>
+
+        <form class="card taskFormCard" onsubmit="return checkTask();">
+          <div class="noteBox">
+            <b>Note:</b> All fields marked with * are required to publish your
+            task.
+          </div>
+
+          <label>Task Title *</label>
+          <input
+            type="text"
+            id="taskTitle"
+            placeholder="Enter a clear, descriptive title"
+          />
+
+          <label>Description *</label>
+          <textarea
+            id="taskDescription"
+            placeholder="Provide detailed information about the task, requirements, and expected deliverables"
+          ></textarea>
+
+          <div class="formColumn">
+            <label>Location *</label>
+            <select id="taskLocation">
+              <option value="">Select location</option>
+              <option>Remote</option>
+              <option>Tel Aviv</option>
+              <option>Jerusalem</option>
+              <option>Haifa</option>
+            </select>
+          </div>
+
+          <div class="formColumn rightColumn">
+            <label>Difficulty Level *</label>
+            <select id="difficultyLevel">
+              <option value="">Select difficulty</option>
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </div>
+
+          <div class="clear"></div>
+
+          <div class="paymentField">
+            <label>Payment ($) *</label>
+            <div class="paymentInputBox">
+              <input
+                type="text"
+                id="taskPayment"
+                value="0.00"
+                placeholder="0.00"
+                onblur="formatPayment()"
+              />
+              <div class="paymentStepper">
+                <button
+                  type="button"
+                  onclick="changePayment(1)"
+                  aria-label="Increase payment"
+                >
+                  &#9650;
+                </button>
+                <button
+                  type="button"
+                  onclick="changePayment(-1)"
+                  aria-label="Decrease payment"
+                >
+                  &#9660;
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <label>Additional Details</label>
+          <textarea id="additionalDetails"></textarea>
+
+          <label>Attachments (Optional)</label>
+          <div class="uploadArea">
+            <div class="uploadIcon">^</div>
+            <p>Click to upload files</p>
+            <span>or drag and drop</span>
+            <small>PDF, DOC, PNG, JPG (max 10MB)</small>
+            <input type="file" id="taskAttachment" />
+          </div>
+
+          <p id="taskMessage" class="message"></p>
+
+          <div class="formActions">
+            <input
+              type="submit"
+              value="Create Task"
+              class="button mainButton"
+            />
+            <input
+              type="button"
+              value="Cancel"
+              class="button secondButton"
+              onclick="window.location.href = 'requester.html'"
+            />
+          </div>
+        </form>
+
+        <div class="tipsBox">
+          <h3>Tips for Creating a Great Task</h3>
+          <p>* Be specific about your requirements and expectations</p>
+          <p>* Provide examples or references when possible</p>
+          <p>* Set a realistic deadline and fair payment</p>
+          <p>* Include all necessary files and materials</p>
+          <p>* Respond promptly to performer questions</p>
+        </div>
+      </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/requester.js"></script>
+  </body>
+</html>
