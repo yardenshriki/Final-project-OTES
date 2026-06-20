@@ -28,6 +28,96 @@
   text-align: left;
 }
 
+.performerOnly {
+  display: none;
+}
+
+.performerActiveOnly,
+.performerAvailableOnly {
+  display: none;
+}
+
+.performerProgressPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  align-items: center;
+  gap: 28px;
+  width: 950px;
+  margin: 0 auto 28px auto;
+  padding: 34px 54px 26px 54px;
+  background-color: #fff2df;
+  border: 2px solid #d9b37c;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.progressTrack {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+  gap: 18px;
+  text-align: center;
+}
+
+.progressTrack::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 5%;
+  right: 5%;
+  height: 4px;
+  background-color: #d9b37c;
+}
+
+.progressStep {
+  position: relative;
+  z-index: 1;
+}
+
+.progressStep span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 14px auto;
+  border: 4px solid #d9b37c;
+  border-radius: 50%;
+  background-color: #fffdfb;
+  color: #3f3327;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+.completedStep span {
+  border-color: #79e889;
+  background-color: #96f3a0;
+}
+
+.progressStep b {
+  display: block;
+  color: #3f3327;
+  font-size: 12px;
+}
+
+.nextStepButton {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #d9b37c;
+  color: #3f3327;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nextStepButton:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
 .taskDescriptionPanel,
 .taskSideCard,
 .communicationPanel {
@@ -166,8 +256,26 @@
   cursor: pointer;
 }
 
+.takeTaskButton {
+  grid-column: 1 / 2;
+  width: 100%;
+  height: 58px;
+  border: none;
+  border-radius: 8px;
+  background-color: #d9b37c;
+  color: #3f3327;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.takeTaskButton {
+  margin-top: 0;
+}
+
 @media screen and (max-width: 900px) {
-  .taskDetailsLayout {
+  .taskDetailsLayout,
+  .performerProgressPanel {
     grid-template-columns: 1fr;
     width: 86%;
   }
@@ -175,9 +283,26 @@
   .communicationPanel {
     grid-column: auto;
   }
+
+  .nextStepButton {
+    justify-self: stretch;
+  }
 }
 
 @media screen and (max-width: 560px) {
+  .performerProgressPanel {
+    padding: 24px 18px;
+  }
+
+  .progressTrack {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .progressTrack::before {
+    display: none;
+  }
+
   .taskDetailsBottom {
     grid-template-columns: 1fr;
   }

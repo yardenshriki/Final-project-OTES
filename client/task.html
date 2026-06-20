@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style/style.css" />
     <link rel="stylesheet" href="style/layout.css" />
+    <link rel="stylesheet" href="style/notifications.css" />
     <link rel="stylesheet" href="style/task.css" />
   </head>
 
@@ -27,7 +28,16 @@
           </div>
         </div>
 
-        <div class="taskDetailsLayout">
+        <section id="performerProgressPanel" class="performerOnly performerActiveOnly performerProgressPanel">
+          <div id="performerProgressTrack" class="progressTrack"></div>
+          <button
+            type="button"
+            id="performerNextStepButton"
+            class="nextStepButton"
+          >
+            Next Step
+          </button>
+        </section><div class="taskDetailsLayout">
           <section class="taskDescriptionPanel">
             <h3>Task Description</h3>
             <p id="taskDetailsDescription"></p>
@@ -75,19 +85,29 @@
             </section>
           </aside>
 
-          <section class="communicationPanel">
+          <section class="communicationPanel requesterOnly performerActiveOnly">
             <div>
               <h3>Communication</h3>
               <p>Chat with the task performer</p>
             </div>
             <button type="button">Chat</button>
           </section>
+<button
+            type="button"
+            id="performerTakeTaskButton"
+            class="performerOnly performerAvailableOnly takeTaskButton"
+          >
+            Take Task
+          </button>
         </div>
       </main>
     </div>
 
     <script src="js/script.js"></script>
     <script src="js/layout.js"></script>
+    <script src="js/tasks-storage.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/requester.js"></script>
   </body>
 </html>
+
