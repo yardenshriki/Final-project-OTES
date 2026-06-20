@@ -1,0 +1,117 @@
+/* Performer page filters */
+.performerFilterOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(63, 51, 39, 0.58);
+  z-index: 30;
+}
+
+.performerFilterDrawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  max-width: 92vw;
+  min-height: 100vh;
+  padding: 18px;
+  background-color: #fff2df;
+  border-left: 2px solid #d9b37c;
+  box-sizing: border-box;
+  z-index: 31;
+  text-align: left;
+  box-shadow: -4px 0 18px rgba(63, 51, 39, 0.28);
+}
+
+.filterDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.filterDrawerHeader h3 {
+  margin: 0;
+  color: #3f3327;
+}
+
+.filterDrawerHeader button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #6a5946;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.performerFilterDrawer label {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #6a5946;
+}
+
+.performerFilterDrawer input,
+.performerFilterDrawer select {
+  height: 40px;
+  border-radius: 4px;
+  background-color: #fffdfb;
+  font-size: 14px;
+}
+
+.filterRangeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.filterRangeHeader label {
+  margin: 0;
+}
+
+.filterRangeHeader span {
+  color: #3f3327;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+#filterMaxPrice {
+  padding: 0;
+  accent-color: #d9b37c;
+  background-color: transparent;
+}
+
+.filterDrawerActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.filterDrawerActions button {
+  height: 42px;
+  border: none;
+  border-radius: 4px;
+  color: #3f3327;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.filterResetButton {
+  background-color: #fffdfb;
+  border: 1px solid #d9b37c;
+}
+
+.filterSubmitButton {
+  background-color: #d9b37c;
+}
+
+@media screen and (max-width: 560px) {
+  .performerFilterDrawer {
+    width: 100%;
+  }
+}
