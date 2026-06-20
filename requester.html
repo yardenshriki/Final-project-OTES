@@ -1,0 +1,149 @@
+<!--yarden shriki, lior zahavi-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Requester - Online Tasks Execution System</title>
+    <link rel="stylesheet" href="style/style.css">
+</head>
+
+<body>
+    <div id="page">
+        <div id="menuOverlay" onclick="closeMenu()"></div>
+
+        <div id="sideMenu">
+            <div class="menuHeader">
+                <h3>Menu</h3>
+                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">ª</button>
+            </div>
+            <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()"><span class="menuIcon"></span>Home Page</button>
+            <button type="button" class="sideMenuItem tasksIcon" onclick="scrollToAllTasks()"><span class="menuIcon"></span>My Tasks</button>
+            <button type="button" class="sideMenuItem profileMenuIcon"><span class="menuIcon"></span>Edit Profile</button>
+            <button type="button" class="sideMenuItem reportIcon"><span class="menuIcon"></span>Report</button>
+            <button type="button" class="sideMenuItem policyIcon"><span class="menuIcon"></span>Company Policy</button>
+            <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'"><span class="menuIcon"></span>Exit</button>
+        </div>
+
+        <div id="appHeader">
+            <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
+            <span class="systemTitle">Online Task Execution System</span>
+
+            <button type="button" class="profileButton" aria-label="Profile">
+                <span class="profileIcon"></span>
+            </button>
+            <div class="roleSwitch">
+                <input type="button" id="requesterButton" value="Requester" onclick="switchRole('Requester')">
+                <input type="button" id="performerButton" value="Performer" onclick="switchRole('Performer')">
+            </div>
+
+        </div>
+
+<div id="requesterHomeScreen" class="screen">
+            <div class="topBar">
+                <span>Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
+                <input type="button" value="Home" onclick="showScreen('requesterHomeScreen')">
+                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
+                <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
+                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
+                <input type="button" value="Report" onclick="showScreen('reportScreen')">
+                <input type="button" value="Policy" onclick="showScreen('policyScreen')">
+                <input type="button" value="Logout" onclick="showScreen('loginScreen')">
+            </div>
+
+            <div class="systemBox dashboardBox">
+                <div class="createBox">
+                    <h3>Create New Task</h3>
+                    <p>Post a new task and find the perfect performer for your needs</p>
+                    <input type="button" value="+  Create New Task" class="button mainButton shortButton" >
+                </div>
+
+                <h3>Task History</h3>
+                <div class="statsRow">
+                    <button type="button" class="statBox activeStat" data-state="all"><span>Total Tasks</span><b id="totalTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="open"><span>Available Tasks</span><b id="openTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="in-progress"><span>In Progress</span><b id="progressTasks">0</b></button>
+                    <button type="button" class="statBox" data-state="completed"><span>Completed</span><b id="completedTasks">0</b></button>
+                </div>
+
+                <div class="filterRow">
+                    <input type="text" id="taskSearch" placeholder="Search tasks...">
+                    <select id="categoryFilter">
+                        <option>All Categories</option>
+                    </select>
+                </div>
+
+                <div id="allTasksSection" class="scrollAnchor"></div>
+                <h3>All Tasks</h3>
+                <div class="taskList" id="requesterTaskList">
+                </div>
+            </div>
+        </div>
+
+<!--<div id="myTasksScreen" class="screen">
+            <div class="topBar">
+                <span>Online Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
+                <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
+                <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
+                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
+                <input type="button" value="Report" onclick="showScreen('reportScreen')">
+            </div>
+
+            <div class="systemBox">
+                <h2>My Tasks</h2>
+                <div class="filterRow">
+                    <input type="text" placeholder="Search task">
+                    <select>
+                        <option>All status</option>
+                        <option>Open</option>
+                        <option>In Progress</option>
+                        <option>Completed</option>
+                    </select>
+                    <select>
+                        <option>All roles</option>
+                        <option>Requester</option>
+                        <option>Performer</option>
+                    </select>
+                </div>
+
+                <div class="taskList" id="myTasksList">
+                </div>
+            </div>
+        </div>-->
+
+        <div id="welcomePopup" class="popupOverlay">
+            <div class="welcomeBox">
+                <h2>Welcome to OTES! ??</h2>
+                <h3>Your registration was successful.</h3>
+
+                <p>We are thrilled to have you with us!</p>
+
+                <p>OTES (Online Tasks Execution System) is a community platform that connects people who need a helping hand with everyday physical tasks, with individuals looking to earn extra income on a flexible schedule-with no experience required and zero commitment.</p>
+
+                <p>The best part? You are in full control. You can switch between posting tasks or performing them whenever you like.</p>
+
+                <p><b>To get started, what would you like to do today?</b></p>
+
+                <input type="button" value="I want to post a task (Requester)" class="button mainButton" onclick="chooseWelcomeRole('Requester')">
+                <input type="button" value="I want to earn extra income (Performer)" class="button secondButton" onclick="chooseWelcomeRole('Performer')">
+            </div>
+        </div>
+
+        <footer class="appFooter">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about our policies, please contact us:</p>
+            <p>Email: <span>support@taskexecution.com</span></p>
+            <p class="lastUpdated">Last updated: February 2, 2026</p>
+            <div class="footerSocials">
+                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
+                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
+                <button type="button" aria-label="Instagram" data-tooltip="Instagram">?</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/requester.js"></script>
+</body>
+
+</html>
+

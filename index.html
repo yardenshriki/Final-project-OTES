@@ -1,0 +1,43 @@
+<!--yarden shriki, lior zahavi -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Online Tasks Execution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style/style.css">
+</head>
+
+<body class="authBody">
+    <div id="page">
+<div id="loginScreen" class="screen">
+            <h1>Online Tasks Execution System</h1>
+            <p class="subTitle">Please login to continue</p>
+
+            <form class="card" onsubmit="return checkLogin()">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+
+                <p id="loginMessage" class="message"></p>
+
+                <input type="submit" value="Login" class="button mainButton">
+                <a href="#" class="link">Forgot Password?</a>
+
+                <div class="line">
+                    <span>or</span>
+                </div>
+
+                <input type="button" value="Sign Up" class="button secondButton" onclick="showScreen('signupScreen')">
+            </form>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>
+
