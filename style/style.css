@@ -1927,3 +1927,315 @@ hr {
     padding: 18px;
   }
 }
+
+.createTaskPage {
+  padding-bottom: 28px;
+}
+
+.createTaskTitle h2 {
+  font-size: 24px;
+}
+
+.taskFormCard textarea {
+  height: 110px;
+  background-color: #fffdfb;
+}
+
+.taskFormCard input,
+.taskFormCard select {
+  background-color: #fffdfb;
+}
+
+.taskFormCard .mainButton {
+  background-color: #e3be84;
+  color: white;
+}
+
+.taskFormCard .secondButton {
+  background-color: #fff4e4;
+  color: #6a5946;
+}
+
+.paymentField {
+  width: 48%;
+}
+
+.paymentInputBox {
+  position: relative;
+}
+
+.paymentInputBox input {
+  padding-right: 42px;
+}
+
+.paymentStepper {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 30px;
+  height: 42px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  overflow: hidden;
+  border-left: 1px solid #efd5ad;
+}
+
+.paymentStepper button {
+  width: 30px;
+  height: 21px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background-color: #fffdfb;
+  color: #6a5946;
+  font-size: 10px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.paymentStepper button:hover,
+.paymentStepper button:focus {
+  color: #3b3227;
+}
+
+.uploadArea p {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.uploadArea span,
+.uploadArea small {
+  display: block;
+  color: #907c62;
+}
+
+.uploadArea input[type="file"] {
+  margin-top: 14px;
+  background-color: transparent;
+  border: none;
+}
+
+.uploadIcon {
+  color: #6a5946;
+  font-size: 42px;
+  font-weight: bold;
+  line-height: 32px;
+}
+
+.formActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.formActions .button {
+  margin-top: 0;
+}
+
+.taskDetailsPage {
+  padding-bottom: 28px;
+}
+
+.taskDetailsTitle h2 {
+  font-size: 26px;
+  margin-top: 18px;
+}
+
+.taskTitleMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.taskTitleMeta span {
+  font-size: 13px;
+}
+
+.taskDetailsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 320px;
+  gap: 28px;
+  width: 950px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.taskDescriptionPanel,
+.taskSideCard,
+.communicationPanel {
+  background-color: #fff2df;
+  border: 2px solid #d9b37c;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.taskDescriptionPanel {
+  min-height: 300px;
+  padding: 28px;
+}
+
+.taskDescriptionPanel h3,
+.taskSideCard h3,
+.communicationPanel h3 {
+  margin-top: 0;
+  color: #3f3327;
+}
+
+.taskDescriptionPanel p {
+  min-height: 150px;
+  line-height: 26px;
+  color: #3f3327;
+}
+
+.taskDetailsBottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 2px solid #e3be84;
+}
+
+.taskDetailsBottom div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+}
+
+.detailsIcon {
+  grid-row: span 2;
+  color: #6a5946;
+  font-size: 24px;
+}
+
+.taskDetailsBottom small {
+  color: #907c62;
+}
+
+.taskDetailsBottom b {
+  color: #3f3327;
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.taskSidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.taskSideCard {
+  padding: 24px;
+}
+
+.requesterInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.requesterAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #e3be84;
+  color: #3f3327;
+  font-weight: bold;
+}
+
+.requesterInfo p {
+  margin: 0 0 4px 0;
+  color: #3f3327;
+}
+
+.requesterInfo small {
+  color: #8b642d;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.detailRow span {
+  color: #907c62;
+}
+
+.detailRow b {
+  color: #3f3327;
+  font-weight: normal;
+}
+
+.communicationPanel {
+  grid-column: 1 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background-color: #d9b37c;
+}
+
+.communicationPanel p {
+  margin: 0;
+  color: #6a5946;
+}
+
+.communicationPanel button {
+  width: 80px;
+  height: 38px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3f3327;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 900px) {
+  .taskFormCard,
+  .tipsBox,
+  .pageTitle {
+    width: 86%;
+  }
+
+  .taskDetailsLayout {
+    grid-template-columns: 1fr;
+    width: 86%;
+  }
+
+  .communicationPanel {
+    grid-column: auto;
+  }
+}
+
+@media screen and (max-width: 560px) {
+  .formColumn,
+  .rightColumn,
+  .paymentField {
+    float: none;
+    width: 100%;
+  }
+
+  .formActions {
+    grid-template-columns: 1fr;
+  }
+
+  .taskDetailsBottom {
+    grid-template-columns: 1fr;
+  }
+
+  .communicationPanel {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+}
