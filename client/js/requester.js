@@ -17,15 +17,32 @@ function loadRequesterTasks() {
             return response.json();
         })
         .then(function (tasks) {
-            requesterTasks = tasks;
+            requesterTasks = tasks.concat(getLocalCreatedTasks());
             renderCategoryOptions(requesterTasks);
             renderRequesterTasks(requesterTasks);
+            renderTaskPage();
             renderMyTasks(requesterTasks);
             renderProfileTaskHistory(requesterTasks);
             updateProfileStats(requesterTasks);
             updateRequesterStats(requesterTasks);
             connectRequesterFilters();
         });
+}
+
+function getLocalCreatedTasks() {
+    var savedTasks = localStorage.getItem("createdTasks");
+
+    if (savedTasks == null || savedTasks == "") {
+        return [];
+    }
+
+    return JSON.parse(savedTasks);
+}
+
+function saveLocalCreatedTask(task) {
+    var localTasks = getLocalCreatedTasks();
+    localTasks.push(task);
+    localStorage.setItem("createdTasks", JSON.stringify(localTasks));
 }
 
 function renderCategoryOptions(tasks) {
@@ -124,8 +141,39 @@ function createTaskCard(task) {
         '<p>Location: ' + task.location + '</p>' +
         '<p>Difficulty: ' + task.difficultyLevel + '</p>' +
         '<p>Payment: <b>$' + task.payment + '</b></p>' +
-        '<input type="button" value="View">' +
+        '<input type="button" value="View" onclick="window.location.href=\'task.html?id=' + task.id + '\'">' +
         '</div>';
+}
+
+function getTaskIdFromUrl() {
+    var urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("id");
+}
+
+function renderTaskPage() {
+    if (document.getElementById("taskDetailsTitle") == null) {
+        return;
+    }
+
+    var taskId = getTaskIdFromUrl();
+    var selectedTask = findTaskById(taskId);
+
+    if (selectedTask == null) {
+        document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
+        document.getElementById("taskDetailsDescription").innerHTML = "The selected task could not be found.";
+        return;
+    }
+
+    document.getElementById("taskDetailsTitle").innerHTML = selectedTask.taskTitle;
+    document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+    document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
+    document.getElementById("taskDetailsPosted").innerHTML = "Posted on " + selectedTask.creationDate;
+    document.getElementById("taskDetailsDescription").innerHTML = selectedTask.description + "<br><br>" + selectedTask.additionalDetails;
+    document.getElementById("taskDetailsPayment").innerHTML = "$" + selectedTask.payment;
+    document.getElementById("taskDetailsDeadline").innerHTML = selectedTask.deadline || "Not set";
+    document.getElementById("taskDetailsCategory").innerHTML = selectedTask.categories;
+    document.getElementById("taskDetailsDifficulty").innerHTML = selectedTask.difficultyLevel;
+    document.getElementById("taskDetailsPostedDate").innerHTML = selectedTask.creationDate;
 }
 
 function renderMyTasks(tasks) {
@@ -225,6 +273,10 @@ function getStatusClass(state) {
 }
 
 function updateRequesterStats(tasks) {
+    if (document.getElementById("totalTasks") == null) {
+        return;
+    }
+
     document.getElementById("totalTasks").innerHTML = tasks.length;
     document.getElementById("openTasks").innerHTML = countTasksByState(tasks, "open");
     document.getElementById("progressTasks").innerHTML = countTasksByState(tasks, "in-progress");
@@ -245,6 +297,81 @@ function countTasksByState(tasks, state) {
 
 document.addEventListener("DOMContentLoaded", loadRequesterTasks);
 
+function getPaymentNumber() {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return 0;
+    }
+
+    var paymentValue = parseFloat(taskPayment.value);
+
+    if (isNaN(paymentValue) || paymentValue < 0) {
+        return 0;
+    }
+
+    return paymentValue;
+}
+
+function formatPayment() {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return;
+    }
+
+    taskPayment.value = getPaymentNumber().toFixed(2);
+}
+
+function changePayment(changeAmount) {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return;
+    }
+
+    var newPayment = getPaymentNumber() + changeAmount;
+
+    if (newPayment < 0) {
+        newPayment = 0;
+    }
+
+    taskPayment.value = newPayment.toFixed(2);
+}
+
+function getTodayText() {
+    var today = new Date();
+    var month = today.getMonth() + 1;
+    var day = today.getDate();
+
+    if (month < 10) {
+        month = "0" + month;
+    }
+
+    if (day < 10) {
+        day = "0" + day;
+    }
+
+    return today.getFullYear() + "-" + month + "-" + day;
+}
+
+function createTaskFromForm() {
+    return {
+        id: Date.now(),
+        taskTitle: document.getElementById("taskTitle").value,
+        description: document.getElementById("taskDescription").value,
+        location: document.getElementById("taskLocation").value,
+        difficultyLevel: document.getElementById("difficultyLevel").value,
+        payment: parseFloat(document.getElementById("taskPayment").value),
+        additionalDetails: document.getElementById("additionalDetails").value,
+        categories: "General",
+        state: "open",
+        assignedToPerformer: false,
+        workStatus: "Available",
+        creationDate: getTodayText()
+    };
+}
+
 function checkTask() {
     var taskTitle = document.getElementById("taskTitle").value;
     var taskDescription = document.getElementById("taskDescription").value;
@@ -259,12 +386,19 @@ function checkTask() {
         return false;
     }
 
-    if (!isDigits(taskPayment)) {
-        showMessage("taskMessage", "Payment must contain numbers only");
+    if (isNaN(parseFloat(taskPayment))) {
+        showMessage("taskMessage", "Payment must contain a valid number");
         return false;
     }
 
-    /* showScreen("taskSuccessScreen"); */
+    if (parseFloat(taskPayment) < 0) {
+        showMessage("taskMessage", "Payment is too low");
+        return false;
+    }
+
+    formatPayment();
+    saveLocalCreatedTask(createTaskFromForm());
+    window.location.href = "requester.html";
     return false;
 }
 
@@ -294,3 +428,4 @@ function checkPayment() {
     /* showScreen("profileScreen"); */
     return false;
 }
+
