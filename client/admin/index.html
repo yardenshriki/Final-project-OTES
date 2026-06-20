@@ -1,0 +1,419 @@
+﻿<!--yarden shriki, lior zahavi-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Online Tasks Execution System</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="adminBody">
+    <div id="page">
+        <main id="adminHomeScreen" class="screen adminScreen">
+            <header class="topBar adminTopBar">
+                <nav class="adminTopNav" aria-label="Admin navigation">
+                <button type="button" class="adminNavButton activeAdminNav" onclick="showAdminSection('adminDashboardSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path></svg>Home Page</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminReportsSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>New Reports</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminUsersSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>User Management</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminPaymentsSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"></path></svg>Payments</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminTasksSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>System Log</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminSoftwareSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>Updates</button>
+                <button type="button" class="adminNavButton" onclick="showAdminSection('adminProfileSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 22a8 8 0 0 1 16 0"></path></svg>Profile</button>
+                </nav>
+            </header>
+            <div class="systemBox dashboardBox adminDashboard">
+                <section id="adminDashboardSection" class="adminSection">
+                    <div class="adminHero">
+                        <p>Online Task Execution System</p>
+                        <h1>Welcome back, <span id="adminWelcomeName">Admin</span></h1>
+                    </div>
+
+                    <div class="adminCategoryGrid" id="adminCardsList"></div>
+                </section>
+                <section id="adminReportsSection" class="adminSection">
+                    <h2>New Reports Today</h2>
+                    <form class="filterRow adminFilterRow" id="reportFilterForm" role="search">
+                        <input type="text" id="reportSearch" placeholder="Search reports by user or description">
+                        <input type="button" value="Exception status" onclick="showAdminSection('adminAnomaliesSection')">
+                    </form>
+                    <div class="adminTableWrap">
+                        <table class="adminTable">
+                            <thead><tr><th>Date</th><th>Username</th><th>Report Type</th><th>Description</th><th>Status</th></tr></thead>
+                            <tbody id="reportsTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="adminAnomaliesSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminReportsSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Exception Status</h2>
+                    </div>
+                    <form class="filterRow adminFilterRow" id="exceptionFilterForm">
+                        <input type="button" value="Export to PDF" onclick="exportExceptionStatusPdf()">
+                    </form>
+                    <div class="adminTableWrap">
+                        <table class="adminTable">
+                            <thead><tr><th>Username</th><th>Reports Filed</th><th>Days Late</th><th>Payment Status</th><th>Description</th><th>Exception</th></tr></thead>
+                            <tbody id="anomaliesTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="adminUsersSection" class="adminSection">
+                    <h2>User Account Management</h2>
+                    <form class="filterRow adminFilterRow" id="userFilterForm" role="search">
+                        <input type="text" id="userSearch" placeholder="Search users by name, ID, or username">
+                    </form>
+                    <div class="adminTableWrap">
+                        <table class="adminTable">
+                            <thead><tr><th>Name</th><th>ID Number</th><th>Join Date</th><th>Last Task</th><th>Status</th></tr></thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+                <section id="adminUserProfileSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection(adminProfileBackSection)"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>User Profile</h2>
+                    </div>
+
+                    <div class="adminProfilePanel">
+                        <div class="adminProfileTop">
+                            <div class="adminAvatarTile">
+                                <svg class="realIcon profileRealIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            <div class="adminProfileDetails">
+                                <h2 id="profileUserName">User Name</h2>
+                                <div class="adminProfileGrid">
+                                    <div>
+                                        <span>Full Name</span>
+                                        <strong id="profileFullName">--</strong>
+                                    </div>
+                                    <div>
+                                        <span>ID Number</span>
+                                        <strong id="profileUserId">--</strong>
+                                    </div>
+                                    <div>
+                                        <span>Email</span>
+                                        <strong id="profileUserEmail">--</strong>
+                                    </div>
+                                    <div>
+                                        <span>Status</span>
+                                        <strong id="profileUserStatus" class="adminStatusBadge">--</strong>
+                                    </div>
+                                    <div>
+                                        <span>Warning Email</span>
+                                        <strong id="profileWarningStatus">--</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="adminActionsTitle">Actions</h3>
+                        <div class="adminActionList">
+                            <button type="button" class="adminActionButton" onclick="showProfileInfo('tasks')">Task History</button>
+                            <button type="button" class="adminActionButton" onclick="showProfileInfo('ratings')">Rating History</button>
+                            <button type="button" class="adminActionButton" onclick="openWarningEmailPage()">Send Warning Email</button>
+                            <button type="button" class="adminActionButton" onclick="openRestrictionEdit()">Add User Restriction</button>
+                            <button type="button" class="adminActionButton" onclick="showProfileInfo('payments')">Show Recent Payments</button>
+                            <button type="button" class="adminActionButton" onclick="showProfileInfo('chats')">Show Chats</button>
+                        </div>
+                        <div id="profileActionDetails" class="profileActionDetails"></div>
+                    </div>
+                </section>
+
+                <section id="adminWarningEmailSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminUserProfileSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Warning Email</h2>
+                    </div>
+
+                    <form class="adminFormPanel" id="warningEmailForm">
+                        <div class="adminWarningNotice">
+                            <span>!</span>
+                            <p id="warningExistingInfo">No previous warning email was sent.</p>
+                        </div>
+                        <label>Username</label>
+                        <input type="text" id="warningUsername" readonly>
+                        <label>Email Message</label>
+                        <textarea id="warningEmailText" rows="6"></textarea>
+                        <input type="button" value="Send Warning Email" class="button mainButton" onclick="sendWarningEmail()">
+                        <input type="button" value="Continue to Block User" class="button secondButton" onclick="openRestrictionEdit()">
+                    </form>
+                </section>
+
+                <section id="adminRestrictionEditSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminUserProfileSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Edit User Restrictions</h2>
+                    </div>
+
+                    <form class="adminFormPanel" id="restrictionEditForm">
+                        <label>Restriction Type</label>
+                        <select id="restrictionTypeEdit" onchange="updateRestrictionDurationField()">
+                            <option value="Suspended">Suspended</option>
+                            <option value="Immediate Block">Immediate Block</option>
+                            <option value="Blocked">Blocked</option>
+                        </select>
+                        <div id="restrictionDurationGroup" class="restrictionDurationGroup">
+                            <label>Suspension Duration (Days)</label>
+                            <input type="number" id="restrictionDuration" min="1" placeholder="Enter number of days">
+                        </div>
+                        <label>Reason</label>
+                        <textarea id="restrictionReasonEdit" rows="5" placeholder="Enter reason for restriction"></textarea>
+                        <input type="button" value="Continue" class="button mainButton" onclick="openRestrictionConfirm()">
+                    </form>
+                </section>
+
+                <section id="restrictionConfirmSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminRestrictionEditSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Confirm Restriction</h2>
+                    </div>
+
+                    <form class="adminConfirmPanel" id="restrictionConfirmForm">
+                        <div class="adminWarningNotice confirmWarning">
+                            <span>!</span>
+                            <p>Are you sure you want to edit this user's restrictions?</p>
+                        </div>
+                        <div class="confirmSummaryBox">
+                            <h3>Changes Summary:</h3>
+                            <div><span>Username:</span><strong id="confirmUsername">--</strong></div>
+                            <div><span>Restriction Type:</span><strong id="confirmRestrictionType">--</strong></div>
+                            <div><span>Duration:</span><strong id="confirmDuration">--</strong></div>
+                            <div><span>Reason:</span><strong id="confirmReason">--</strong></div>
+                        </div>
+                        <div class="confirmActions">
+                            <input type="button" value="Cancel" class="button secondButton" onclick="showAdminSection('adminRestrictionEditSection')">
+                            <input type="button" value="Confirm Changes" class="button mainButton" onclick="approveRestriction()">
+                        </div>
+                        <p id="restrictionEmailNotice" class="restrictionEmailNotice"></p>
+                    </form>
+                </section>
+
+                <section id="adminPaymentsSection" class="adminSection">
+                    <h2>Payment Pending</h2>
+                    <form class="filterRow adminFilterRow" id="paymentFilterForm" role="search"><input type="text" id="paymentSearch" placeholder="Search by transaction, payer, or payee"></form>
+                    <div class="adminTableWrap">
+                        <table class="adminTable">
+                            <thead><tr><th>Transaction ID</th><th>Payer</th><th>Payee</th><th>Status</th><th>Receipt</th><th>Date</th></tr></thead>
+                            <tbody id="paymentsTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="adminPaymentDetailsSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminPaymentsSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Payment Details</h2>
+                    </div>
+                    <div class="detailsGrid">
+                        <div class="detailsMain">
+                            <h3 id="paymentTaskName"></h3>
+                            <p>Transaction ID: <span id="paymentTransactionId"></span></p>
+                            <p>Requester: <span id="paymentRequester"></span></p>
+                            <p>Performer: <span id="paymentPerformer"></span></p>
+                            <p>Description: <span id="paymentDescription"></span></p>
+                            <p>Status: <span id="paymentStatus"></span></p>
+                        </div>
+                        <aside class="sideCard">
+                            <input type="button" value="Export Receipt to PDF" class="button mainButton" onclick="exportPaymentReceiptPdf()">
+                            <input type="button" value="View Task Rating" class="button secondButton" onclick="viewPaymentTaskRating()">
+                        </aside>
+                        <div id="paymentRatingDetails" class="profileActionDetails paymentRatingDetails"></div>
+                    </div>
+                </section>
+                <section id="adminTasksSection" class="adminSection">
+                    <div class="adminSectionHeaderLine">
+                        <div class="adminPageTitle adminSectionTitleInline">
+                            <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminDashboardSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                            <h2>System Log of Tasks</h2>
+                        </div>
+                        <button type="button" class="adminGraphButton" onclick="showAdminSection('adminAnalyticsSection')">
+                            <svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16V9"></path><path d="M12 16V5"></path><path d="M17 16v-3"></path></svg>
+                            View Usage Graph
+                        </button>
+                    </div>
+                    <div class="adminTableWrap taskLogTableWrap">
+                        <table class="adminTable taskLogTable">
+                            <thead><tr><th>Full Name</th><th>Last Task</th><th>Active Status</th><th>Date</th></tr></thead>
+                            <tbody id="tasksLogTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="adminTaskDetailsSection" class="adminSection">
+                    <div class="adminPageTitle">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection(adminTaskBackSection)"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Task Details</h2>
+                    </div>
+                    <div class="adminTaskPanel">
+                        <h3 id="taskDetailsName">Task Details</h3>
+                        <div class="taskPeopleGrid">
+                            <div id="taskRequesterDetails" class="taskUserCard"></div>
+                            <div id="taskPerformerDetails" class="taskUserCard"></div>
+                        </div>
+                        <div class="taskInfoBlock">
+                            <span>Task Date</span>
+                            <strong id="taskDateDetails">--</strong>
+                        </div>
+                        <div class="taskInfoBlock">
+                            <span>Task Status</span>
+                            <strong id="taskStatusDetails">--</strong>
+                        </div>
+                        <div class="taskInfoBlock taskAnomalyBlock">
+                            <span>Anomaly Reports:</span>
+                            <strong id="taskAnomalyDetails">--</strong>
+                        </div>
+                        <button type="button" class="button secondButton taskChatButton" onclick="viewTaskChat()">View Chat</button>
+                        <div id="taskChatDetails" class="taskChatDetails"></div>
+                    </div>
+                </section>
+                <section id="adminSoftwareSection" class="adminSection">
+                    <div class="adminPageTitle adminSoftwareTitleRow">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminDashboardSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Software Update Details</h2>
+                    </div>
+
+                    <div class="adminSoftwarePanel">
+                        <div class="adminSoftwareIconTile">
+                            <svg class="realIcon adminSoftwareMainIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V7l8-4 8 4v14"></path><path d="M9 21v-6h6v6"></path><path d="M8 9h1"></path><path d="M12 9h1"></path><path d="M16 9h1"></path><path d="M8 12h1"></path><path d="M12 12h1"></path><path d="M16 12h1"></path></svg>
+                        </div>
+
+                        <div class="adminSoftwareInfoBox">
+                            <span>Version Name</span>
+                            <strong id="softwareVersionName">Version</strong>
+                        </div>
+
+                        <div class="adminSoftwareInfoBox">
+                            <span>Release Date</span>
+                            <strong id="softwareVersionDate">--</strong>
+                        </div>
+
+                        <div class="adminSoftwareInfoBox adminSoftwareChangesBox">
+                            <span>Recent Changes in Version</span>
+                            <ul id="softwareChangesList"></ul>
+                        </div>
+                    </div>
+                </section>
+                <section id="adminAnalyticsSection" class="adminSection">
+                    <div class="adminPageTitle analyticsTitleRow">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminTasksSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Analytics &amp; Graphs</h2>
+                    </div>
+                    <div class="adminChartsGrid analyticsGrid analyticsMixedGrid">
+                        <div class="analyticsCard">
+                            <h3>Tasks Overview</h3>
+                            <div class="analyticsPieLayout">
+                                <div id="tasksPieChart" class="analyticsPieChart"></div>
+                                <div id="tasksPieLegend" class="analyticsLegend"></div>
+                            </div>
+                        </div>
+                        <div class="analyticsCard">
+                            <h3>Payments Status</h3>
+                            <div id="paymentsStatusChart" class="analyticsBars analyticsPaymentBars"></div>
+                        </div>
+                        <div class="analyticsCard">
+                            <h3>Users in System</h3>
+                            <div id="usersSystemChart" class="usersSystemChart"></div>
+                            <div class="usersSystemLegend">
+                                <span><i class="legendDot usersActiveDot"></i>Active</span>
+                                <span><i class="legendDot usersInactiveDot"></i>Inactive / restricted</span>
+                            </div>
+                        </div>                        <div class="analyticsCard analyticsWideCard">
+                            <h3>Users Activity &amp; Reports</h3>
+                            <div id="userReportsSummary" class="analyticsSummaryGrid"></div>
+                            <div id="userReportsAreaChart" class="analyticsAreaChart"></div>
+                            <div class="analyticsAreaLegend">
+                                <span><i class="legendDot analyticsBlue"></i>System activity</span>
+                                <span><i class="legendDot analyticsRed"></i>Reports</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="adminProfileSection" class="adminSection">
+                    <div class="adminPageTitle adminProfileTitleRow">
+                        <button type="button" class="adminBackButton" aria-label="Back" title="Back" onclick="showAdminSection('adminDashboardSection')"><span class="adminBackIcon" aria-hidden="true">&larr;</span></button>
+                        <h2>Admin Profile</h2>
+                    </div>
+
+                    <div class="adminProfilePanel adminOwnerProfilePanel">
+                        <div class="adminProfileTop">
+                            <div class="adminAvatarTile adminOwnerAvatar">
+                                <svg class="realIcon profileRealIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 22a8 8 0 0 1 16 0"></path></svg>
+                            </div>
+                            <div class="adminProfileDetails">
+                                <h2 id="ownerAdminName">Administrator</h2>
+                                <div class="adminProfileGrid">
+                                    <div>
+                                        <span>Username</span>
+                                        <strong id="ownerAdminUsername">Admin</strong>
+                                    </div>
+                                    <div>
+                                        <span>Role</span>
+                                        <strong>System Admin</strong>
+                                    </div>
+                                    <div>
+                                        <span>Status</span>
+                                        <strong class="adminStatusBadge">Active</strong>
+                                    </div>
+                                    <div>
+                                        <span>Access Type</span>
+                                        <strong>ADMIN username detection</strong>
+                                    </div>
+                                    <div>
+                                        <span>Data Source</span>
+                                        <strong id="adminApiStatus">Loading data source</strong>
+                                    </div>
+                                    <div>
+                                        <span>Last Login</span>
+                                        <strong id="ownerAdminLastLogin">Current session</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="adminOwnerInfoGrid adminOwnerInfoGridSingle">
+                            <div class="adminOwnerInfoBox adminOwnerCombinedBox">
+                                <h3>Permissions & Admin Responsibilities</h3>
+                                <div id="adminPermissionsList" class="adminPermissionList"></div>
+                                <div class="adminResponsibilityList adminCombinedResponsibilityList">
+                                    <p>Review new reports and exceptions</p>
+                                    <p>Manage user restrictions and warning emails</p>
+                                    <p>Monitor payments, task logs, software updates, and analytics</p>
+                                    <p>Prepare admin data for the future database API connection</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="appFooter adminFooter">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about our policies, please contact us:</p>
+            <p>Email: <span>support@taskexecution.com</span></p>
+            <p class="lastUpdated">Last updated: February 2, 2026</p>
+            <div class="footerSocials" aria-label="Social links">
+                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
+                <button type="button" aria-label="Tumblr" data-tooltip="Tumblr">t</button>
+                <button type="button" aria-label="Help" data-tooltip="Help">?</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
