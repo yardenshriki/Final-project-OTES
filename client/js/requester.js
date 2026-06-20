@@ -1,6 +1,13 @@
 //yarden shriki, lior zahavi
 var requesterTasks = [];
 var selectedTaskState = "all";
+var taskProgressSteps = [
+    "Task accepted",
+    "On my way",
+    "Task in progress",
+    "Finalizing the task",
+    "Task completed"
+];
 
 function scrollToAllTasks() {
     closeMenu();
@@ -17,9 +24,10 @@ function loadRequesterTasks() {
             return response.json();
         })
         .then(function (tasks) {
-            requesterTasks = tasks;
+            requesterTasks = applyLocalTaskAssignments(tasks.concat(getLocalCreatedTasks()));
             renderCategoryOptions(requesterTasks);
             renderRequesterTasks(requesterTasks);
+            renderTaskPage();
             renderMyTasks(requesterTasks);
             renderProfileTaskHistory(requesterTasks);
             updateProfileStats(requesterTasks);
@@ -124,8 +132,188 @@ function createTaskCard(task) {
         '<p>Location: ' + task.location + '</p>' +
         '<p>Difficulty: ' + task.difficultyLevel + '</p>' +
         '<p>Payment: <b>$' + task.payment + '</b></p>' +
-        '<input type="button" value="View">' +
+        '<input type="button" value="View" onclick="window.location.href=\'task.html?id=' + task.id + '\'">' +
         '</div>';
+}
+
+function getTaskIdFromUrl() {
+    var urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("id");
+}
+
+function renderTaskPage() {
+    if (document.getElementById("taskDetailsTitle") == null) {
+        return;
+    }
+
+    var taskId = getTaskIdFromUrl();
+    var selectedTask = findTaskById(taskId);
+
+    if (selectedTask == null) {
+        document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
+        document.getElementById("taskDetailsDescription").innerHTML = "The selected task could not be found.";
+        return;
+    }
+
+    document.getElementById("taskDetailsTitle").innerHTML = selectedTask.taskTitle;
+    document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+    document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
+    document.getElementById("taskDetailsPosted").innerHTML = "Posted on " + selectedTask.creationDate;
+    document.getElementById("taskDetailsDescription").innerHTML = selectedTask.description + "<br><br>" + selectedTask.additionalDetails;
+    document.getElementById("taskDetailsPayment").innerHTML = "$" + selectedTask.payment;
+    document.getElementById("taskDetailsDeadline").innerHTML = selectedTask.deadline || "Not set";
+    document.getElementById("taskDetailsCategory").innerHTML = selectedTask.categories;
+    document.getElementById("taskDetailsDifficulty").innerHTML = selectedTask.difficultyLevel;
+    document.getElementById("taskDetailsPostedDate").innerHTML = selectedTask.creationDate;
+    connectTakeTaskButton(selectedTask);
+    connectNextStepButton(selectedTask);
+    renderPerformerProgress(selectedTask);
+    updateTaskPageByRole(selectedTask);
+}
+
+function getTaskProgressIndex(workStatus) {
+    for (var i = 0; i < taskProgressSteps.length; i++) {
+        if (taskProgressSteps[i] == workStatus) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+function renderPerformerProgress(selectedTask) {
+    var progressTrack = document.getElementById("performerProgressTrack");
+    var nextStepButton = document.getElementById("performerNextStepButton");
+
+    if (progressTrack == null || nextStepButton == null) {
+        return;
+    }
+
+    var currentStepIndex = getTaskProgressIndex(selectedTask.workStatus);
+    progressTrack.innerHTML = "";
+
+    for (var i = 0; i < taskProgressSteps.length; i++) {
+        var stepClass = "progressStep";
+        var stepMark = "";
+
+        if (i <= currentStepIndex) {
+            stepClass += " completedStep";
+            stepMark = "✓";
+        }
+
+        progressTrack.innerHTML += '<div class="' + stepClass + '">' +
+            '<span>' + stepMark + '</span>' +
+            '<b>' + taskProgressSteps[i] + '</b>' +
+            '</div>';
+    }
+
+    if (currentStepIndex >= taskProgressSteps.length - 1) {
+        nextStepButton.innerHTML = "Task completed";
+        nextStepButton.disabled = true;
+    } else {
+        nextStepButton.innerHTML = taskProgressSteps[currentStepIndex + 1];
+        nextStepButton.disabled = false;
+    }
+}
+
+function connectNextStepButton(selectedTask) {
+    var nextStepButton = document.getElementById("performerNextStepButton");
+
+    if (nextStepButton == null) {
+        return;
+    }
+
+    nextStepButton.onclick = function () {
+        var currentStepIndex = getTaskProgressIndex(selectedTask.workStatus);
+
+        if (currentStepIndex >= taskProgressSteps.length - 1) {
+            return;
+        }
+
+        selectedTask.workStatus = taskProgressSteps[currentStepIndex + 1];
+        saveLocalTaskWorkStatus(selectedTask.id, selectedTask.workStatus);
+        updateTaskStateByWorkStatus(selectedTask);
+
+        if (selectedTask.workStatus == "Task completed") {
+            createTaskCompletionNotification(selectedTask);
+        }
+
+        document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+        document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
+        renderPerformerProgress(selectedTask);
+        updateTaskPageByRole(selectedTask);
+    };
+}
+
+function createTaskCompletionNotification(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    addNotification({
+        toRole: "Requester",
+        type: "task-completion",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        performerName: selectedTask.performerName || "John Designer",
+        title: "Task completion",
+        message: selectedTask.taskTitle + " has been marked as finished."
+    });
+}
+
+function updateTaskPageByRole(selectedTask) {
+    var performerItems = document.getElementsByClassName("performerOnly");
+    var activeItems = document.getElementsByClassName("performerActiveOnly");
+    var availableItems = document.getElementsByClassName("performerAvailableOnly");
+    var requesterItems = document.getElementsByClassName("requesterOnly");
+    var isPerformerTaskPage = userRole == "Performer";
+    var isTakenTask = selectedTask.assignedToPerformer == true;
+
+    for (var i = 0; i < performerItems.length; i++) {
+        if (isPerformerTaskPage) {
+            performerItems[i].style.display = getTaskElementDisplay(performerItems[i]);
+        } else {
+            performerItems[i].style.display = "none";
+        }
+    }
+
+    for (var j = 0; j < activeItems.length; j++) {
+        activeItems[j].style.display = isPerformerTaskPage && isTakenTask ? getTaskElementDisplay(activeItems[j]) : "none";
+    }
+
+    for (var k = 0; k < availableItems.length; k++) {
+        availableItems[k].style.display = isPerformerTaskPage && isTakenTask == false ? getTaskElementDisplay(availableItems[k]) : "none";
+    }
+
+    for (var m = 0; m < requesterItems.length; m++) {
+        requesterItems[m].style.display = isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
+    }
+}
+
+function getTaskElementDisplay(element) {
+    if (element.className.indexOf("performerProgressPanel") != -1) {
+        return "grid";
+    }
+
+    if (element.className.indexOf("communicationPanel") != -1) {
+        return "flex";
+    }
+
+    return "block";
+}
+
+function connectTakeTaskButton(selectedTask) {
+    var takeTaskButton = document.getElementById("performerTakeTaskButton");
+
+    if (takeTaskButton == null) {
+        return;
+    }
+
+    takeTaskButton.onclick = function () {
+        takeLocalTask(selectedTask.id);
+        localStorage.setItem("userRole", "Performer");
+        window.location.href = "performer.html";
+    };
 }
 
 function renderMyTasks(tasks) {
@@ -225,6 +413,10 @@ function getStatusClass(state) {
 }
 
 function updateRequesterStats(tasks) {
+    if (document.getElementById("totalTasks") == null) {
+        return;
+    }
+
     document.getElementById("totalTasks").innerHTML = tasks.length;
     document.getElementById("openTasks").innerHTML = countTasksByState(tasks, "open");
     document.getElementById("progressTasks").innerHTML = countTasksByState(tasks, "in-progress");
@@ -245,6 +437,81 @@ function countTasksByState(tasks, state) {
 
 document.addEventListener("DOMContentLoaded", loadRequesterTasks);
 
+function getPaymentNumber() {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return 0;
+    }
+
+    var paymentValue = parseFloat(taskPayment.value);
+
+    if (isNaN(paymentValue) || paymentValue < 0) {
+        return 0;
+    }
+
+    return paymentValue;
+}
+
+function formatPayment() {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return;
+    }
+
+    taskPayment.value = getPaymentNumber().toFixed(2);
+}
+
+function changePayment(changeAmount) {
+    var taskPayment = document.getElementById("taskPayment");
+
+    if (taskPayment == null) {
+        return;
+    }
+
+    var newPayment = getPaymentNumber() + changeAmount;
+
+    if (newPayment < 0) {
+        newPayment = 0;
+    }
+
+    taskPayment.value = newPayment.toFixed(2);
+}
+
+function getTodayText() {
+    var today = new Date();
+    var month = today.getMonth() + 1;
+    var day = today.getDate();
+
+    if (month < 10) {
+        month = "0" + month;
+    }
+
+    if (day < 10) {
+        day = "0" + day;
+    }
+
+    return today.getFullYear() + "-" + month + "-" + day;
+}
+
+function createTaskFromForm() {
+    return {
+        id: Date.now(),
+        taskTitle: document.getElementById("taskTitle").value,
+        description: document.getElementById("taskDescription").value,
+        location: document.getElementById("taskLocation").value,
+        difficultyLevel: document.getElementById("difficultyLevel").value,
+        payment: parseFloat(document.getElementById("taskPayment").value),
+        additionalDetails: document.getElementById("additionalDetails").value,
+        categories: "General",
+        state: "open",
+        assignedToPerformer: false,
+        workStatus: "Available",
+        creationDate: getTodayText()
+    };
+}
+
 function checkTask() {
     var taskTitle = document.getElementById("taskTitle").value;
     var taskDescription = document.getElementById("taskDescription").value;
@@ -259,12 +526,19 @@ function checkTask() {
         return false;
     }
 
-    if (!isDigits(taskPayment)) {
-        showMessage("taskMessage", "Payment must contain numbers only");
+    if (isNaN(parseFloat(taskPayment))) {
+        showMessage("taskMessage", "Payment must contain a valid number");
         return false;
     }
 
-    /* showScreen("taskSuccessScreen"); */
+    if (parseFloat(taskPayment) < 0) {
+        showMessage("taskMessage", "Payment is too low");
+        return false;
+    }
+
+    formatPayment();
+    saveLocalCreatedTask(createTaskFromForm());
+    window.location.href = "requester.html";
     return false;
 }
 
@@ -294,3 +568,4 @@ function checkPayment() {
     /* showScreen("profileScreen"); */
     return false;
 }
+

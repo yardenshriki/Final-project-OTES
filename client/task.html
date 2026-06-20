@@ -1,0 +1,113 @@
+<!--yarden shriki, lior zahavi-->
+<!doctype html>
+<html>
+  <head>
+    <title>Task Details - Online Tasks Execution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/layout.css" />
+    <link rel="stylesheet" href="style/notifications.css" />
+    <link rel="stylesheet" href="style/task.css" />
+  </head>
+
+  <body>
+    <div id="page">
+      <div id="sharedLayout"></div>
+
+      <main id="taskDetailsScreen" class="screen taskDetailsPage">
+        <div class="pageTitle taskDetailsTitle">
+          <input
+            type="button"
+            value="<  Back"
+            onclick="window.location.href = 'requester.html'"
+          />
+          <h2 id="taskDetailsTitle">Task Details</h2>
+          <div class="taskTitleMeta">
+            <span id="taskDetailsStatus" class="statusOpen">open</span>
+            <span id="taskDetailsPosted">Posted on</span>
+          </div>
+        </div>
+
+        <section id="performerProgressPanel" class="performerOnly performerActiveOnly performerProgressPanel">
+          <div id="performerProgressTrack" class="progressTrack"></div>
+          <button
+            type="button"
+            id="performerNextStepButton"
+            class="nextStepButton"
+          >
+            Next Step
+          </button>
+        </section><div class="taskDetailsLayout">
+          <section class="taskDescriptionPanel">
+            <h3>Task Description</h3>
+            <p id="taskDetailsDescription"></p>
+
+            <div class="taskDetailsBottom">
+              <div>
+                <span class="detailsIcon">$</span>
+                <small>Payment</small>
+                <b id="taskDetailsPayment"></b>
+              </div>
+              <div>
+                <span class="detailsIcon">□</span>
+                <small>Deadline</small>
+                <b id="taskDetailsDeadline"></b>
+              </div>
+            </div>
+          </section>
+
+          <aside class="taskSidePanel">
+            <section class="taskSideCard">
+              <h3>Task Requester</h3>
+              <div class="requesterInfo">
+                <div class="requesterAvatar">o</div>
+                <div>
+                  <p>Sarah Johnson</p>
+                  <small>* 4.8 rating</small>
+                </div>
+              </div>
+            </section>
+
+            <section class="taskSideCard">
+              <h3>Task Details</h3>
+              <div class="detailRow">
+                <span>Category:</span>
+                <b id="taskDetailsCategory"></b>
+              </div>
+              <div class="detailRow">
+                <span>Difficulty:</span>
+                <b id="taskDetailsDifficulty"></b>
+              </div>
+              <div class="detailRow">
+                <span>Posted:</span>
+                <b id="taskDetailsPostedDate"></b>
+              </div>
+            </section>
+          </aside>
+
+          <section class="communicationPanel requesterOnly performerActiveOnly">
+            <div>
+              <h3>Communication</h3>
+              <p>Chat with the task performer</p>
+            </div>
+            <button type="button">Chat</button>
+          </section>
+<button
+            type="button"
+            id="performerTakeTaskButton"
+            class="performerOnly performerAvailableOnly takeTaskButton"
+          >
+            Take Task
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/tasks-storage.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/requester.js"></script>
+  </body>
+</html>
+

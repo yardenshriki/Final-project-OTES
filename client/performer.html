@@ -5,11 +5,47 @@
 <head>
     <title>Performer - Online Tasks Execution System</title>
     <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/notifications.css">
+    <link rel="stylesheet" href="style/performer.css">
 </head>
 
 <body>
     <div id="page">
         <div id="menuOverlay" onclick="closeMenu()"></div>
+        <div id="performerFilterOverlay" class="performerFilterOverlay"></div>
+        <aside id="performerFilterDrawer" class="performerFilterDrawer">
+            <div class="filterDrawerHeader">
+                <h3>Filter Tasks</h3>
+                <button type="button" id="closePerformerFilter" aria-label="Close filters">x</button>
+            </div>
+
+            <label>Difficulty Level</label>
+            <select id="filterDifficulty">
+                <option value="">All Difficulties</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+
+            <label>Location</label>
+            <input type="text" id="filterLocation" placeholder="Search city...">
+
+            <div class="filterRangeHeader">
+                <label>Price Range</label>
+                <span id="filterPriceText">$0 - $1000</span>
+            </div>
+            <input type="range" id="filterMaxPrice" min="0" max="1000" step="25" value="1000">
+
+            <label>Category</label>
+            <select id="filterCategory">
+                <option value="">All Categories</option>
+            </select>
+
+            <div class="filterDrawerActions">
+                <button type="button" id="resetPerformerFilters" class="filterResetButton">Reset Changes</button>
+                <button type="button" id="submitPerformerFilters" class="filterSubmitButton">Submit Changes</button>
+            </div>
+        </aside>
 
         <div id="sideMenu">
             <div class="menuHeader">
@@ -129,8 +165,13 @@
         </footer>
 
     <script src="js/script.js"></script>
+    <script src="js/tasks-storage.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/performer.js"></script>
 </body>
 
 </html>
+
+
+
 

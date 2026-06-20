@@ -1,0 +1,482 @@
+/* Mailbox and notification modals */
+.mailButton {
+  float: right;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 10px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.chatButton {
+  float: right;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.mailIcon {
+  display: block;
+  position: relative;
+  width: 24px;
+  height: 17px;
+  margin: 11px auto 0 auto;
+  border: 2px solid #6a5946;
+  border-radius: 2px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.mailIcon::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: -8px;
+  width: 15px;
+  height: 15px;
+  border-right: 2px solid #6a5946;
+  border-bottom: 2px solid #6a5946;
+  transform: rotate(45deg);
+  box-sizing: border-box;
+}
+
+.mailIcon::after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.chatIcon {
+  display: block;
+  position: relative;
+  width: 24px;
+  height: 18px;
+  margin: 10px auto 0 auto;
+  border: 2px solid #6a5946;
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+
+.chatIcon::before {
+  content: none;
+}
+
+.chatIcon::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: -7px;
+  width: 9px;
+  height: 9px;
+  border-left: 2px solid #6a5946;
+  border-bottom: 2px solid #6a5946;
+  background-color: #f0cf9d;
+  transform: rotate(-35deg);
+  box-sizing: border-box;
+}
+
+.mailUnreadBadge {
+  display: none;
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background-color: #df4a5a;
+  color: white;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+.mailOverlay,
+.messageModalOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(63, 51, 39, 0.58);
+  z-index: 40;
+}
+
+.mailDrawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  max-width: 94vw;
+  height: 100vh;
+  padding: 18px;
+  background-color: #fff2df;
+  border-left: 2px solid #d9b37c;
+  box-sizing: border-box;
+  z-index: 41;
+  text-align: left;
+  box-shadow: -4px 0 18px rgba(63, 51, 39, 0.28);
+  overflow: hidden;
+}
+
+.mailDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.mailDrawerHeader h3 {
+  margin: 0;
+  color: #3f3327;
+}
+
+.mailDrawerHeader button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #6a5946;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mailList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 78px);
+  padding-right: 6px;
+  overflow-y: auto;
+}
+
+.mailList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mailList::-webkit-scrollbar-track {
+  background-color: #f8e8d0;
+  border-radius: 8px;
+}
+
+.mailList::-webkit-scrollbar-thumb {
+  background-color: #d9b37c;
+  border-radius: 8px;
+}
+
+.mailItem {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d9b37c;
+  border-radius: 6px;
+  background-color: #fffdfb;
+  color: #3f3327;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.mailItemUnread {
+  border-width: 2px;
+  background-color: #fff4e4;
+}
+
+.mailItem h4 {
+  margin: 0 0 6px 0;
+}
+
+.mailItem p {
+  margin: 0;
+  color: #6a5946;
+  line-height: 20px;
+}
+
+.mailItem small {
+  display: block;
+  margin-top: 8px;
+  color: #907c62;
+}
+
+.receiptDownloadButton {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin-top: 12px;
+  border: 2px solid #d9b37c;
+  border-radius: 6px;
+  background-color: #fffdfb;
+  color: #3f3327;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.receiptDownloadButton:hover,
+.receiptDownloadButton:focus {
+  background-color: #f8e8d0;
+}
+
+.emptyMailbox {
+  padding: 18px;
+  border: 1px solid #d9b37c;
+  border-radius: 6px;
+  color: #6a5946;
+  text-align: center;
+}
+
+.taskCompletionModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 430px;
+  max-width: 90vw;
+  padding: 34px;
+  border: 3px solid #d9b37c;
+  border-radius: 12px;
+  background-color: #fff2df;
+  box-shadow: 0 18px 36px rgba(63, 51, 39, 0.32);
+  color: #3f3327;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  z-index: 42;
+}
+
+.completionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 22px auto;
+  border: 2px solid #d9b37c;
+  border-radius: 50%;
+  background-color: #f8e8d0;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.taskCompletionModal h2 {
+  margin-bottom: 18px;
+  font-size: 22px;
+  color: #3f3327;
+}
+
+.taskCompletionModal h3 {
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.completionActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.completionActions button {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#approveCompletionButton {
+  border: none;
+  background-color: #d9b37c;
+  color: #3f3327;
+}
+
+#rejectCompletionButton {
+  border: 2px solid #d9b37c;
+  background-color: #fffdfb;
+  color: #3f3327;
+}
+
+.completionNote {
+  margin-top: 26px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fffdfb;
+  color: #6a5946;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.ratingModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 470px;
+  max-width: 92vw;
+  padding: 32px;
+  border: 3px solid #d9b37c;
+  border-radius: 14px;
+  background-color: #fff2df;
+  box-shadow: 0 18px 36px rgba(63, 51, 39, 0.34);
+  color: #3f3327;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  z-index: 42;
+}
+
+.ratingIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  margin: -2px auto 20px auto;
+  border: 2px solid #c99f63;
+  border-radius: 50%;
+  background-color: #d9b37c;
+  color: #3f3327;
+  font-size: 34px;
+  line-height: 1;
+  box-shadow: 0 5px 12px rgba(63, 51, 39, 0.18);
+}
+
+.ratingModal h2 {
+  margin: 0 0 16px 0;
+  color: #3f3327;
+  font-size: 26px;
+}
+
+.ratingSummary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 34px;
+  padding: 18px;
+  border: 1px solid #efd5ad;
+  border-radius: 10px;
+  background-color: #fff7ea;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.ratingSummary div {
+  min-width: 0;
+}
+
+.ratingSummary span,
+.ratingModal label {
+  display: block;
+  margin: 0 0 8px 0;
+  color: #907c62;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ratingSummary b {
+  display: block;
+  color: #3f3327;
+  font-size: 15px;
+}
+
+.ratingTaskName {
+  grid-column: 1 / 3;
+  padding-top: 14px;
+  border-top: 1px solid #efd5ad;
+}
+
+.ratingStars {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.ratingStars button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #efd5ad;
+  font-size: 40px;
+  line-height: 42px;
+  text-shadow: 0 2px 5px rgba(63, 51, 39, 0.16);
+  cursor: pointer;
+}
+
+.ratingStars button:hover,
+.ratingStars button:focus,
+.ratingStars .activeRatingStar {
+  color: #d9b37c;
+}
+
+.ratingModal label {
+  text-align: left;
+}
+
+.ratingModal textarea {
+  width: 100%;
+  height: 110px;
+  padding: 16px;
+  border: 2px solid #d9b37c;
+  border-radius: 10px;
+  background-color: #fffdfb;
+  color: #3f3327;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.submitRatingButton {
+  width: 100%;
+  height: 54px;
+  margin-top: 28px;
+  border: none;
+  border-radius: 10px;
+  background-color: #d9b37c;
+  color: #3f3327;
+  font-size: 17px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(63, 51, 39, 0.14);
+}
+
+.submitRatingButton:hover,
+.submitRatingButton:focus {
+  background-color: #c99f63;
+}
+
+@media screen and (max-width: 560px) {
+  .mailDrawer {
+    width: 100%;
+  }
+
+  .completionActions {
+    grid-template-columns: 1fr;
+  }
+
+  .ratingModal {
+    padding: 24px;
+  }
+
+  .ratingStars {
+    gap: 6px;
+  }
+
+  .ratingStars button {
+    width: 34px;
+    font-size: 34px;
+  }
+}
