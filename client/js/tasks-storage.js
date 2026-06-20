@@ -48,6 +48,25 @@ function takeLocalTask(taskId) {
   saveLocalTaskWorkStatus(taskId, "Task accepted");
 }
 
+function getLocalTaskParticipants() {
+  var savedParticipants = localStorage.getItem("taskParticipants");
+
+  if (savedParticipants == null || savedParticipants == "") {
+    return {};
+  }
+
+  return JSON.parse(savedParticipants);
+}
+
+function saveLocalTaskParticipants(taskId, requesterName, performerName) {
+  var taskParticipants = getLocalTaskParticipants();
+  taskParticipants[taskId] = {
+    requesterName: requesterName,
+    performerName: performerName
+  };
+  localStorage.setItem("taskParticipants", JSON.stringify(taskParticipants));
+}
+
 function getLocalTaskWorkStatuses() {
   var savedStatuses = localStorage.getItem("taskWorkStatuses");
 
@@ -85,11 +104,19 @@ function updateTaskStateByWorkStatus(task) {
 }
 
 function applyLocalTaskAssignments(tasks) {
+  var taskParticipants = getLocalTaskParticipants();
+
   for (var i = 0; i < tasks.length; i++) {
     var savedWorkStatus = getLocalTaskWorkStatus(tasks[i].id);
+    var savedParticipants = taskParticipants[tasks[i].id];
 
     if (savedWorkStatus != null) {
       tasks[i].workStatus = savedWorkStatus;
+    }
+
+    if (savedParticipants != null) {
+      tasks[i].requesterName = savedParticipants.requesterName;
+      tasks[i].performerName = savedParticipants.performerName;
     }
 
     if (isTaskTakenByPerformer(tasks[i].id)) {
