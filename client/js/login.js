@@ -1,4 +1,4 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var LOGIN_ADMIN_DATA_STORAGE_KEY = "otesAdminData";
 function checkLogin() {
     var username = document.getElementById("username").value;
@@ -14,11 +14,11 @@ function checkLogin() {
     if (username.toUpperCase().indexOf("ADMIN") == 0) {
         localStorage.setItem("userRole", "Admin");
         localStorage.setItem("adminUsername", username);
-        window.location.href = "admin.html";
+        window.location.href = "admin/";
         return false;
     }
 
-    fetch("data/admin-data.json")
+    fetch("admin/data/admin-data.json")
         .then(function (response) {
             return response.json();
         })
