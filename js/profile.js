@@ -1,0 +1,700 @@
+var profileRole = localStorage.getItem("userRole") || "Requester";
+var profileData = {};
+var currentProfile = null;
+var profileOriginalUsername = "";
+var uploadedProfileImage = "";
+
+function getProfileHomePath() {
+    if (profileRole == "Performer") {
+        return "performer.html";
+    }
+
+    return "requester.html";
+}
+
+function goToProfileHome() {
+    window.location.href = getProfileHomePath();
+}
+
+function switchProfileRole(roleName) {
+    profileRole = roleName;
+    localStorage.setItem("userRole", profileRole);
+    goToProfileHome();
+}
+
+function markProfileRole() {
+    var requesterButton = document.getElementById("requesterButton");
+    var performerButton = document.getElementById("performerButton");
+
+    if (requesterButton == null || performerButton == null) {
+        return;
+    }
+
+    if (profileRole == "Performer") {
+        requesterButton.className = "";
+        performerButton.className = "activeRole";
+    } else {
+        requesterButton.className = "activeRole";
+        performerButton.className = "";
+    }
+}
+
+function loadProfileData(done) {
+    var savedData = localStorage.getItem("otesAdminData");
+
+    if (savedData != null && savedData != "") {
+        try {
+            done(JSON.parse(savedData));
+            return;
+        } catch (error) {
+        }
+    }
+
+    fetch("data/admin-data.json")
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            done(data);
+        })
+        .catch(function () {
+            done(getDefaultProfileData());
+        });
+}
+
+function getDefaultProfileData() {
+    return {
+        users: [
+            {
+                username: "john_doe",
+                name: "John Doe",
+                email: "john.doe@gmail.com",
+                tasks: ["Design a Logo", "Data Entry"],
+                ratings: ["4.8 from Anna Smith"]
+            }
+        ],
+        taskLogs: [],
+        payments: []
+    };
+}
+
+function initializeProfile() {
+    markProfileRole();
+
+    loadProfileData(function (data) {
+        profileData = data;
+        currentProfile = buildCurrentProfile(data);
+        renderProfile();
+        fillEditForm();
+        fillCardForm();
+    });
+}
+
+function buildCurrentProfile(data) {
+    var username = localStorage.getItem("loggedInUsername") || "john_doe";
+    var user = findProfileUser(data, username);
+
+    if (user == null && data.users != null && data.users.length > 0) {
+        user = data.users[0];
+    }
+
+    if (user == null) {
+        user = getDefaultProfileData().users[0];
+    }
+
+    var savedProfile = getSavedProfile(user.username);
+    var profile = {};
+
+    copyProfileFields(profile, user);
+    copyProfileFields(profile, savedProfile);
+
+    profileOriginalUsername = user.username || username;
+    profile.username = profile.username || username;
+    profile.name = profile.name || "John Doe";
+    profile.email = profile.email || "john.doe@gmail.com";
+    profile.bio = profile.bio || "Experienced designer with a passion for creating clean, modern designs. Specialized in logo design and branding.";
+    profile.skills = profile.skills || "Logo Design, Branding, UI/UX, Illustration";
+    profile.rating = profile.rating || getRatingFromText(profile.ratings);
+    profile.ratingCount = profile.ratingCount || getCompletedCount(profile);
+    profile.completedTasks = profile.completedTasks || getCompletedCount(profile);
+    profile.activeTasks = profile.activeTasks || getActiveCount(profile);
+    profile.earnings = profile.earnings || getEarnings(profile);
+    profile.reviews = profile.reviews || profile.ratings || ["4.8 from Anna Smith"];
+    profile.image = profile.image || "";
+
+    return profile;
+}
+
+function copyProfileFields(target, source) {
+    if (source == null) {
+        return;
+    }
+
+    for (var key in source) {
+        target[key] = source[key];
+    }
+}
+
+function findProfileUser(data, username) {
+    if (data.users == null) {
+        return null;
+    }
+
+    for (var i = 0; i < data.users.length; i++) {
+        if (normalizeProfileText(data.users[i].username) == normalizeProfileText(username)) {
+            return data.users[i];
+        }
+    }
+
+    return null;
+}
+
+function getSavedProfile(username) {
+    var savedProfile = localStorage.getItem("otesProfile_" + username);
+
+    if (savedProfile == null || savedProfile == "") {
+        return {};
+    }
+
+    try {
+        return JSON.parse(savedProfile);
+    } catch (error) {
+        return {};
+    }
+}
+
+function saveCurrentProfile() {
+    if (profileOriginalUsername != currentProfile.username) {
+        localStorage.removeItem("otesProfile_" + profileOriginalUsername);
+    }
+
+    localStorage.setItem("otesProfile_" + currentProfile.username, JSON.stringify(currentProfile));
+    updateProfileInAdminData();
+    profileOriginalUsername = currentProfile.username;
+}
+
+function updateProfileInAdminData() {
+    var user = findProfileUser(profileData, profileOriginalUsername);
+
+    if (user == null) {
+        return;
+    }
+
+    user.name = currentProfile.name;
+    user.username = currentProfile.username;
+    user.email = currentProfile.email;
+    user.bio = currentProfile.bio;
+    user.skills = currentProfile.skills;
+    user.profileImage = currentProfile.image;
+    if (currentProfile.password != null && currentProfile.password != "") {
+        user.password = currentProfile.password;
+        user.passwordUpdated = currentProfile.passwordUpdated;
+    }
+    localStorage.setItem("otesAdminData", JSON.stringify(profileData));
+}
+
+function renderProfile() {
+    setProfileText("profileName", currentProfile.name);
+    setProfileText("profileEmail", currentProfile.email);
+    setProfileText("profileRating", currentProfile.rating);
+    setProfileText("profileRatingCount", currentProfile.ratingCount);
+    setProfileText("profileBio", currentProfile.bio);
+    setProfileText("profileSkills", currentProfile.skills);
+    setProfileText("completedTasksCount", currentProfile.completedTasks);
+    setProfileText("activeTasksCount", currentProfile.activeTasks);
+    setProfileText("earningsAmount", "$" + currentProfile.earnings);
+    renderProfileImage("profileImage", "profileInitials", currentProfile);
+    renderTaskHistory();
+    renderReviews();
+}
+
+function setProfileText(id, text) {
+    var element = document.getElementById(id);
+
+    if (element != null) {
+        element.innerText = text;
+    }
+}
+
+function renderProfileImage(imageId, initialsId, profile) {
+    var image = document.getElementById(imageId);
+    var initials = document.getElementById(initialsId);
+
+    if (image == null || initials == null) {
+        return;
+    }
+
+    initials.innerText = getInitials(profile.name);
+
+    if (profile.image != null && profile.image != "") {
+        image.src = profile.image;
+        image.style.display = "block";
+        initials.style.display = "none";
+    } else {
+        image.removeAttribute("src");
+        image.style.display = "none";
+        initials.style.display = "flex";
+    }
+}
+
+function getInitials(name) {
+    var parts = String(name || "User").trim().split(" ");
+    var initials = "";
+
+    for (var i = 0; i < parts.length && i < 2; i++) {
+        if (parts[i] != "") {
+            initials += parts[i].charAt(0).toUpperCase();
+        }
+    }
+
+    return initials || "U";
+}
+
+function renderTaskHistory() {
+    var list = document.getElementById("profileTaskList");
+    var tasks = currentProfile.tasks || [];
+    var rows = "";
+
+    if (profileData.taskLogs != null) {
+        for (var i = 0; i < profileData.taskLogs.length; i++) {
+            var task = profileData.taskLogs[i];
+            if (normalizeProfileText(task.requester) == normalizeProfileText(currentProfile.name) || normalizeProfileText(task.performer) == normalizeProfileText(currentProfile.name) || normalizeProfileText(task.fullName) == normalizeProfileText(currentProfile.name)) {
+                rows += "<li><b>" + cleanProfileText(task.lastTask) + "</b> - " + cleanProfileText(task.activeStatus) + " (" + cleanProfileText(task.date) + ")</li>";
+            }
+        }
+    }
+
+    for (var j = 0; j < tasks.length; j++) {
+        rows += "<li>" + cleanProfileText(tasks[j]) + "</li>";
+    }
+
+    list.innerHTML = rows || "<li>No task history yet.</li>";
+}
+
+function renderReviews() {
+    var list = document.getElementById("profileReviewList");
+    var reviews = currentProfile.reviews || [];
+    var rows = "";
+
+    for (var i = 0; i < reviews.length; i++) {
+        rows += "<li>" + cleanProfileText(reviews[i]) + "</li>";
+    }
+
+    list.innerHTML = rows || "<li>No reviews yet.</li>";
+}
+
+function showProfileTab(tabName) {
+    var tabs = document.querySelectorAll(".profileTabs button");
+    var panels = ["aboutTab", "tasksTab", "reviewsTab"];
+
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].className = tabs[i].getAttribute("data-tab") == tabName ? "activeProfileTab" : "";
+    }
+
+    for (var j = 0; j < panels.length; j++) {
+        document.getElementById(panels[j]).className = "profileTabPanel hiddenProfilePanel";
+    }
+
+    document.getElementById(tabName + "Tab").className = "profileTabPanel";
+}
+
+function showProfileView(viewId) {
+    var views = ["profileView", "editProfileView", "cardView"];
+
+    for (var i = 0; i < views.length; i++) {
+        document.getElementById(views[i]).className = "profileSection hiddenProfilePanel";
+    }
+
+    document.getElementById(viewId).className = "profileSection";
+}
+
+function fillEditForm() {
+    uploadedProfileImage = currentProfile.image || "";
+    setInputValue("editFullName", currentProfile.name);
+    setInputValue("editUsername", currentProfile.username);
+    setInputValue("editEmail", currentProfile.email);
+    setInputValue("editBio", currentProfile.bio);
+    setInputValue("editSkills", currentProfile.skills);
+    setInputValue("editPassword", "");
+    setInputValue("editPasswordConfirm", "");
+    renderProfileImage("editProfileImage", "editProfileInitials", currentProfile);
+}
+
+function saveEditProfile() {
+    var fullName = getInputValue("editFullName");
+    var username = getInputValue("editUsername");
+    var email = getInputValue("editEmail");
+    var bio = getInputValue("editBio");
+    var skills = getInputValue("editSkills");
+    var password = getPasswordInputValue("editPassword");
+    var confirmPassword = getPasswordInputValue("editPasswordConfirm");
+    var changedDetails = [];
+
+    setProfileMessage("profileEditMessage", "", false);
+
+    if (fullName == "" || username == "" || email == "") {
+        setProfileMessage("profileEditMessage", "Full name, username, and email are required", false);
+        return false;
+    }
+
+    if (!isValidProfileEmail(email)) {
+        setProfileMessage("profileEditMessage", "Email must be valid and include @", false);
+        return false;
+    }
+
+    if ((password != "" && confirmPassword == "") || (password == "" && confirmPassword != "")) {
+        setProfileMessage("profileEditMessage", "Please fill both password fields", false);
+        return false;
+    }
+
+    if (password != confirmPassword) {
+        setProfileMessage("profileEditMessage", "Password confirmation does not match", false);
+        return false;
+    }
+
+    if (password != "" && !isValidProfilePassword(password)) {
+        setProfileMessage("profileEditMessage", "Password must include both letters and numbers", false);
+        return false;
+    }
+
+    changedDetails = getProfileChangedDetails(fullName, username, email, bio, skills, password);
+
+    currentProfile.name = fullName;
+    currentProfile.username = username;
+    currentProfile.email = email;
+    currentProfile.bio = bio;
+    currentProfile.skills = skills;
+    currentProfile.image = uploadedProfileImage;
+
+    if (password != "") {
+        currentProfile.password = password;
+        currentProfile.passwordUpdated = new Date().toISOString().substring(0, 10);
+    }
+
+    localStorage.setItem("loggedInUsername", username);
+    saveCurrentProfile();
+    renderProfile();
+    fillEditForm();
+    showProfileView("profileView");
+    showProfileUpdatedPopup(changedDetails);
+    return false;
+}
+
+function isValidProfileEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidProfilePassword(password) {
+    return /[A-Za-z]/.test(password) && /[0-9]/.test(password);
+}
+
+function getProfileChangedDetails(fullName, username, email, bio, skills, password) {
+    var changes = [];
+
+    addProfileChange(changes, "Full Name", currentProfile.name, fullName);
+    addProfileChange(changes, "Username", currentProfile.username, username);
+    addProfileChange(changes, "Email", currentProfile.email, email);
+    addProfileChange(changes, "Bio", currentProfile.bio, bio);
+    addProfileChange(changes, "Skills", currentProfile.skills, skills);
+
+    if ((currentProfile.image || "") != (uploadedProfileImage || "")) {
+        changes.push("Profile picture updated");
+    }
+
+    if (password != "") {
+        changes.push("Password updated");
+    }
+
+    if (changes.length == 0) {
+        changes.push("No visible details changed");
+    }
+
+    return changes;
+}
+
+function addProfileChange(changes, label, oldValue, newValue) {
+    if (String(oldValue || "") != String(newValue || "")) {
+        changes.push(label + ": " + String(oldValue || "Empty") + " -> " + String(newValue || "Empty"));
+    }
+}
+
+function showProfileUpdatedPopup(changedDetails) {
+    var popup = document.getElementById("profileUpdatedPopup");
+    var list = document.getElementById("profileUpdatedList");
+    var rows = "";
+
+    if (popup == null || list == null) {
+        return;
+    }
+
+    for (var i = 0; i < changedDetails.length; i++) {
+        rows += "<li>" + cleanProfileText(changedDetails[i]) + "</li>";
+    }
+
+    list.innerHTML = rows;
+    popup.style.display = "flex";
+    popup.setAttribute("aria-hidden", "false");
+}
+
+function closeProfileUpdatedPopup() {
+    var popup = document.getElementById("profileUpdatedPopup");
+
+    if (popup != null) {
+        popup.style.display = "none";
+        popup.setAttribute("aria-hidden", "true");
+    }
+}
+
+function fillCardForm() {
+    var savedCard = localStorage.getItem("otesCard_" + getProfileStorageUsername());
+
+    if (savedCard == null || savedCard == "") {
+        return;
+    }
+
+    try {
+        var card = JSON.parse(savedCard);
+        setInputValue("cardNumber", card.maskedNumber || "");
+        setInputValue("cardHolder", card.cardHolder || "");
+        setInputValue("cardExpiry", card.expiry || "");
+    } catch (error) {
+    }
+}
+
+function saveCardDetails() {
+    var cardNumber = getInputValue("cardNumber").replace(/\s/g, "");
+    var cardHolder = getInputValue("cardHolder");
+    var cardExpiry = getInputValue("cardExpiry");
+    var cardCvv = getInputValue("cardCvv");
+
+    if (cardNumber.length != 16 || isNaN(cardNumber)) {
+        setProfileMessage("cardMessage", "Card number must contain 16 digits", false);
+        return false;
+    }
+
+    if (cardHolder == "" || cardExpiry == "" || cardCvv == "") {
+        setProfileMessage("cardMessage", "Please fill all card details", false);
+        return false;
+    }
+
+    if (cardCvv.length < 3 || cardCvv.length > 4 || isNaN(cardCvv)) {
+        setProfileMessage("cardMessage", "CVV must contain 3 or 4 digits", false);
+        return false;
+    }
+
+    localStorage.setItem("otesCard_" + getProfileStorageUsername(), JSON.stringify({
+        maskedNumber: "**** **** **** " + cardNumber.substring(12),
+        cardHolder: cardHolder,
+        expiry: cardExpiry,
+        savedAt: new Date().toISOString().substring(0, 10)
+    }));
+
+    setProfileMessage("cardMessage", "Card details saved successfully", true);
+    document.getElementById("cardCvv").value = "";
+    return false;
+}
+
+function getProfileStorageUsername() {
+    if (currentProfile != null && currentProfile.username != null) {
+        return currentProfile.username;
+    }
+
+    return localStorage.getItem("loggedInUsername") || "john_doe";
+}
+
+function previewProfileImage(file) {
+    if (file == null) {
+        return;
+    }
+
+    var reader = new FileReader();
+
+    reader.onload = function (event) {
+        uploadedProfileImage = event.target.result;
+        var previewProfile = {};
+        copyProfileFields(previewProfile, currentProfile);
+        previewProfile.image = uploadedProfileImage;
+        renderProfileImage("editProfileImage", "editProfileInitials", previewProfile);
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function setInputValue(id, value) {
+    var element = document.getElementById(id);
+
+    if (element != null) {
+        element.value = value || "";
+    }
+}
+
+function getInputValue(id) {
+    var element = document.getElementById(id);
+
+    if (element == null) {
+        return "";
+    }
+
+    return element.value.trim();
+}
+
+function getPasswordInputValue(id) {
+    var element = document.getElementById(id);
+
+    if (element == null) {
+        return "";
+    }
+
+    return element.value;
+}
+
+function togglePasswordVisibility(inputId, buttonId) {
+    var input = document.getElementById(inputId);
+    var button = document.getElementById(buttonId);
+
+    if (input == null || button == null) {
+        return;
+    }
+
+    if (input.type == "password") {
+        input.type = "text";
+        button.setAttribute("aria-label", "Hide password");
+    } else {
+        input.type = "password";
+        button.setAttribute("aria-label", "Show password");
+    }
+}
+
+function setProfileMessage(id, text, isSuccess) {
+    var message = document.getElementById(id);
+
+    if (message == null) {
+        return;
+    }
+
+    message.innerText = text;
+    message.className = isSuccess ? "message profileFormMessage profileSuccess" : "message profileFormMessage";
+}
+
+function getCompletedCount(profile) {
+    var count = 0;
+
+    if (profileData.taskLogs != null) {
+        for (var i = 0; i < profileData.taskLogs.length; i++) {
+            if (normalizeProfileText(profileData.taskLogs[i].fullName) == normalizeProfileText(profile.name) && normalizeProfileText(profileData.taskLogs[i].activeStatus) == "completed") {
+                count++;
+            }
+        }
+    }
+
+    return count || 24;
+}
+
+function getActiveCount(profile) {
+    var count = 0;
+
+    if (profileData.taskLogs != null) {
+        for (var i = 0; i < profileData.taskLogs.length; i++) {
+            if (normalizeProfileText(profileData.taskLogs[i].fullName) == normalizeProfileText(profile.name) && normalizeProfileText(profileData.taskLogs[i].activeStatus) != "completed") {
+                count++;
+            }
+        }
+    }
+
+    return count || 2;
+}
+
+function getEarnings(profile) {
+    var total = 0;
+
+    if (profileData.payments != null) {
+        for (var i = 0; i < profileData.payments.length; i++) {
+            if (normalizeProfileText(profileData.payments[i].payee) == normalizeProfileText(profile.name)) {
+                total += 150;
+            }
+        }
+    }
+
+    return total || 3250;
+}
+
+function getRatingFromText(ratings) {
+    if (ratings != null && ratings.length > 0) {
+        var rating = String(ratings[0]).match(/[0-9]+(\.[0-9]+)?/);
+
+        if (rating != null) {
+            return rating[0];
+        }
+    }
+
+    return "4.8";
+}
+
+function cleanProfileText(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function normalizeProfileText(value) {
+    return String(value || "").toLowerCase().trim();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    initializeProfile();
+
+    document.getElementById("profileBackButton").addEventListener("click", goToProfileHome);
+    document.getElementById("profileMenuButton").addEventListener("click", goToProfileHome);
+    document.querySelector(".profileHeaderLink").addEventListener("click", function () {
+        showProfileView("profileView");
+    });
+    document.getElementById("editBackButton").addEventListener("click", function () {
+        showProfileView("profileView");
+    });
+    document.getElementById("cardBackButton").addEventListener("click", function () {
+        showProfileView("profileView");
+    });
+    document.getElementById("editProfileButton").addEventListener("click", function () {
+        fillEditForm();
+        showProfileView("editProfileView");
+    });
+    document.getElementById("openCardButton").addEventListener("click", function () {
+        fillCardForm();
+        showProfileView("cardView");
+    });
+    document.getElementById("cancelEditButton").addEventListener("click", function () {
+        showProfileView("profileView");
+    });
+    document.getElementById("cancelCardButton").addEventListener("click", function () {
+        showProfileView("profileView");
+    });
+    document.getElementById("editProfileForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        saveEditProfile();
+    });
+    document.getElementById("creditCardForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        saveCardDetails();
+    });
+    document.getElementById("profileUpdatedButton").addEventListener("click", closeProfileUpdatedPopup);
+    document.getElementById("toggleEditPassword").addEventListener("click", function () {
+        togglePasswordVisibility("editPassword", "toggleEditPassword");
+    });
+    document.getElementById("toggleEditPasswordConfirm").addEventListener("click", function () {
+        togglePasswordVisibility("editPasswordConfirm", "toggleEditPasswordConfirm");
+    });
+    document.getElementById("editProfilePicture").addEventListener("change", function () {
+        previewProfileImage(this.files[0]);
+    });
+    document.getElementById("requesterButton").addEventListener("click", function () {
+        switchProfileRole("Requester");
+    });
+    document.getElementById("performerButton").addEventListener("click", function () {
+        switchProfileRole("Performer");
+    });
+
+    var tabs = document.querySelectorAll(".profileTabs button");
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].addEventListener("click", function () {
+            showProfileTab(this.getAttribute("data-tab"));
+        });
+    }
+});

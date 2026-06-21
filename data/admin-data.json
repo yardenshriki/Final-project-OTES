@@ -1,4 +1,4 @@
-{
+﻿{
     "reports":  [
                     {
                         "date":  "2026-05-26",
@@ -44,6 +44,15 @@
                       "name":  "John Doe",
                       "idNumber":  "123456789",
                       "email":  "john@example.com",
+                      "password":  "",
+                      "passwordUpdated":  "",
+                      "bio":  "Experienced designer with a passion for creating clean, modern designs. Specialized in logo design and branding.",
+                      "skills":  "Logo Design, Branding, UI/UX, Illustration",
+                      "rating":  "4.8",
+                      "ratingCount":  24,
+                      "completedTasks":  24,
+                      "activeTasks":  2,
+                      "earnings":  3250,
                       "joinDate":  "2026-01-12",
                       "lastTask":  "Design a Logo",
                       "status":  "Active",
@@ -63,13 +72,28 @@
                       "restrictionDuration":  "",
                       "restrictionReason":  "",
                       "restrictionEmailSent":  false,
-                      "restrictionEmailDate":  ""
+                      "restrictionEmailDate":  "",
+                      "reportsFiled":  0,
+                      "hasComplaint":  false,
+                      "lastReportDate":  "",
+                      "reportHistory":  [
+
+                                        ]
                   },
                   {
                       "username":  "sarah_j",
                       "name":  "Sarah Johnson",
                       "idNumber":  "987654321",
                       "email":  "sarah@example.com",
+                      "password":  "",
+                      "passwordUpdated":  "",
+                      "bio":  "Creative video editor focused on short-form content, subtitles, and clean visual storytelling.",
+                      "skills":  "Video Editing, Subtitles, Social Media, Storytelling",
+                      "rating":  "4.9",
+                      "ratingCount":  18,
+                      "completedTasks":  18,
+                      "activeTasks":  1,
+                      "earnings":  2800,
                       "joinDate":  "2026-02-03",
                       "lastTask":  "Video Editing",
                       "status":  "Restricted",
@@ -88,13 +112,28 @@
                       "restrictionDuration":  "",
                       "restrictionReason":  "",
                       "restrictionEmailSent":  false,
-                      "restrictionEmailDate":  ""
+                      "restrictionEmailDate":  "",
+                      "reportsFiled":  0,
+                      "hasComplaint":  false,
+                      "lastReportDate":  "",
+                      "reportHistory":  [
+
+                                        ]
                   },
                   {
                       "username":  "anna_s",
                       "name":  "Anna Smith",
                       "idNumber":  "456789123",
                       "email":  "anna@example.com",
+                      "password":  "",
+                      "passwordUpdated":  "",
+                      "bio":  "Task requester and web project owner who works with performers on design and development tasks.",
+                      "skills":  "Task Management, Website Planning, Content Review",
+                      "rating":  "4.7",
+                      "ratingCount":  12,
+                      "completedTasks":  12,
+                      "activeTasks":  3,
+                      "earnings":  0,
                       "joinDate":  "2026-03-20",
                       "lastTask":  "Website Development",
                       "status":  "Active",
@@ -114,7 +153,13 @@
                       "restrictionDuration":  "",
                       "restrictionReason":  "",
                       "restrictionEmailSent":  false,
-                      "restrictionEmailDate":  ""
+                      "restrictionEmailDate":  "",
+                      "reportsFiled":  0,
+                      "hasComplaint":  false,
+                      "lastReportDate":  "",
+                      "reportHistory":  [
+
+                                        ]
                   }
               ],
     "payments":  [

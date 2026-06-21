@@ -112,6 +112,7 @@ function showScreen(screenName) {
 
     document.getElementById(screenName).style.display = "block";
     markRole();
+
 }
 
 function showMessage(messageName, text) {
@@ -173,6 +174,7 @@ function chooseWelcomeRole(roleName) {
     }
 }
 
+
 document.addEventListener("click", function (event) {
     var sideMenu = document.getElementById("sideMenu");
     var menuButton = document.getElementsByClassName("menuButton")[0];
@@ -218,6 +220,7 @@ window.onload = function () {
         showWelcomePopup();
     }
 };
+
 
 
 
