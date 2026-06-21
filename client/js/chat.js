@@ -233,6 +233,10 @@ function addTaskChatSystemMessage(task, messageText) {
         chat = createTaskChat(task);
     }
 
+    if (chat == null) {
+        return;
+    }
+
     addTaskChatMessage(task.id, {
         senderRole: "Performer",
         senderName: chat.performerName,

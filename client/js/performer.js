@@ -8,7 +8,7 @@ function loadPerformerTasks() {
             return response.json();
         })
         .then(function (tasks) {
-            performerTasks = tasks;
+            performerTasks = applyLocalTaskAssignments(tasks.concat(getLocalCreatedTasks()));
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
@@ -103,7 +103,7 @@ function createPerformerTaskCard(task, buttonText) {
         '<p>Location: ' + task.location + '</p>' +
         '<p>Created: ' + task.creationDate + '</p>' +
         '<p>Payment: <b>$' + task.payment + '</b></p>' +
-        '<input type="button" value="' + buttonText + '">' +
+        '<input type="button" value="' + buttonText + '" onclick="openPerformerTask(' + task.id + ', false)">' +
         '</div>';
 }
 
@@ -116,8 +116,18 @@ function createPerformerAvailableTaskCard(task) {
         '<div class="taskMeta"><span>Payment:</span><b>$' + task.payment + '</b></div>' +
         '<div class="taskMeta"><span>Created:</span><b>' + task.creationDate + '</b></div>' +
         '<div class="taskMeta"><span>Location:</span><b>' + task.location + '</b></div>' +
-        '<input type="button" value="View Details">' +
+        '<input type="button" value="View Details" onclick="openPerformerTask(' + task.id + ', true)">' +
         '</div>';
+}
+
+function openPerformerTask(taskId, isAvailableTask) {
+    localStorage.setItem("userRole", "Performer");
+
+    if (isAvailableTask == true) {
+        window.location.href = "task.html?id=" + taskId + "&mode=take";
+    } else {
+        window.location.href = "task.html?id=" + taskId;
+    }
 }
 
 function getPerformerStatusText(state) {
