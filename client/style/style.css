@@ -744,6 +744,109 @@ hr {
   border-radius: 10px;
 }
 
+.companyPolicyScreen {
+  width: min(900px, 90vw);
+  margin: 92px auto 50px;
+  direction: ltr;
+  text-align: left;
+}
+
+.companyPolicyTitle {
+  margin: 0 0 24px;
+  color: #2f2a24;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.companyPolicyPanel {
+  max-height: 560px;
+  padding: 34px 38px;
+  overflow-y: auto;
+  background-color: #fff0db;
+  border: 2px solid #e1bd83;
+  border-radius: 9px;
+  color: #2f2a24;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+  line-height: 1.65;
+}
+
+.companyPolicyIntro {
+  margin: 0 0 24px;
+  font-size: 16px;
+  text-align: left;
+}
+
+.companyPolicyGroup {
+  margin: 0 0 24px;
+}
+
+.companyPolicyGroup:last-child {
+  margin-bottom: 0;
+}
+
+.companyPolicyGroup h2 {
+  margin: 0 0 10px;
+  color: #2f2a24;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.companyPolicyGroup ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.companyPolicyGroup li {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.companyPolicyPanel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.companyPolicyPanel::-webkit-scrollbar-track {
+  background-color: #f7dfba;
+  border-radius: 999px;
+}
+
+.companyPolicyPanel::-webkit-scrollbar-thumb {
+  background-color: #e2bd80;
+  border-radius: 999px;
+}
+
+@media screen and (max-width: 700px) {
+  .companyPolicyScreen {
+    width: 88%;
+    margin-top: 82px;
+  }
+
+  .companyPolicyTitle {
+    font-size: 25px;
+  }
+
+  .companyPolicyPanel {
+    max-height: 62vh;
+    padding: 24px 22px;
+  }
+
+  .companyPolicyIntro,
+  .companyPolicyGroup li {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .companyPolicyGroup h2 {
+    font-size: 16px;
+  }
+}
+
 .popupOverlay {
   display: none;
   position: fixed;

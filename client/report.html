@@ -1,0 +1,104 @@
+<!--yarden shriki, lior zahavi-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Report an Issue - Online Tasks Execution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/notifications.css">
+    <link rel="stylesheet" href="style/report.css">
+</head>
+
+<body class="reportPageBody">
+    <div id="page">
+        <header id="appHeader">
+            <button type="button" id="reportHomeButton" class="menuButton" aria-label="Back">&#8592;</button>
+            <span class="systemTitle">Online Task Execution System</span>
+
+            <button type="button" class="profileButton" aria-label="Profile">
+                <span class="profileIcon"></span>
+            </button>
+            <nav class="roleSwitch" aria-label="User role">
+                <button type="button" id="requesterButton">Requester</button>
+                <button type="button" id="performerButton">Performer</button>
+            </nav>
+        </header>
+
+        <main class="reportMain">
+            <section class="reportScreen" aria-labelledby="reportTitle">
+                <div class="reportPageHeader">
+                    <button type="button" id="reportBackButton" class="reportBackButton" aria-label="Back">&#8592;</button>
+                    <div>
+                        <h1 id="reportTitle"><span class="reportTitleIcon">!</span> Report an Issue</h1>
+                        <p>Report any issues related to payments, tasks, users, or system problems.</p>
+                    </div>
+                </div>
+
+                <form id="reportForm" class="reportForm">
+                    <label for="reportType">Report Type *</label>
+                    <select id="reportType" required>
+                        <option value="">Select report type</option>
+                        <option value="System Issue">System Issue</option>
+                        <option value="User Report">User Report</option>
+                        <option value="Task Report">Task Report</option>
+                        <option value="Payment Issue">Payment Issue</option>
+                    </select>
+
+                    <label for="reportName">Full Name *</label>
+                    <input type="text" id="reportName" placeholder="Enter your full name" required>
+
+                    <label for="reportedTarget">Task or Username *</label>
+                    <input type="text" id="reportedTarget" placeholder="Enter task name or username" required>
+
+                    <label for="reportDescription">Report Description *</label>
+                    <textarea id="reportDescription" placeholder="Please provide detailed information about the issue..." required></textarea>
+                    <small class="reportHelpText">Include as much detail as possible to help us resolve the issue quickly.</small>
+
+                    <div class="reportActions">
+                        <button type="submit" class="reportSubmitButton">Submit Report</button>
+                        <button type="button" id="reportCancelButton" class="reportCancelButton">Cancel</button>
+                    </div>
+
+                    <p id="reportMessage" class="message reportMessage"></p>
+                </form>
+
+                <section class="reportGuidelines" aria-labelledby="reportGuidelinesTitle">
+                    <h2 id="reportGuidelinesTitle"><span>i</span> Report Guidelines</h2>
+                    <ul>
+                        <li><b>System Issues:</b> Technical problems, bugs, or platform errors.</li>
+                        <li><b>User Reports:</b> Concerns about user behavior or violations.</li>
+                        <li><b>Task Reports:</b> Issues with task completion, quality, or disputes.</li>
+                        <li>All reports are reviewed within 24-48 hours.</li>
+                        <li>You will receive an email update once your report is processed.</li>
+                    </ul>
+                </section>
+            </section>
+        </main>
+
+        <section id="reportSuccessPopup" class="reportSuccessPopup" aria-hidden="true">
+            <div class="reportSuccessBox" role="dialog" aria-modal="true" aria-labelledby="reportSuccessTitle">
+                <div class="reportSuccessIcon">&#10003;</div>
+                <h2 id="reportSuccessTitle">Report Submitted Successfully</h2>
+                <p>Your report has been received and is now under review.</p>
+                <button type="button" id="reportSuccessButton" class="reportSuccessButton">Got it, thank you</button>
+            </div>
+        </section>
+
+        <footer class="appFooter">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about our policies, please contact us:</p>
+            <p>Email: <span>support@taskexecution.com</span></p>
+            <p class="lastUpdated">Last updated: February 2, 2026</p>
+            <div class="footerSocials">
+                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
+                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
+                <button type="button" aria-label="Instagram" data-tooltip="Instagram">?</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/report.js"></script>
+</body>
+
+</html>

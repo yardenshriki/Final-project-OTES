@@ -1,0 +1,292 @@
+.reportPageBody #page {
+  min-height: 100vh;
+}
+
+.reportPageBody #appHeader {
+  display: block;
+}
+
+.reportPageBody .roleSwitch button {
+  width: 95px;
+  max-width: 22vw;
+  height: 32px;
+  border: none;
+  border-radius: 18px;
+  background-color: #f8e8d0;
+  color: #5c4b39;
+  cursor: pointer;
+}
+
+.reportPageBody .roleSwitch .activeRole {
+  background-color: #d6ad6c;
+  color: white;
+  font-weight: bold;
+}
+
+.reportMain {
+  flex: 1;
+}
+
+.reportScreen {
+  display: block;
+  width: min(860px, 88vw);
+  margin: 18px auto 34px;
+  color: #2f2a24;
+  direction: ltr;
+  text-align: left;
+}
+
+.reportPageHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.reportBackButton {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background-color: #fff8ef;
+  color: #6b5639;
+  font-size: 22px;
+  line-height: 30px;
+  cursor: pointer;
+  box-shadow: 0 2px 7px #ead4b2;
+}
+
+.reportPageHeader h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 36px;
+}
+
+.reportPageHeader p {
+  margin: 0;
+  color: #80694b;
+  font-size: 14px;
+}
+
+.reportTitleIcon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  border: 2px solid #e3be84;
+  border-radius: 50%;
+  color: #c08c42;
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: 4px;
+}
+
+.reportForm,
+.reportGuidelines {
+  width: 100%;
+  padding: 28px 32px;
+  background-color: #fff0db;
+  border: 2px solid #e1bd83;
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+
+.reportForm label {
+  display: block;
+  margin: 0 0 8px;
+  color: #3f3327;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.reportForm input,
+.reportForm select,
+.reportForm textarea {
+  width: 100%;
+  margin: 0 0 22px;
+  padding: 11px 12px;
+  border: 1px solid #dbb476;
+  border-radius: 3px;
+  background-color: #fffaf3;
+  color: #2f2a24;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.reportForm textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.reportHelpText {
+  display: block;
+  margin: -14px 0 26px;
+  color: #8b7354;
+  font-size: 12px;
+}
+
+.reportActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.reportSubmitButton,
+.reportCancelButton {
+  height: 36px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reportSubmitButton {
+  border: 1px solid #e3be84;
+  background-color: #e3be84;
+  color: white;
+}
+
+.reportCancelButton {
+  border: 1px solid #d8b475;
+  background-color: #fff6e8;
+  color: #4d3f31;
+}
+
+.reportMessage {
+  text-align: left;
+}
+
+.reportSuccess {
+  color: #2f8b57;
+}
+
+.reportSuccessPopup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background-color: rgba(47, 42, 36, 0.45);
+  z-index: 200;
+  box-sizing: border-box;
+}
+
+.reportSuccessBox {
+  width: min(420px, 92vw);
+  padding: 30px 28px;
+  background-color: #fffaf3;
+  border: 2px solid #e1bd83;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(90, 69, 43, 0.24);
+  color: #2f2a24;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.reportSuccessIcon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background-color: #e3be84;
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 52px;
+  text-align: center;
+}
+
+.reportSuccessBox h2 {
+  margin: 0 0 10px;
+  color: #2f2a24;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+.reportSuccessBox p {
+  margin: 0 0 22px;
+  color: #6a5946;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.reportSuccessButton {
+  width: 100%;
+  height: 42px;
+  border: 0;
+  border-radius: 6px;
+  background-color: #e3be84;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reportSuccessButton:hover,
+.reportSuccessButton:focus {
+  background-color: #d6ad6c;
+  box-shadow: 0 3px 8px #d7bc91;
+}
+
+.reportGuidelines {
+  margin-top: 24px;
+  background-color: #f5d5a8;
+}
+
+.reportGuidelines h2 {
+  margin: 0 0 22px;
+  font-size: 16px;
+  color: #2f2a24;
+}
+
+.reportGuidelines h2 span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 7px;
+  border: 1px solid #4f3d28;
+  border-radius: 50%;
+  font-size: 11px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.reportGuidelines ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.reportGuidelines li {
+  margin-bottom: 10px;
+  color: #5f4d39;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+@media screen and (max-width: 700px) {
+  .reportScreen {
+    width: 90vw;
+    margin-top: 10px;
+  }
+
+  .reportPageHeader h1 {
+    font-size: 25px;
+    line-height: 31px;
+  }
+
+  .reportForm,
+  .reportGuidelines {
+    padding: 22px 18px;
+  }
+
+  .reportActions {
+    grid-template-columns: 1fr;
+  }
+
+  .reportPageBody .roleSwitch button {
+    width: 72px;
+    font-size: 12px;
+  }
+}

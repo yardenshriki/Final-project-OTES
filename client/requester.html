@@ -1,4 +1,4 @@
-<!--yarden shriki, lior zahavi-->
+﻿<!--yarden shriki, lior zahavi-->
 <!DOCTYPE html>
 <html>
 
@@ -16,13 +16,13 @@
         <div id="sideMenu">
             <div class="menuHeader">
                 <h3>Menu</h3>
-                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">�</button>
+                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">×</button>
             </div>
             <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()"><span class="menuIcon"></span>Home Page</button>
             <button type="button" class="sideMenuItem tasksIcon" onclick="scrollToAllTasks()"><span class="menuIcon"></span>My Tasks</button>
-            <button type="button" class="sideMenuItem profileMenuIcon"><span class="menuIcon"></span>Edit Profile</button>
-            <button type="button" class="sideMenuItem reportIcon"><span class="menuIcon"></span>Report</button>
-            <button type="button" class="sideMenuItem policyIcon"><span class="menuIcon"></span>Company Policy</button>
+            <button type="button" class="sideMenuItem profileMenuIcon" onclick="window.location.href='profile.html'"><span class="menuIcon"></span>Edit Profile</button>
+            <button type="button" class="sideMenuItem reportIcon" onclick="window.location.href='report.html'"><span class="menuIcon"></span>Report</button>
+            <button type="button" class="sideMenuItem policyIcon" onclick="showScreen('policyScreen')"><span class="menuIcon"></span>Company Policy</button>
             <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'"><span class="menuIcon"></span>Exit</button>
         </div>
 
@@ -30,7 +30,7 @@
             <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
             <span class="systemTitle">Online Task Execution System</span>
 
-            <button type="button" class="profileButton" aria-label="Profile">
+            <button type="button" class="profileButton" aria-label="Profile" onclick="window.location.href='profile.html'">
                 <span class="profileIcon"></span>
             </button>
             <div class="roleSwitch">
@@ -46,8 +46,8 @@
                 <input type="button" value="Home" onclick="showScreen('requesterHomeScreen')">
                 <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
                 <input type="button" value="My Tasks" onclick="showScreen('myTasksScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-                <input type="button" value="Report" onclick="showScreen('reportScreen')">
+                <input type="button" value="Profile" onclick="window.location.href='profile.html'">
+                <input type="button" value="Report" onclick="window.location.href='report.html'">
                 <input type="button" value="Policy" onclick="showScreen('policyScreen')">
                 <input type="button" value="Logout" onclick="showScreen('loginScreen')">
             </div>
@@ -86,8 +86,8 @@
                 <span>Online Task Execution System</span>                <input type="button" value="Menu" onclick="openMenu()">
                 <input type="button" value="Requester" onclick="showScreen('requesterHomeScreen')">
                 <input type="button" value="Performer" onclick="showScreen('performerHomeScreen')">
-                <input type="button" value="Profile" onclick="showScreen('profileScreen')">
-                <input type="button" value="Report" onclick="showScreen('reportScreen')">
+                <input type="button" value="Profile" onclick="window.location.href='profile.html'">
+                <input type="button" value="Report" onclick="window.location.href='report.html'">
             </div>
 
             <div class="systemBox">
@@ -111,7 +111,55 @@
                 </div>
             </div>
         </div>-->
+        <section id="policyScreen" class="screen companyPolicyScreen">
+            <h1 class="companyPolicyTitle">Company Policy</h1>
 
+            <div class="companyPolicyPanel" dir="ltr">
+                <p class="companyPolicyIntro">OTES is a platform that connects Task Requesters with Task Performers for paid task execution. All users must use the system in a respectful, honest, and responsible way.</p>
+
+                <section class="companyPolicyGroup">
+                    <h2>Task Requesters</h2>
+                    <ul>
+                        <li>Provide clear task details, including description, requirements, location, deadline, and payment amount.</li>
+                        <li>Review completed work and approve it only when the task matches the agreed requirements.</li>
+                    </ul>
+                </section>
+
+                <section class="companyPolicyGroup">
+                    <h2>Task Performers</h2>
+                    <ul>
+                        <li>Accept only tasks they are able to complete.</li>
+                        <li>Update task progress and communicate with the Requester when needed.</li>
+                    </ul>
+                </section>
+
+                <section class="companyPolicyGroup">
+                    <h2>Payments and Receipts</h2>
+                    <ul>
+                        <li>All payments must be handled through the system.</li>
+                        <li>Payment is transferred after task completion and approval.</li>
+                        <li>A receipt is generated after a successful payment.</li>
+                    </ul>
+                </section>
+
+                <section class="companyPolicyGroup">
+                    <h2>Communication</h2>
+                    <ul>
+                        <li>Users must use the task chat for questions, updates, clarifications, and task-related information.</li>
+                        <li>Users must not share false information, inappropriate content, private payment details, or personal contact information outside the required workflow.</li>
+                    </ul>
+                </section>
+
+                <section class="companyPolicyGroup">
+                    <h2>Reports and Admin Review</h2>
+                    <ul>
+                        <li>Users can submit a report for payment issues, incomplete tasks, user problems, or system issues.</li>
+                        <li>Reports are reviewed by the Admin.</li>
+                        <li>The Admin may monitor task activity, check payment issues, and restrict users when needed to keep the platform safe and reliable.</li>
+                    </ul>
+                </section>
+            </div>
+        </section>
         <div id="welcomePopup" class="popupOverlay">
             <div class="welcomeBox">
                 <h2>Welcome to OTES! ??</h2>
@@ -150,6 +198,9 @@
 </body>
 
 </html>
+
+
+
 
 
 
