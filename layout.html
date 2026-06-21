@@ -1,158 +1,32 @@
 <div id="menuOverlay" onclick="closeMenu()"></div>
 
-<div id="sideMenu">
+<aside id="sideMenu">
   <div class="menuHeader">
     <h3>Menu</h3>
-    <button
-      type="button"
-      class="closeMenuButton"
-      onclick="closeMenu()"
-      aria-label="Close menu"
-    >
-      x
-    </button>
+    <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">x</button>
   </div>
 
-  <button
-    type="button"
-    class="sideMenuItem homeIcon"
-    onclick="window.location.href = 'requester.html'"
-  >
+  <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()">
     <span class="menuIcon"></span>Home Page
   </button>
 
-  <button
-    type="button"
-    class="sideMenuItem tasksIcon"
-    onclick="window.location.href = 'requester.html#allTasksSection'"
-  >
+  <button type="button" class="sideMenuItem tasksIcon" onclick="openLayoutTasks()">
     <span class="menuIcon"></span>My Tasks
   </button>
 
-  <button type="button" class="sideMenuItem profileMenuIcon">
+  <button type="button" class="sideMenuItem profileMenuIcon" onclick="window.location.href='profile.html'">
     <span class="menuIcon"></span>Edit Profile
   </button>
 
-  <button type="button" class="sideMenuItem reportIcon">
+  <button type="button" class="sideMenuItem reportIcon" onclick="window.location.href='report.html'">
     <span class="menuIcon"></span>Report
   </button>
 
-  <button type="button" class="sideMenuItem policyIcon">
+  <button type="button" class="sideMenuItem policyIcon" onclick="openLayoutPolicy()">
     <span class="menuIcon"></span>Company Policy
   </button>
 
-  <button
-    type="button"
-    class="sideMenuItem exitIcon"
-    onclick="window.location.href = 'index.html'"
-  >
+  <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'">
     <span class="menuIcon"></span>Exit
   </button>
-</div>
-
-<div id="appHeader">
-  <input
-    type="button"
-    value="&#9776;"
-    class="menuButton"
-    onclick="openMenu()"
-  />
-  <span class="systemTitle">Task Execution System</span>
-
-  <button type="button" class="profileButton" aria-label="Profile">
-    <span class="profileIcon"></span>
-  </button>
-
-  <button
-    type="button"
-    id="mailButton"
-    class="mailButton"
-    aria-label="Mailbox"
-  >
-    <span class="mailIcon"></span>
-    <span id="mailUnreadBadge" class="mailUnreadBadge">0</span>
-  </button>
-
-  <button type="button" id="chatButton" class="chatButton" aria-label="Chat">
-    <span class="chatIcon"></span>
-  </button>
-
-  <div class="roleSwitch">
-    <input
-      type="button"
-      id="requesterButton"
-      value="Requester"
-      onclick="switchRole('Requester')"
-    />
-    <input
-      type="button"
-      id="performerButton"
-      value="Performer"
-      onclick="switchRole('Performer')"
-    />
-  </div>
-</div>
-
-<div id="mailOverlay" class="mailOverlay"></div>
-
-<aside id="mailDrawer" class="mailDrawer">
-  <div class="mailDrawerHeader">
-    <h3>Mailbox</h3>
-    <button type="button" id="closeMailDrawer" aria-label="Close mailbox">x</button>
-  </div>
-  <div id="mailList" class="mailList"></div>
 </aside>
-
-<div id="messageModalOverlay" class="messageModalOverlay"></div>
-
-<section id="taskCompletionModal" class="taskCompletionModal">
-  <div class="completionIcon">!</div>
-  <h2>TASK COMPLETION</h2>
-  <p id="taskCompletionMessage"></p>
-  <h3>Was the task completed properly?</h3>
-  <div class="completionActions">
-    <button type="button" id="approveCompletionButton">YES, APPROVE</button>
-    <button type="button" id="rejectCompletionButton">NOT APPROVE</button>
-  </div>
-  <p class="completionNote">
-    * Clicking "YES" will transfer the payment to the performer immediately.
-  </p>
-</section>
-
-<section id="ratingModal" class="ratingModal">
-  <div class="ratingIcon">★</div>
-  <h2>Rate the Performer</h2>
-
-  <div class="ratingSummary">
-    <div>
-      <span>Performer</span>
-      <b id="ratingPerformerName">John Designer</b>
-    </div>
-    <div>
-      <span>Date</span>
-      <b id="ratingDate">2026-02-04</b>
-    </div>
-    <div class="ratingTaskName">
-      <span>Task Name</span>
-      <b id="ratingTaskName">Design a Logo</b>
-    </div>
-  </div>
-
-  <div id="ratingStars" class="ratingStars" aria-label="Rating stars">
-    <button type="button" data-rating="1">★</button>
-    <button type="button" data-rating="2">★</button>
-    <button type="button" data-rating="3">★</button>
-    <button type="button" data-rating="4">★</button>
-    <button type="button" data-rating="5">★</button>
-  </div>
-
-  <label for="ratingFeedback">Additional Feedback</label>
-  <textarea
-    id="ratingFeedback"
-    placeholder="Describe your experience working with this performer..."
-  ></textarea>
-
-  <button type="button" id="submitRatingButton" class="submitRatingButton">
-    Submit Rating
-  </button>
-</section>
