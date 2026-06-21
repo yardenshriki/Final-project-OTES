@@ -6,25 +6,13 @@
     <title>Requester - Online Tasks Execution System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/layout.css">
     <link rel="stylesheet" href="style/notifications.css">
 </head>
 
 <body>
     <div id="page">
-        <div id="menuOverlay" onclick="closeMenu()"></div>
-
-        <div id="sideMenu">
-            <div class="menuHeader">
-                <h3>Menu</h3>
-                <button type="button" class="closeMenuButton" onclick="closeMenu()" aria-label="Close menu">×</button>
-            </div>
-            <button type="button" class="sideMenuItem homeIcon" onclick="openHomeByRole()"><span class="menuIcon"></span>Home Page</button>
-            <button type="button" class="sideMenuItem tasksIcon" onclick="scrollToAllTasks()"><span class="menuIcon"></span>My Tasks</button>
-            <button type="button" class="sideMenuItem profileMenuIcon" onclick="window.location.href='profile.html'"><span class="menuIcon"></span>Edit Profile</button>
-            <button type="button" class="sideMenuItem reportIcon" onclick="window.location.href='report.html'"><span class="menuIcon"></span>Report</button>
-            <button type="button" class="sideMenuItem policyIcon" onclick="showScreen('policyScreen')"><span class="menuIcon"></span>Company Policy</button>
-            <button type="button" class="sideMenuItem exitIcon" onclick="window.location.href='index.html'"><span class="menuIcon"></span>Exit</button>
-        </div>
+        <div id="layoutContainer"></div>
 
         <div id="appHeader">
             <input type="button" value="&#9776;" class="menuButton" onclick="openMenu()">
@@ -192,6 +180,7 @@
     </div>
 
     <script src="js/script.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/tasks-storage.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/requester.js"></script>

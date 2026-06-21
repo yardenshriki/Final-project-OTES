@@ -22,6 +22,12 @@ var screenPages = {
 
 function openMenu() {
     if (document.getElementById("sideMenu") == null) {
+        if (typeof loadSharedLayout == "function") {
+            loadSharedLayout(function () {
+                openMenu();
+            });
+        }
+
         return;
     }
 
@@ -196,6 +202,10 @@ document.addEventListener("click", function (event) {
 
 window.onload = function () {
     var screens = document.getElementsByClassName("screen");
+
+    if (typeof loadSharedLayout == "function") {
+        loadSharedLayout();
+    }
 
     if (document.getElementById("performerHomeScreen") != null) {
         userRole = "Performer";
