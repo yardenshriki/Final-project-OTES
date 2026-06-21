@@ -15,6 +15,8 @@ function clearSignupErrors() {
     clearSignupError("idNumber", "idNumberError");
     clearSignupError("gender", "genderError");
     clearSignupError("email", "emailError");
+    clearSignupError("signupPassword", "signupPasswordError");
+    clearSignupError("confirmPassword", "confirmPasswordError");
     clearSignupError("profilePicture", "profilePictureError");
 }
 
@@ -114,14 +116,42 @@ function fillExpiryMonths() {
     }
 }
 
+function hasLetter(text) {
+    for (var i = 0; i < text.length; i++) {
+        if ((text[i] >= "A" && text[i] <= "Z") || (text[i] >= "a" && text[i] <= "z")) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function hasDigit(text) {
+    for (var i = 0; i < text.length; i++) {
+        if (text[i] >= "0" && text[i] <= "9") {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function isStrongPassword(password) {
+    return password.length >= 6 && hasLetter(password) && hasDigit(password);
+}
+
 function checkSignup() {
     var fullName = document.getElementById("fullName").value;
     var birthDate = document.getElementById("birthDate").value;
     var idNumber = document.getElementById("idNumber").value;
     var gender = document.getElementById("gender").value;
     var email = document.getElementById("email").value;
+    var signupPassword = document.getElementById("signupPassword").value;
+    var confirmPassword = document.getElementById("confirmPassword").value;
     var profilePicture = document.getElementById("profilePicture").value;
     var hasError = false;
+    var hasEmptyField = false;
+    var hasPasswordMismatch = false;
 
     clearMessage("signupMessage");
     clearSignupErrors();
@@ -129,11 +159,13 @@ function checkSignup() {
     if (fullName == "") {
         setSignupError("fullName", "fullNameError", "Full name is required");
         hasError = true;
+        hasEmptyField = true;
     }
 
     if (birthDate == "") {
         setSignupError("birthDate", "birthDateError", "Birth date is required");
         hasError = true;
+        hasEmptyField = true;
     } else {
         if (birthDate > getMaxBirthDate()) {
             setSignupError("birthDate", "birthDateError", "You must be at least 18 years old");
@@ -144,6 +176,7 @@ function checkSignup() {
     if (idNumber == "") {
         setSignupError("idNumber", "idNumberError", "ID number is required");
         hasError = true;
+        hasEmptyField = true;
     } else {
         if (idNumber.length != 9) {
             setSignupError("idNumber", "idNumberError", "ID number must contain 9 digits");
@@ -159,11 +192,13 @@ function checkSignup() {
     if (gender == "") {
         setSignupError("gender", "genderError", "Gender is required");
         hasError = true;
+        hasEmptyField = true;
     }
 
     if (email == "") {
         setSignupError("email", "emailError", "Email is required");
         hasError = true;
+        hasEmptyField = true;
     } else {
         if (email.indexOf("@") == -1) {
             setSignupError("email", "emailError", "Email must include @");
@@ -176,13 +211,44 @@ function checkSignup() {
         }
     }
 
+    if (signupPassword == "") {
+        setSignupError("signupPassword", "signupPasswordError", "Password is required");
+        hasError = true;
+        hasEmptyField = true;
+    } else {
+        if (isStrongPassword(signupPassword) == false) {
+            setSignupError("signupPassword", "signupPasswordError", "Password must be at least 6 characters and include letters and numbers");
+            hasError = true;
+        }
+    }
+
+    if (confirmPassword == "") {
+        setSignupError("confirmPassword", "confirmPasswordError", "Confirm password is required");
+        hasError = true;
+        hasEmptyField = true;
+    } else {
+        if (signupPassword != "" && signupPassword != confirmPassword) {
+            setSignupError("confirmPassword", "confirmPasswordError", "Passwords do not match");
+            hasError = true;
+            hasPasswordMismatch = true;
+        }
+    }
+
     if (profilePicture == "") {
         setSignupError("profilePicture", "profilePictureError", "Profile picture is required");
         hasError = true;
+        hasEmptyField = true;
     }
 
     if (hasError == true) {
-        showMessage("signupMessage", "Please fix the fields marked in red");
+        if (hasEmptyField == true) {
+            showMessage("signupMessage", "Please fill all fields");
+        } else if (hasPasswordMismatch == true) {
+            showMessage("signupMessage", "Passwords do not match");
+        } else {
+            showMessage("signupMessage", "Please fix the fields marked in red");
+        }
+
         return false;
     }
 
