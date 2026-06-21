@@ -751,6 +751,109 @@ hr {
   border-radius: 10px;
 }
 
+.companyPolicyScreen {
+  width: min(900px, 90vw);
+  margin: 92px auto 50px;
+  direction: ltr;
+  text-align: left;
+}
+
+.companyPolicyTitle {
+  margin: 0 0 24px;
+  color: #2f2a24;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.companyPolicyPanel {
+  max-height: 560px;
+  padding: 34px 38px;
+  overflow-y: auto;
+  background-color: #fff0db;
+  border: 2px solid #e1bd83;
+  border-radius: 9px;
+  color: #2f2a24;
+  box-sizing: border-box;
+  direction: ltr;
+  text-align: left;
+  line-height: 1.65;
+}
+
+.companyPolicyIntro {
+  margin: 0 0 24px;
+  font-size: 16px;
+  text-align: left;
+}
+
+.companyPolicyGroup {
+  margin: 0 0 24px;
+}
+
+.companyPolicyGroup:last-child {
+  margin-bottom: 0;
+}
+
+.companyPolicyGroup h2 {
+  margin: 0 0 10px;
+  color: #2f2a24;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.companyPolicyGroup ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.companyPolicyGroup li {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.companyPolicyPanel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.companyPolicyPanel::-webkit-scrollbar-track {
+  background-color: #f7dfba;
+  border-radius: 999px;
+}
+
+.companyPolicyPanel::-webkit-scrollbar-thumb {
+  background-color: #e2bd80;
+  border-radius: 999px;
+}
+
+@media screen and (max-width: 700px) {
+  .companyPolicyScreen {
+    width: 88%;
+    margin-top: 82px;
+  }
+
+  .companyPolicyTitle {
+    font-size: 25px;
+  }
+
+  .companyPolicyPanel {
+    max-height: 62vh;
+    padding: 24px 22px;
+  }
+
+  .companyPolicyIntro,
+  .companyPolicyGroup li {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .companyPolicyGroup h2 {
+    font-size: 16px;
+  }
+}
+
 .popupOverlay {
   display: none;
   position: fixed;
@@ -898,258 +1001,6 @@ hr {
 .footerSocials button:hover::after,
 .footerSocials button:focus::after {
   display: block;
-}
-
-#sideMenu {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 250px;
-  min-height: 100vh;
-  padding: 18px;
-  background-color: #f4d6a8;
-  border-right: 1px solid #c99f63;
-  box-shadow: 4px 0 18px #b99a70;
-  z-index: 20;
-  box-sizing: border-box;
-}
-
-#sideMenu input {
-  display: block;
-  width: 100%;
-  height: 42px;
-  margin-top: 10px;
-  padding-left: 12px;
-  border: none;
-  border-radius: 4px;
-  background-color: #f4d6a8;
-  color: #5c4b39;
-  text-align: left;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#sideMenu input:hover {
-  background-color: #d8b06f;
-}
-
-.sideMenuItem {
-  display: flex;
-  align-items: center;
-  position: relative;
-  width: 100%;
-  height: 46px;
-  margin-top: 7px;
-  padding-left: 6px;
-  border: none;
-  border-radius: 6px;
-  background-color: #f4d6a8;
-  color: #1f1b16;
-  text-align: left;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.sideMenuItem:hover,
-.sideMenuItem:focus {
-  background-color: #d8b06f;
-}
-
-.menuIcon {
-  display: inline-block;
-  position: relative;
-  width: 20px;
-  height: 20px;
-  margin-right: 14px;
-  color: #3f3327;
-}
-
-.homeIcon .menuIcon::before {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: 10px;
-  width: 16px;
-  height: 12px;
-  border: 2px solid #3f3327;
-  border-top: none;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.homeIcon .menuIcon::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 3px;
-  width: 15px;
-  height: 15px;
-  border-left: 2px solid #3f3327;
-  border-top: 2px solid #3f3327;
-  transform: rotate(45deg);
-  box-sizing: border-box;
-}
-
-.tasksIcon .menuIcon::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 6px;
-  width: 20px;
-  height: 16px;
-  border: 2px solid #3f3327;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.tasksIcon .menuIcon::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 12px;
-  height: 7px;
-  border: 2px solid #3f3327;
-  border-bottom: none;
-  border-radius: 4px 4px 0 0;
-  box-sizing: border-box;
-}
-
-.profileMenuIcon .menuIcon::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 3px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid #3f3327;
-  border-radius: 50%;
-  box-sizing: border-box;
-}
-
-.profileMenuIcon .menuIcon::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 15px;
-  width: 16px;
-  height: 9px;
-  border: 2px solid #3f3327;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  box-sizing: border-box;
-}
-
-.reportIcon .menuIcon::before {
-  content: "!";
-  position: absolute;
-  left: 2px;
-  top: 1px;
-  width: 22px;
-  height: 22px;
-  border: 2px solid #3f3327;
-  border-radius: 50%;
-  color: #3f3327;
-  font-size: 15px;
-  font-weight: bold;
-  line-height: 17px;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.policyIcon .menuIcon::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 2px;
-  width: 16px;
-  height: 20px;
-  border: 2px solid #3f3327;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.policyIcon .menuIcon::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  top: 10px;
-  width: 11px;
-  height: 2px;
-  background-color: #3f3327;
-  transform: rotate(-45deg);
-  box-shadow: -3px 3px 0 -1px #3f3327;
-}
-
-.exitIcon .menuIcon::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 11px;
-  width: 16px;
-  height: 2px;
-  background-color: #3f3327;
-}
-
-.exitIcon .menuIcon::after {
-  content: "";
-  position: absolute;
-  right: 3px;
-  top: 6px;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid #3f3327;
-  border-right: 2px solid #3f3327;
-  transform: rotate(45deg);
-}
-
-.menuHeader {
-  position: relative;
-  overflow: hidden;
-  border-bottom: none;
-  margin-bottom: 12px;
-}
-
-#menuOverlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  min-height: 100vh;
-  background-color: rgba(63, 51, 39, 0.32);
-  z-index: 18;
-}
-
-.menuHeader h3 {
-  float: left;
-  margin-top: 8px;
-}
-
-.closeMenuButton {
-  position: absolute;
-  top: 4px;
-  right: 0;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background-color: transparent;
-  color: #5c4b39;
-  font-size: 24px;
-  line-height: 26px;
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.15s;
-}
-
-.closeMenuButton:hover,
-.closeMenuButton:focus {
-  transform: scale(1.2);
 }
 
 #appHeader {

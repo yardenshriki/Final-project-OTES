@@ -1,4 +1,8 @@
 /* Shared app header and side menu */
+.layoutLoaderFrame {
+  display: none;
+}
+
 #sideMenu {
   display: none;
   position: fixed;

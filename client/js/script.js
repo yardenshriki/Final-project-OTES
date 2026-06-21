@@ -22,6 +22,12 @@ var screenPages = {
 
 function openMenu() {
     if (document.getElementById("sideMenu") == null) {
+        if (typeof loadSharedLayout == "function") {
+            loadSharedLayout(function () {
+                openMenu();
+            });
+        }
+
         return;
     }
 
@@ -112,6 +118,7 @@ function showScreen(screenName) {
 
     document.getElementById(screenName).style.display = "block";
     markRole();
+
 }
 
 function showMessage(messageName, text) {
@@ -173,6 +180,7 @@ function chooseWelcomeRole(roleName) {
     }
 }
 
+
 document.addEventListener("click", function (event) {
     var sideMenu = document.getElementById("sideMenu");
     var menuButton = document.getElementsByClassName("menuButton")[0];
@@ -194,6 +202,10 @@ document.addEventListener("click", function (event) {
 
 window.onload = function () {
     var screens = document.getElementsByClassName("screen");
+
+    if (typeof loadSharedLayout == "function") {
+        loadSharedLayout();
+    }
 
     if (document.getElementById("performerHomeScreen") != null) {
         userRole = "Performer";
@@ -218,6 +230,7 @@ window.onload = function () {
         showWelcomePopup();
     }
 };
+
 
 
 

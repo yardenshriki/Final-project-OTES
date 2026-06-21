@@ -31,6 +31,11 @@ function checkLogin() {
                 return;
             }
 
+            if (user != null && user.password != null && user.password != "" && user.password != password) {
+                showMessage("loginMessage", "Invalid username or password");
+                return;
+            }
+
             localStorage.setItem("loggedInUsername", username);
             window.location.href = "requester.html";
         })
