@@ -1,4 +1,4 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var userRole = localStorage.getItem("userRole") || "Requester";
 
 var screenPages = {
@@ -16,7 +16,8 @@ var screenPages = {
     performerHomeScreen: "performer.html",
     availableTaskDetailsScreen: "performer.html",
     performerTaskDetailsScreen: "performer.html",
-    finishTaskScreen: "performer.html"
+    finishTaskScreen: "performer.html",
+    adminHomeScreen: "admin/"
 };
 
 function openMenu() {
@@ -74,7 +75,9 @@ function switchRole(roleName) {
     localStorage.setItem("userRole", userRole);
     markRole();
 
-    if (userRole == "Performer") {
+    if (userRole == "Admin") {
+        showScreen("adminHomeScreen");
+    } else if (userRole == "Performer") {
         showScreen("performerHomeScreen");
     } else {
         showScreen("requesterHomeScreen");
@@ -132,7 +135,9 @@ function isDigits(text) {
 }
 
 function openHomeByRole() {
-    if (userRole == "Performer") {
+    if (userRole == "Admin") {
+        showScreen("adminHomeScreen");
+    } else if (userRole == "Performer") {
         showScreen("performerHomeScreen");
     } else {
         showScreen("requesterHomeScreen");
@@ -200,6 +205,11 @@ window.onload = function () {
         localStorage.setItem("userRole", userRole);
     }
 
+    if (document.getElementById("adminHomeScreen") != null) {
+        userRole = "Admin";
+        localStorage.setItem("userRole", userRole);
+    }
+
     if (screens.length > 0) {
         showScreen(screens[0].id);
     }
@@ -208,3 +218,5 @@ window.onload = function () {
         showWelcomePopup();
     }
 };
+
+
