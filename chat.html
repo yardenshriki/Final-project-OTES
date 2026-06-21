@@ -1,0 +1,32 @@
+<div id="chatOverlay" class="chatOverlay"></div>
+
+<aside id="chatDrawer" class="chatDrawer">
+  <div class="chatDrawerHeader">
+    <div>
+      <h3>Chat</h3>
+      <p id="chatDrawerSubtitle">Task discussions</p>
+    </div>
+    <button type="button" id="closeChatDrawer" aria-label="Close chat">x</button>
+  </div>
+
+  <div id="chatListView" class="chatListView">
+    <div id="chatList" class="chatList"></div>
+  </div>
+
+  <div id="chatConversationView" class="chatConversationView">
+    <button type="button" id="backToChatsButton" class="backToChatsButton">
+      <span>&lt;</span> Back to chats
+    </button>
+    <div id="chatMessages" class="chatMessages"></div>
+    <form id="chatMessageForm" class="chatMessageForm">
+      <input
+        type="text"
+        id="chatMessageInput"
+        placeholder="Type your message..."
+        autocomplete="off"
+      />
+      <button type="submit" aria-label="Send message">›</button>
+    </form>
+    <small class="chatHint">Press Enter to send</small>
+  </div>
+</aside>

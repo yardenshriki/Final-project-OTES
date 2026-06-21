@@ -107,6 +107,13 @@
   font-size: 12px;
 }
 
+.passwordHint {
+  margin: 5px 0 0 0;
+  color: #907c62;
+  font-size: 12px;
+  line-height: 16px;
+}
+
 .authBody #signupScreen .button,
 .authBody #paymentScreen .button {
   height: 40px;
