@@ -233,6 +233,7 @@ function connectNextStepButton(selectedTask) {
         selectedTask.workStatus = taskProgressSteps[currentStepIndex + 1];
         saveLocalTaskWorkStatus(selectedTask.id, selectedTask.workStatus);
         updateTaskStateByWorkStatus(selectedTask);
+        ensureTaskChatParticipants(selectedTask);
 
         if (typeof addTaskChatSystemMessage == "function") {
             addTaskChatSystemMessage(selectedTask, "Performer finished the step of: " + selectedTask.workStatus);
@@ -304,6 +305,22 @@ function taskHasChatParticipants(task) {
         task.requesterName != "" &&
         task.performerName != null &&
         task.performerName != "";
+}
+
+function ensureTaskChatParticipants(task) {
+    if (task.assignedToPerformer != true) {
+        return;
+    }
+
+    if (task.requesterName == null || task.requesterName == "") {
+        task.requesterName = "Sarah Johnson";
+    }
+
+    if (task.performerName == null || task.performerName == "") {
+        task.performerName = "John Designer";
+    }
+
+    saveLocalTaskParticipants(task.id, task.requesterName, task.performerName);
 }
 
 function getTaskElementDisplay(element) {

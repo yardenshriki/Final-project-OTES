@@ -121,6 +121,16 @@ function applyLocalTaskAssignments(tasks) {
 
     if (isTaskTakenByPerformer(tasks[i].id)) {
       tasks[i].assignedToPerformer = true;
+
+      if (tasks[i].requesterName == null || tasks[i].requesterName == "") {
+        tasks[i].requesterName = "Sarah Johnson";
+      }
+
+      if (tasks[i].performerName == null || tasks[i].performerName == "") {
+        tasks[i].performerName = "John Designer";
+        saveLocalTaskParticipants(tasks[i].id, tasks[i].requesterName, tasks[i].performerName);
+      }
+
       if (tasks[i].workStatus == "Available") {
         tasks[i].workStatus = "Task accepted";
       }
