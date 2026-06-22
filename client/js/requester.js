@@ -548,12 +548,51 @@ function getTodayText() {
     return today.getFullYear() + "-" + month + "-" + day;
 }
 
+function getTaskFormValue(elementId) {
+    var element = document.getElementById(elementId);
+
+    if (element == null) {
+        return "";
+    }
+
+    return element.value;
+}
+
+function getTaskLocationDetails() {
+    var address = getTaskFormValue("taskLocation");
+    var placeId = getTaskFormValue("taskPlaceId");
+    var googleMapsUrl = getTaskFormValue("taskMapsUrl");
+
+    if (googleMapsUrl == "" && address != "") {
+        googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+
+        if (placeId != "") {
+            googleMapsUrl += "&query_place_id=" + encodeURIComponent(placeId);
+        }
+    }
+
+    return {
+        address: address,
+        placeId: placeId,
+        latitude: getTaskFormValue("taskLatitude"),
+        longitude: getTaskFormValue("taskLongitude"),
+        googleMapsUrl: googleMapsUrl
+    };
+}
+
 function createTaskFromForm() {
+    var locationDetails = getTaskLocationDetails();
+
     return {
         id: Date.now(),
         taskTitle: document.getElementById("taskTitle").value,
         description: document.getElementById("taskDescription").value,
-        location: document.getElementById("taskLocation").value,
+        location: locationDetails.address,
+        locationDetails: locationDetails,
+        locationPlaceId: locationDetails.placeId,
+        locationLatitude: locationDetails.latitude,
+        locationLongitude: locationDetails.longitude,
+        googleMapsUrl: locationDetails.googleMapsUrl,
         difficultyLevel: document.getElementById("difficultyLevel").value,
         payment: parseFloat(document.getElementById("taskPayment").value),
         additionalDetails: document.getElementById("additionalDetails").value,

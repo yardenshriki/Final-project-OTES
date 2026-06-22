@@ -13,7 +13,7 @@
 
   <body>
     <div id="page">
-      <div id="sharedLayout"></div>
+      <div id="layoutContainer"></div>
 
       <main id="createTaskScreen" class="screen createTaskPage">
         <div class="pageTitle createTaskTitle">
@@ -45,14 +45,37 @@
           ></textarea>
 
           <div class="formColumn">
-            <label>Location *</label>
-            <select id="taskLocation">
-              <option value="">Select location</option>
-              <option>Remote</option>
-              <option>Tel Aviv</option>
-              <option>Jerusalem</option>
-              <option>Haifa</option>
-            </select>
+            <label for="taskLocation">Location *</label>
+            <div class="locationField">
+              <button
+                type="button"
+                id="taskLocationButton"
+                class="locationSelectButton"
+                onclick="toggleTaskLocationList()"
+                aria-expanded="false"
+              >
+                <span id="taskLocationButtonText">Select location</span>
+                <span class="locationSelectArrow">&#9662;</span>
+              </button>
+              <div
+                id="taskLocationList"
+                class="locationOptions"
+                role="listbox"
+              ></div>
+              <button
+                type="button"
+                class="nearestLocationButton"
+                onclick="useNearestLocation()"
+              >
+                Use nearest location
+              </button>
+            </div>
+            <input type="hidden" id="taskLocation" />
+            <input type="hidden" id="taskPlaceId" />
+            <input type="hidden" id="taskLatitude" />
+            <input type="hidden" id="taskLongitude" />
+            <input type="hidden" id="taskMapsUrl" />
+            <p id="taskLocationStatus" class="fieldHint"></p>
           </div>
 
           <div class="formColumn rightColumn">
@@ -141,6 +164,8 @@
     <script src="js/tasks-storage.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/chat.js"></script>
+    <script src="js/google-maps-config.js"></script>
+    <script src="js/maps-location.js"></script>
     <script src="js/requester.js"></script>
   </body>
 </html>
