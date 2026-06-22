@@ -1,6 +1,12 @@
 ﻿//yarden shriki, lior zahavi
 var performerTasks = [];
 var sortNewestFirst = true;
+var performerFilters = {
+    difficulty: "",
+    location: "",
+    category: "",
+    maxPrice: 1000
+};
 
 function loadPerformerTasks() {
     fetch("data/tasks.json")
@@ -9,6 +15,7 @@ function loadPerformerTasks() {
         })
         .then(function (tasks) {
             performerTasks = applyLocalTaskAssignments(tasks.concat(getLocalCreatedTasks()));
+            fillPerformerFilterCategories();
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
@@ -18,6 +25,12 @@ function loadPerformerTasks() {
 function connectPerformerActions() {
     var searchInput = document.getElementById("performerSearchInput");
     var sortButton = document.getElementById("sortDateButton");
+    var filterButton = document.getElementsByClassName("performerFilterButton")[0];
+    var closeFilterButton = document.getElementById("closePerformerFilter");
+    var filterOverlay = document.getElementById("performerFilterOverlay");
+    var submitFilterButton = document.getElementById("submitPerformerFilters");
+    var resetFilterButton = document.getElementById("resetPerformerFilters");
+    var maxPriceInput = document.getElementById("filterMaxPrice");
 
     if (searchInput != null) {
         searchInput.oninput = renderPerformerAvailableTasks;
@@ -37,6 +50,30 @@ function connectPerformerActions() {
 
             renderPerformerAvailableTasks();
         };
+    }
+
+    if (filterButton != null) {
+        filterButton.onclick = openPerformerFilter;
+    }
+
+    if (closeFilterButton != null) {
+        closeFilterButton.onclick = closePerformerFilter;
+    }
+
+    if (filterOverlay != null) {
+        filterOverlay.onclick = closePerformerFilter;
+    }
+
+    if (submitFilterButton != null) {
+        submitFilterButton.onclick = submitPerformerFilters;
+    }
+
+    if (resetFilterButton != null) {
+        resetFilterButton.onclick = resetPerformerFilters;
+    }
+
+    if (maxPriceInput != null) {
+        maxPriceInput.oninput = updateFilterPriceText;
     }
 }
 
@@ -73,8 +110,12 @@ function renderPerformerAvailableTasks() {
     var availableTasks = performerTasks.filter(function (task) {
         var matchesState = task.state == "open" && task.assignedToPerformer == false;
         var matchesSearch = task.taskTitle.toLowerCase().indexOf(searchText) != -1 || task.description.toLowerCase().indexOf(searchText) != -1;
+        var matchesDifficulty = performerFilters.difficulty == "" || task.difficultyLevel == performerFilters.difficulty;
+        var matchesLocation = performerFilters.location == "" || task.location.toLowerCase().indexOf(performerFilters.location.toLowerCase()) != -1;
+        var matchesCategory = performerFilters.category == "" || task.categories == performerFilters.category;
+        var matchesPrice = task.payment <= performerFilters.maxPrice;
 
-        return matchesState && matchesSearch;
+        return matchesState && matchesSearch && matchesDifficulty && matchesLocation && matchesCategory && matchesPrice;
     });
 
     availableTasks.sort(function (firstTask, secondTask) {
@@ -128,6 +169,85 @@ function openPerformerTask(taskId, isAvailableTask) {
     } else {
         window.location.href = "task.html?id=" + taskId;
     }
+}
+
+function fillPerformerFilterCategories() {
+    var categorySelect = document.getElementById("filterCategory");
+
+    if (categorySelect == null) {
+        return;
+    }
+
+    categorySelect.innerHTML = '<option value="">All Categories</option>';
+
+    for (var i = 0; i < performerTasks.length; i++) {
+        if (performerCategoryExists(performerTasks[i].categories, categorySelect) == false) {
+            categorySelect.innerHTML += '<option value="' + performerTasks[i].categories + '">' + performerTasks[i].categories + '</option>';
+        }
+    }
+}
+
+function performerCategoryExists(categoryName, categorySelect) {
+    for (var i = 0; i < categorySelect.options.length; i++) {
+        if (categorySelect.options[i].value == categoryName) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function openPerformerFilter() {
+    document.getElementById("filterDifficulty").value = performerFilters.difficulty;
+    document.getElementById("filterLocation").value = performerFilters.location;
+    document.getElementById("filterCategory").value = performerFilters.category;
+    document.getElementById("filterMaxPrice").value = performerFilters.maxPrice;
+    updateFilterPriceText();
+
+    document.getElementById("performerFilterOverlay").style.display = "block";
+    document.getElementById("performerFilterDrawer").style.display = "block";
+}
+
+function closePerformerFilter() {
+    document.getElementById("performerFilterOverlay").style.display = "none";
+    document.getElementById("performerFilterDrawer").style.display = "none";
+}
+
+function updateFilterPriceText() {
+    var maxPriceInput = document.getElementById("filterMaxPrice");
+    var priceText = document.getElementById("filterPriceText");
+
+    if (maxPriceInput == null || priceText == null) {
+        return;
+    }
+
+    priceText.innerHTML = "$0 - $" + maxPriceInput.value;
+}
+
+function submitPerformerFilters() {
+    performerFilters.difficulty = document.getElementById("filterDifficulty").value;
+    performerFilters.location = document.getElementById("filterLocation").value;
+    performerFilters.category = document.getElementById("filterCategory").value;
+    performerFilters.maxPrice = parseInt(document.getElementById("filterMaxPrice").value);
+
+    closePerformerFilter();
+    renderPerformerAvailableTasks();
+}
+
+function resetPerformerFilters() {
+    performerFilters.difficulty = "";
+    performerFilters.location = "";
+    performerFilters.category = "";
+    performerFilters.maxPrice = 1000;
+
+    document.getElementById("filterDifficulty").value = "";
+    document.getElementById("filterLocation").value = "";
+    document.getElementById("filterCategory").value = "";
+    document.getElementById("filterMaxPrice").value = "1000";
+    updateFilterPriceText();
+
+    renderPerformerAvailableTasks();
+    closePerformerFilter();
 }
 
 function getPerformerStatusText(state) {
