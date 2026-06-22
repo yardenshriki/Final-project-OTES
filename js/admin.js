@@ -52,6 +52,14 @@ function getAdminDisplayName() {
     return username;
 }
 
+function logoutAdmin() {
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("adminUsername");
+    sessionStorage.removeItem("userRole");
+    sessionStorage.removeItem("adminUsername");
+    window.location.href = "index.html";
+}
+
 function getAdminDataSourceText() {
     if (ADMIN_API_URL != "" && ADMIN_API_URL != "PASTE_ADMIN_API_URL_HERE") {
         return "External database API";
