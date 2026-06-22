@@ -30,7 +30,25 @@
             </select>
 
             <label>Location</label>
-            <input type="text" id="filterLocation" placeholder="Search city...">
+            <div class="performerFilterLocationField">
+                <button
+                    type="button"
+                    id="performerFilterLocationButton"
+                    class="performerFilterLocationButton"
+                    onclick="togglePerformerFilterLocationList()"
+                    aria-expanded="false"
+                >
+                    <span id="performerFilterLocationButtonText">All Locations</span>
+                    <span class="performerFilterLocationArrow">&#9662;</span>
+                </button>
+                <div
+                    id="performerFilterLocationList"
+                    class="performerFilterLocationOptions"
+                    role="listbox"
+                ></div>
+            </div>
+            <input type="hidden" id="filterLocation">
+            <p id="performerFilterLocationStatus" class="performerFilterLocationStatus"></p>
 
             <div class="filterRangeHeader">
                 <label>Price Range</label>
@@ -196,14 +214,8 @@
     <script src="js/tasks-storage.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/chat.js"></script>
+    <script src="js/maps-location.js"></script>
     <script src="js/performer.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-
