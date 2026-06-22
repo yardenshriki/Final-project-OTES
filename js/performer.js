@@ -285,6 +285,10 @@ function getPerformerStatusClass(state) {
         return "statusDone";
     }
 
+    if (state == "cancelled") {
+        return "statusCancelled";
+    }
+
     return "statusProgress";
 }
 

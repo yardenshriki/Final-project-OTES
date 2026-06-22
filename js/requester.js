@@ -8,6 +8,7 @@ var taskProgressSteps = [
     "Finalizing the task",
     "Task completed"
 ];
+var performerCancelWindowMinutes = 5;
 
 function scrollToAllTasks() {
     closeMenu();
@@ -167,6 +168,7 @@ function renderTaskPage() {
     document.getElementById("taskDetailsPostedDate").innerHTML = selectedTask.creationDate;
     connectTakeTaskButton(selectedTask);
     connectNextStepButton(selectedTask);
+    connectCancelTaskButton(selectedTask);
     renderPerformerProgress(selectedTask);
     updateTaskPageByRole(selectedTask);
 }
@@ -294,10 +296,225 @@ function updateTaskPageByRole(selectedTask) {
     for (var m = 0; m < requesterItems.length; m++) {
         if (requesterItems[m].className.indexOf("communicationPanel") != -1) {
             requesterItems[m].style.display = hasChatParticipants ? getTaskElementDisplay(requesterItems[m]) : "none";
+        } else if (requesterItems[m].className.indexOf("cancelTaskPanel") != -1) {
+            requesterItems[m].style.display = userRole != "Performer" && canRequesterCancelTask(selectedTask) ? "flex" : "none";
         } else {
             requesterItems[m].style.display = isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
         }
     }
+
+    updatePerformerCancelTaskPanel(selectedTask);
+}
+
+function canRequesterCancelTask(task) {
+    return task != null &&
+        task.state == "open" &&
+        task.assignedToPerformer != true &&
+        task.workStatus == "Available" &&
+        isTaskTakenByPerformer(task.id) == false &&
+        isTaskCancelled(task.id) == false;
+}
+
+function connectCancelTaskButton(selectedTask) {
+    var cancelTaskButton = document.getElementById("cancelTaskButton");
+    var confirmCancelTaskButton = document.getElementById("confirmCancelTaskButton");
+    var keepTaskButton = document.getElementById("keepTaskButton");
+    var cancelTaskOverlay = document.getElementById("cancelTaskOverlay");
+
+    if (cancelTaskButton != null) {
+        cancelTaskButton.onclick = function () {
+            openCancelTaskModal(selectedTask);
+        };
+    }
+
+    if (confirmCancelTaskButton != null) {
+        confirmCancelTaskButton.onclick = function () {
+            if (document.getElementById("cancelTaskModal").getAttribute("data-cancel-mode") == "performer") {
+                confirmPerformerTaskCancellation(selectedTask);
+            } else {
+                confirmCancelTask(selectedTask);
+            }
+        };
+    }
+
+    if (keepTaskButton != null) {
+        keepTaskButton.onclick = closeCancelTaskModal;
+    }
+
+    if (cancelTaskOverlay != null) {
+        cancelTaskOverlay.onclick = closeCancelTaskModal;
+    }
+}
+
+function openCancelTaskModal(selectedTask) {
+    if (canRequesterCancelTask(selectedTask) == false) {
+        return;
+    }
+
+    document.getElementById("cancelTaskModalTitle").innerHTML = "Cancel Task";
+    document.getElementById("cancelTaskModal").setAttribute("data-cancel-mode", "requester");
+    document.getElementById("cancelTaskTitle").innerHTML = selectedTask.taskTitle;
+    document.getElementById("cancelTaskLocation").innerHTML = selectedTask.location;
+    document.getElementById("cancelTaskPayment").innerHTML = "$" + selectedTask.payment;
+    document.getElementById("cancelTaskStatus").innerHTML = selectedTask.state;
+    document.getElementById("confirmCancelTaskButton").innerHTML = "Yes, cancel task";
+    document.getElementById("keepTaskButton").innerHTML = "No, keep task";
+    document.getElementById("cancelTaskOverlay").style.display = "block";
+    document.getElementById("cancelTaskModal").style.display = "block";
+}
+
+function closeCancelTaskModal() {
+    var cancelTaskOverlay = document.getElementById("cancelTaskOverlay");
+    var cancelTaskModal = document.getElementById("cancelTaskModal");
+
+    if (cancelTaskOverlay != null) {
+        cancelTaskOverlay.style.display = "none";
+    }
+
+    if (cancelTaskModal != null) {
+        cancelTaskModal.style.display = "none";
+    }
+}
+
+function confirmCancelTask(selectedTask) {
+    if (canRequesterCancelTask(selectedTask) == false) {
+        closeCancelTaskModal();
+        return;
+    }
+
+    cancelLocalTask(selectedTask.id);
+    selectedTask.state = "cancelled";
+    selectedTask.workStatus = "Cancelled";
+    selectedTask.assignedToPerformer = false;
+    createTaskCancelledNotification(selectedTask);
+    closeCancelTaskModal();
+
+    document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+    document.getElementById("taskDetailsStatus").className = getStatusClass(selectedTask.state);
+    updateTaskPageByRole(selectedTask);
+}
+
+function createTaskCancelledNotification(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    addNotification({
+        toRole: "Requester",
+        type: "task-cancelled",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        title: "Task cancelled",
+        message: "Your task " + selectedTask.taskTitle + " was cancelled successfully and is no longer available for performers."
+    });
+}
+
+function canPerformerCancelAcceptedTask(task) {
+    if (task == null || userRole != "Performer" || task.assignedToPerformer != true || task.state != "in-progress") {
+        return false;
+    }
+
+    var acceptedAt = getTaskAcceptedAt(task.id) || task.acceptedAt;
+
+    if (acceptedAt == null || acceptedAt == "") {
+        return false;
+    }
+
+    return getAcceptedTaskMinutesLeft(acceptedAt) > 0;
+}
+
+function getAcceptedTaskMinutesLeft(acceptedAt) {
+    var acceptedTime = new Date(acceptedAt).getTime();
+
+    if (isNaN(acceptedTime)) {
+        return 0;
+    }
+
+    var deadlineTime = acceptedTime + performerCancelWindowMinutes * 60 * 1000;
+    var millisecondsLeft = deadlineTime - new Date().getTime();
+
+    if (millisecondsLeft <= 0) {
+        return 0;
+    }
+
+    return Math.ceil(millisecondsLeft / 60000);
+}
+
+function updatePerformerCancelTaskPanel(selectedTask) {
+    var performerCancelTaskPanel = document.getElementById("performerCancelTaskPanel");
+    var performerCancelTaskText = document.getElementById("performerCancelTaskText");
+
+    if (performerCancelTaskPanel == null || performerCancelTaskText == null) {
+        return;
+    }
+
+    if (canPerformerCancelAcceptedTask(selectedTask)) {
+        performerCancelTaskPanel.style.display = "flex";
+        performerCancelTaskText.innerHTML = "You have " + getAcceptedTaskMinutesLeft(getTaskAcceptedAt(selectedTask.id) || selectedTask.acceptedAt) + " minute(s) left to cancel this task.";
+    } else {
+        performerCancelTaskPanel.style.display = "none";
+    }
+}
+
+function openPerformerCancelTaskModal(selectedTask) {
+    if (canPerformerCancelAcceptedTask(selectedTask) == false) {
+        return;
+    }
+
+    document.getElementById("cancelTaskModalTitle").innerHTML = "Cancel Accepted Task";
+    document.getElementById("cancelTaskModal").setAttribute("data-cancel-mode", "performer");
+    document.getElementById("cancelTaskTitle").innerHTML = selectedTask.taskTitle;
+    document.getElementById("cancelTaskLocation").innerHTML = selectedTask.location;
+    document.getElementById("cancelTaskPayment").innerHTML = "$" + selectedTask.payment;
+    document.getElementById("cancelTaskStatus").innerHTML = selectedTask.state;
+    document.getElementById("confirmCancelTaskButton").innerHTML = "Yes, cancel acceptance";
+    document.getElementById("keepTaskButton").innerHTML = "No, keep task";
+    document.getElementById("cancelTaskOverlay").style.display = "block";
+    document.getElementById("cancelTaskModal").style.display = "block";
+}
+
+function confirmPerformerTaskCancellation(selectedTask) {
+    if (canPerformerCancelAcceptedTask(selectedTask) == false) {
+        closeCancelTaskModal();
+        return;
+    }
+
+    createPerformerCancelledNotifications(selectedTask);
+    cancelTakenTaskByPerformer(selectedTask.id);
+    selectedTask.state = "open";
+    selectedTask.workStatus = "Available";
+    selectedTask.assignedToPerformer = false;
+    selectedTask.performerName = "";
+    selectedTask.acceptedAt = "";
+    closeCancelTaskModal();
+    window.location.href = "performer.html";
+}
+
+function createPerformerCancelledNotifications(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    var performerName = selectedTask.performerName || "John Designer";
+
+    addNotification({
+        toRole: "Requester",
+        type: "performer-task-cancelled",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        performerName: performerName,
+        title: "Task acceptance cancelled",
+        message: performerName + " cancelled the accepted task " + selectedTask.taskTitle + ". The task is available again."
+    });
+
+    addNotification({
+        toRole: "Performer",
+        type: "performer-task-cancelled",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        title: "Task cancellation confirmed",
+        message: "You cancelled " + selectedTask.taskTitle + " within the allowed 5 minute window."
+    });
 }
 
 function taskHasChatParticipants(task) {
@@ -338,6 +555,8 @@ function getTaskElementDisplay(element) {
 function connectTakeTaskButton(selectedTask) {
     var takeTaskButton = document.getElementById("performerTakeTaskButton");
     var taskChatButton = document.getElementById("taskChatButton");
+    var performerCancelTaskButton = document.getElementById("performerCancelTaskButton");
+    var acceptedTaskOkButton = document.getElementById("acceptedTaskOkButton");
 
     if (taskChatButton != null) {
         taskChatButton.onclick = function () {
@@ -351,22 +570,78 @@ function connectTakeTaskButton(selectedTask) {
         return;
     }
 
+    if (performerCancelTaskButton != null) {
+        performerCancelTaskButton.onclick = function () {
+            openPerformerCancelTaskModal(selectedTask);
+        };
+    }
+
+    if (acceptedTaskOkButton != null) {
+        acceptedTaskOkButton.onclick = function () {
+            window.location.href = "performer.html";
+        };
+    }
+
     takeTaskButton.onclick = function () {
-        takeLocalTask(selectedTask.id);
+        var performerName = selectedTask.performerName || "John Designer";
+        var requesterName = selectedTask.requesterName || "Sarah Johnson";
+
+        takeLocalTask(selectedTask.id, requesterName, performerName);
         selectedTask.assignedToPerformer = true;
-        selectedTask.requesterName = selectedTask.requesterName || "Sarah Johnson";
-        selectedTask.performerName = selectedTask.performerName || "John Designer";
+        selectedTask.requesterName = requesterName;
+        selectedTask.performerName = performerName;
+        selectedTask.acceptedAt = getTaskAcceptedAt(selectedTask.id);
         saveLocalTaskParticipants(selectedTask.id, selectedTask.requesterName, selectedTask.performerName);
         selectedTask.workStatus = "Task accepted";
         updateTaskStateByWorkStatus(selectedTask);
+        createTaskAcceptedNotifications(selectedTask);
 
         if (typeof createTaskChat == "function") {
             createTaskChat(selectedTask);
         }
 
         localStorage.setItem("userRole", "Performer");
-        window.location.href = "performer.html";
+        openPerformerAcceptedTaskModal(selectedTask);
     };
+}
+
+function createTaskAcceptedNotifications(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    var performerName = selectedTask.performerName || "John Designer";
+
+    addNotification({
+        toRole: "Requester",
+        type: "task-accepted",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        performerName: performerName,
+        title: "Task accepted",
+        message: performerName + " accepted your task " + selectedTask.taskTitle + " and confirmed responsibility for it."
+    });
+
+    addNotification({
+        toRole: "Performer",
+        type: "performer-task-responsibility",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        title: "Task responsibility",
+        message: "You accepted " + selectedTask.taskTitle + ". Contact the requester in the chat for any additional task details."
+    });
+}
+
+function openPerformerAcceptedTaskModal(selectedTask) {
+    if (document.getElementById("performerAcceptedTaskMessage") == null) {
+        window.location.href = "performer.html";
+        return;
+    }
+
+    document.getElementById("performerAcceptedTaskMessage").innerHTML =
+        "<b>" + selectedTask.taskTitle + "</b> is now your responsibility. Please contact the Requester through the chat for additional task details.";
+    document.getElementById("performerAcceptedTaskOverlay").style.display = "block";
+    document.getElementById("performerAcceptedTaskModal").style.display = "block";
 }
 
 function renderMyTasks(tasks) {
@@ -384,7 +659,7 @@ function renderMyTasks(tasks) {
             '<p>Category: ' + tasks[i].categories + '</p>' +
             '<p>Location: ' + tasks[i].location + '</p>' +
             '<span class="' + getStatusClass(tasks[i].state) + '">Status: ' + tasks[i].state + '</span>' +
-            '<input type="button" value="Open">' +
+            '<input type="button" value="Open" onclick="window.location.href=\'task.html?id=' + tasks[i].id + '\'">' +
             '</div>';
     }
 }
@@ -456,6 +731,10 @@ function updateProfileStats(tasks) {
 function getStatusClass(state) {
     if (state == "open") {
         return "statusOpen";
+    }
+
+    if (state == "cancelled") {
+        return "statusCancelled";
     }
 
     if (state == "completed") {
