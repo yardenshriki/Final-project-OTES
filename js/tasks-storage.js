@@ -123,11 +123,11 @@ function getLocalTaskParticipants() {
   return JSON.parse(savedParticipants);
 }
 
-function saveLocalTaskParticipants(taskId, requesterName, performerName) {
+function saveLocalTaskParticipants(taskId, requester_name, performer_name) {
   var taskParticipants = getLocalTaskParticipants();
   taskParticipants[taskId] = {
-    requesterName: requesterName,
-    performerName: performerName
+    requester_name: requester_name,
+    performer_name: performer_name
   };
   localStorage.setItem("taskParticipants", JSON.stringify(taskParticipants));
 }
@@ -153,28 +153,20 @@ function getLocalTaskWorkStatus(taskId) {
   return taskWorkStatuses[taskId];
 }
 
-function saveLocalTaskWorkStatus(taskId, workStatus) {
+function saveLocalTaskWorkStatus(taskId, work_status) {
   var taskWorkStatuses = getLocalTaskWorkStatuses();
-  taskWorkStatuses[taskId] = workStatus;
+  taskWorkStatuses[taskId] = work_status;
   localStorage.setItem("taskWorkStatuses", JSON.stringify(taskWorkStatuses));
 }
 
 function updateTaskStateByWorkStatus(task) {
-  if (task.workStatus == "Cancelled") {
-    task.state = "cancelled";
-    task.assignedToPerformer = false;
-    return task;
-  }
-
-  if (task.workStatus == "Task completed") {
+  if (task.work_status == "Task completed") {
     task.state = "completed";
-    task.assignedToPerformer = true;
     return task;
   }
 
-  if (task.workStatus != "Available") {
+  if (task.work_status != "Available") {
     task.state = "in-progress";
-    task.assignedToPerformer = true;
   }
 
   return task;
@@ -266,12 +258,12 @@ function applyLocalTaskAssignments(tasks) {
     var savedAcceptance = acceptanceData[tasks[i].id];
 
     if (savedWorkStatus != null) {
-      tasks[i].workStatus = savedWorkStatus;
+      tasks[i].work_status = savedWorkStatus;
     }
 
     if (savedParticipants != null) {
-      tasks[i].requesterName = savedParticipants.requesterName;
-      tasks[i].performerName = savedParticipants.performerName;
+      tasks[i].requester_name = savedParticipants.requester_name;
+      tasks[i].performer_name = savedParticipants.performer_name;
     }
 
     if (savedAcceptance != null) {
@@ -294,19 +286,19 @@ function applyLocalTaskAssignments(tasks) {
     }
 
     if (isTaskTakenByPerformer(tasks[i].id)) {
-      tasks[i].assignedToPerformer = true;
+      tasks[i].performer_id = tasks[i].performer_id || 2;
 
-      if (tasks[i].requesterName == null || tasks[i].requesterName == "") {
-        tasks[i].requesterName = "Sarah Johnson";
+      if (tasks[i].requester_name == null || tasks[i].requester_name == "") {
+        tasks[i].requester_name = "Sarah Johnson";
       }
 
-      if (tasks[i].performerName == null || tasks[i].performerName == "") {
-        tasks[i].performerName = "John Designer";
-        saveLocalTaskParticipants(tasks[i].id, tasks[i].requesterName, tasks[i].performerName);
+      if (tasks[i].performer_name == null || tasks[i].performer_name == "") {
+        tasks[i].performer_name = "John Designer";
+        saveLocalTaskParticipants(tasks[i].id, tasks[i].requester_name, tasks[i].performer_name);
       }
 
-      if (tasks[i].workStatus == "Available") {
-        tasks[i].workStatus = "Task accepted";
+      if (tasks[i].work_status == "Available") {
+        tasks[i].work_status = "Task accepted";
       }
     }
 

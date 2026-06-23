@@ -106,7 +106,7 @@ function markTaskChatAsRead(taskId) {
     var wasUpdated = false;
 
     for (var i = 0; i < chats.length; i++) {
-        if (chats[i].taskId == taskId) {
+        if (chats[i].task_id == taskId) {
             for (var j = 0; j < chats[i].messages.length; j++) {
                 if (isChatMessageUnread(chats[i].messages[j], userRole)) {
                     if (chats[i].messages[j].readBy == null) {
@@ -160,24 +160,24 @@ function escapeChatText(text) {
 
 function getOtherChatUserName(chat) {
     if (userRole == "Performer") {
-        return chat.requesterName;
+        return chat.requester_name;
     }
 
-    return chat.performerName;
+    return chat.performer_name;
 }
 
 function taskHasChatParticipants(task) {
-    return task.requesterName != null &&
-        task.requesterName != "" &&
-        task.performerName != null &&
-        task.performerName != "";
+    return task.requester_name != null &&
+        task.requester_name != "" &&
+        task.performer_name != null &&
+        task.performer_name != "";
 }
 
 function findTaskChat(taskId) {
     var chats = getTaskChats();
 
     for (var i = 0; i < chats.length; i++) {
-        if (chats[i].taskId == taskId) {
+        if (chats[i].task_id == taskId) {
             return chats[i];
         }
     }
@@ -193,23 +193,23 @@ function createTaskChat(task) {
     var chats = getTaskChats();
 
     for (var i = 0; i < chats.length; i++) {
-        if (chats[i].taskId == task.id) {
+        if (chats[i].task_id == task.id) {
             return chats[i];
         }
     }
 
     var chat = {
-        taskId: task.id,
-        taskTitle: task.taskTitle,
-        requesterName: task.requesterName,
-        performerName: task.performerName,
+        task_id: task.id,
+        title: task.title,
+        requester_name: task.requester_name,
+        performer_name: task.performer_name,
         messages: []
     };
 
     chat.messages.push({
         senderRole: "Performer",
-        senderName: chat.performerName,
-        text: "Task accepted by " + chat.performerName,
+        senderName: chat.performer_name,
+        text: "Task accepted by " + chat.performer_name,
         time: getChatTimeText(),
         isSystem: true,
         readBy: createChatReadState("Performer")
@@ -239,7 +239,7 @@ function addTaskChatSystemMessage(task, messageText) {
 
     addTaskChatMessage(task.id, {
         senderRole: "Performer",
-        senderName: chat.performerName,
+        senderName: chat.performer_name,
         text: messageText,
         time: getChatTimeText(),
         isSystem: true,
@@ -251,7 +251,7 @@ function addTaskChatMessage(taskId, message) {
     var chats = getTaskChats();
 
     for (var i = 0; i < chats.length; i++) {
-        if (chats[i].taskId == taskId) {
+        if (chats[i].task_id == taskId) {
             if (message.readBy == null) {
                 message.readBy = createChatReadState(message.senderRole);
             }
@@ -306,9 +306,9 @@ function renderChatList() {
             unreadBadge = '<span class="chatListUnreadBadge">' + unreadCount + '</span>';
         }
 
-        chatList.innerHTML += '<button type="button" class="chatListItem" onclick="openTaskChat(' + chats[i].taskId + ')">' +
+        chatList.innerHTML += '<button type="button" class="chatListItem" onclick="openTaskChat(' + chats[i].task_id + ')">' +
             unreadBadge +
-            '<h4>' + escapeChatText(chats[i].taskTitle) + '</h4>' +
+            '<h4>' + escapeChatText(chats[i].title) + '</h4>' +
             '<p>To: ' + escapeChatText(getOtherChatUserName(chats[i])) + '</p>' +
             '<small>' + escapeChatText(lastMessage.text) + '</small>' +
             '</button>';
@@ -361,7 +361,7 @@ function renderChatConversation(taskId) {
         return;
     }
 
-    document.getElementById("chatDrawerSubtitle").innerHTML = escapeChatText(chat.taskTitle);
+    document.getElementById("chatDrawerSubtitle").innerHTML = escapeChatText(chat.title);
     chatMessages.innerHTML = "";
 
     for (var i = 0; i < chat.messages.length; i++) {
