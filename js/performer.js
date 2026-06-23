@@ -36,9 +36,6 @@ function loadPerformerTasks() {
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
-        })
-        .catch(function (error) {
-            console.log(error.message);
         });
 }
 
@@ -148,10 +145,9 @@ function renderPerformerActiveTasks() {
     }
 
     activeTasksList.innerHTML = "";
-    var performerId = getCurrentUserId(2);
 
     for (var i = 0; i < performerTasks.length; i++) {
-        if (performerTasks[i].performer_id == performerId && performerTasks[i].state != "completed") {
+        if (performerTasks[i].assignedToPerformer == true && performerTasks[i].state != "completed") {
             activeTasksList.innerHTML += createPerformerTaskCard(performerTasks[i], "View");
         }
     }
@@ -180,15 +176,15 @@ function renderPerformerAvailableTasks() {
         var matchesSearch = task.taskTitle.toLowerCase().indexOf(searchText) != -1 || task.description.toLowerCase().indexOf(searchText) != -1;
         var matchesDifficulty = performerFilters.difficulty == "" || task.difficultyLevel == performerFilters.difficulty;
         var matchesLocation = performerFilters.location == "" || task.location.toLowerCase().indexOf(performerFilters.location.toLowerCase()) != -1;
-        var matchesCategory = performerFilters.category == "" || task.category == performerFilters.category;
+        var matchesCategory = performerFilters.category == "" || task.categories == performerFilters.category;
         var matchesPrice = task.payment <= performerFilters.maxPrice;
 
         return matchesState && matchesSearch && matchesDifficulty && matchesLocation && matchesCategory && matchesPrice;
     });
 
     availableTasks.sort(function (firstTask, secondTask) {
-        var firstDate = new Date(firstTask.created_at);
-        var secondDate = new Date(secondTask.created_at);
+        var firstDate = new Date(firstTask.creationDate);
+        var secondDate = new Date(secondTask.creationDate);
 
         if (sortNewestFirst == true) {
             return secondDate - firstDate;
@@ -211,10 +207,10 @@ function renderPerformerAvailableTasks() {
 function createPerformerTaskCard(task, buttonText) {
     return '<div class="taskItem fullTask">' +
         '<span class="' + getPerformerStatusClass(task.state) + ' statusTop">' + task.state + '</span>' +
-        '<h4>' + task.title + '</h4>' +
+        '<h4>' + task.taskTitle + '</h4>' +
         '<p>' + task.description + '</p>' +
         '<p>Location: ' + task.location + '</p>' +
-        '<p>Created: ' + task.created_at + '</p>' +
+        '<p>Created: ' + task.creationDate + '</p>' +
         '<p>Payment: <b>$' + task.payment + '</b></p>' +
         '<input type="button" value="' + buttonText + '" onclick="openPerformerTask(' + task.id + ', false)">' +
         '</div>';
@@ -222,12 +218,12 @@ function createPerformerTaskCard(task, buttonText) {
 
 function createPerformerAvailableTaskCard(task) {
     return '<div class="taskItem performerAvailableCard">' +
-        '<span class="difficultyBadge">' + task.difficulty + '</span>' +
-        '<h4>' + task.title + '</h4>' +
+        '<span class="difficultyBadge">' + task.difficultyLevel + '</span>' +
+        '<h4>' + task.taskTitle + '</h4>' +
         '<p class="taskDescription">' + task.description + '</p>' +
-        '<div class="taskMeta"><span>Category:</span><b>' + task.category + '</b></div>' +
+        '<div class="taskMeta"><span>Category:</span><b>' + task.categories + '</b></div>' +
         '<div class="taskMeta"><span>Payment:</span><b>$' + task.payment + '</b></div>' +
-        '<div class="taskMeta"><span>Created:</span><b>' + task.created_at + '</b></div>' +
+        '<div class="taskMeta"><span>Created:</span><b>' + task.creationDate + '</b></div>' +
         '<div class="taskMeta"><span>Location:</span><b>' + task.location + '</b></div>' +
         '<input type="button" value="View Details" onclick="openPerformerTask(' + task.id + ', true)">' +
         '</div>';
@@ -253,8 +249,8 @@ function fillPerformerFilterCategories() {
     categorySelect.innerHTML = '<option value="">All Categories</option>';
 
     for (var i = 0; i < performerTasks.length; i++) {
-        if (performerCategoryExists(performerTasks[i].category, categorySelect) == false) {
-            categorySelect.innerHTML += '<option value="' + performerTasks[i].category + '">' + performerTasks[i].category + '</option>';
+        if (performerCategoryExists(performerTasks[i].categories, categorySelect) == false) {
+            categorySelect.innerHTML += '<option value="' + performerTasks[i].categories + '">' + performerTasks[i].categories + '</option>';
         }
     }
 }
