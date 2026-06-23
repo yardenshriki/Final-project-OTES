@@ -12,14 +12,21 @@ var performerFilters = {
 function loadPerformerTasks() {
     fetch(tasksApiUrl)
         .then(function (response) {
-            if (response.status == 200) {
-                return response.json();
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error("Server request failed");
             }
 
-            throw new Error("Failed to load performer tasks");
+            return response.json();
         })
         .then(function (tasks) {
-            performerTasks = tasks;
+            performerTasks = normalizePerformerTasks(tasks);
+            fillPerformerFilterCategories();
+            renderPerformerActiveTasks();
+            renderPerformerAvailableTasks();
+            connectPerformerActions();
+        })
+        .catch(function () {
+            performerTasks = [];
             fillPerformerFilterCategories();
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
@@ -30,14 +37,46 @@ function loadPerformerTasks() {
         });
 }
 
-function getCurrentUserId(defaultId) {
-    var savedUserId = localStorage.getItem("loggedInUserId");
+function getCurrentPerformerId() {
+    var savedId = localStorage.getItem("loggedInUserId");
 
-    if (savedUserId != null && savedUserId != "") {
-        return Number(savedUserId);
+    if (savedId != null && savedId != "") {
+        return Number(savedId);
     }
 
-    return defaultId;
+    return 2;
+}
+
+function normalizePerformerTasks(tasks) {
+    var normalizedTasks = [];
+
+    for (var i = 0; i < tasks.length; i++) {
+        normalizedTasks.push(normalizePerformerTask(tasks[i]));
+    }
+
+    return normalizedTasks;
+}
+
+function normalizePerformerTask(task) {
+    var performerId = getCurrentPerformerId();
+    var normalizedTask = Object.assign({}, task);
+
+    normalizedTask.taskTitle = task.taskTitle || task.title || "";
+    normalizedTask.difficultyLevel = task.difficultyLevel || task.difficulty || "";
+    normalizedTask.categories = task.categories || task.category || "";
+    normalizedTask.creationDate = task.creationDate || formatTaskDate(task.created_at);
+    normalizedTask.payment = Number(task.payment || 0);
+    normalizedTask.assignedToPerformer = task.assignedToPerformer == true || task.performer_id == performerId;
+
+    return normalizedTask;
+}
+
+function formatTaskDate(dateValue) {
+    if (dateValue == null || dateValue == "") {
+        return "";
+    }
+
+    return String(dateValue).split("T")[0];
 }
 
 function connectPerformerActions() {
@@ -128,8 +167,8 @@ function renderPerformerAvailableTasks() {
 
     var availableTasks = performerTasks.filter(function (task) {
         var matchesState = task.state == "open" && (task.performer_id == null || task.performer_id == "");
-        var matchesSearch = task.title.toLowerCase().indexOf(searchText) != -1 || task.description.toLowerCase().indexOf(searchText) != -1;
-        var matchesDifficulty = performerFilters.difficulty == "" || task.difficulty == performerFilters.difficulty;
+        var matchesSearch = task.taskTitle.toLowerCase().indexOf(searchText) != -1 || task.description.toLowerCase().indexOf(searchText) != -1;
+        var matchesDifficulty = performerFilters.difficulty == "" || task.difficultyLevel == performerFilters.difficulty;
         var matchesLocation = performerFilters.location == "" || task.location.toLowerCase().indexOf(performerFilters.location.toLowerCase()) != -1;
         var matchesCategory = performerFilters.category == "" || task.category == performerFilters.category;
         var matchesPrice = task.payment <= performerFilters.maxPrice;
@@ -311,11 +350,11 @@ function getPerformerStatusClass(state) {
     return "statusProgress";
 }
 
-var previousWindowOnload = window.onload;
+var performerPreviousWindowOnload = window.onload;
 
 window.onload = function () {
-    if (typeof previousWindowOnload == "function") {
-        previousWindowOnload();
+    if (typeof performerPreviousWindowOnload == "function") {
+        performerPreviousWindowOnload();
     }
 
     loadPerformerTasks();
