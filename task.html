@@ -93,6 +93,20 @@
             </div>
             <button type="button" id="taskChatButton">Chat</button>
           </section>
+          <section id="requesterCancelTaskPanel" class="requesterOnly cancelTaskPanel">
+            <div>
+              <h3>Cancel Task</h3>
+              <p>This option is available only before a performer accepts the task.</p>
+            </div>
+            <button type="button" id="cancelTaskButton">Cancel Task</button>
+          </section>
+          <section id="performerCancelTaskPanel" class="performerOnly performerCancelTaskPanel">
+            <div>
+              <h3>Cancel Accepted Task</h3>
+              <p id="performerCancelTaskText">You can cancel this task only within 5 minutes after accepting it.</p>
+            </div>
+            <button type="button" id="performerCancelTaskButton">Cancel Task</button>
+          </section>
 <button
             type="button"
             id="performerTakeTaskButton"
@@ -103,6 +117,29 @@
         </div>
       </main>
     </div>
+
+    <div id="cancelTaskOverlay" class="cancelTaskOverlay"></div>
+    <section id="cancelTaskModal" class="cancelTaskModal" aria-labelledby="cancelTaskModalTitle">
+      <h2 id="cancelTaskModalTitle">Cancel Task</h2>
+      <p>Are you sure you want to cancel this task?</p>
+      <div class="cancelTaskSummary">
+        <div><span>Task</span><b id="cancelTaskTitle"></b></div>
+        <div><span>Location</span><b id="cancelTaskLocation"></b></div>
+        <div><span>Payment</span><b id="cancelTaskPayment"></b></div>
+        <div><span>Status</span><b id="cancelTaskStatus"></b></div>
+      </div>
+      <div class="cancelTaskActions">
+        <button type="button" id="confirmCancelTaskButton">Yes, cancel task</button>
+        <button type="button" id="keepTaskButton">No, keep task</button>
+      </div>
+    </section>
+
+    <div id="performerAcceptedTaskOverlay" class="performerAcceptedTaskOverlay"></div>
+    <section id="performerAcceptedTaskModal" class="performerAcceptedTaskModal" aria-labelledby="performerAcceptedTaskTitle">
+      <h2 id="performerAcceptedTaskTitle">Task Accepted</h2>
+      <p id="performerAcceptedTaskMessage"></p>
+      <button type="button" id="acceptedTaskOkButton">Go to My Tasks</button>
+    </section>
 
     <script src="js/script.js"></script>
     <script src="js/layout.js"></script>

@@ -23,6 +23,78 @@
   background-color: #fffdfb;
 }
 
+.locationField {
+  position: relative;
+}
+
+.locationButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #d9b37c;
+  border-radius: 4px;
+  background-color: #fffdfb;
+  color: #6a5946;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.locationArrow {
+  margin-left: 10px;
+}
+
+.locationOptions {
+  display: none;
+  position: absolute;
+  top: 47px;
+  left: 0;
+  right: 0;
+  max-height: 265px;
+  overflow-y: auto;
+  border: 1px solid #92734b;
+  background-color: #fffdfb;
+  box-shadow: 0 8px 16px rgba(63, 51, 39, 0.22);
+  z-index: 30;
+}
+
+.openLocationOptions {
+  display: block;
+}
+
+.locationOption {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #fffdfb;
+  color: #6a5946;
+  text-align: left;
+  font-size: 15px;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.locationOption:hover,
+.locationOption:focus,
+.selectedLocationOption {
+  background-color: #92734b;
+  color: white;
+}
+
+.taskLocationStatus {
+  min-height: 16px;
+  margin: 6px 0 0 0;
+  color: #8a7358;
+  font-size: 11px;
+  line-height: 16px;
+}
+
 .taskFormCard .mainButton {
   background-color: #e3be84;
   color: white;

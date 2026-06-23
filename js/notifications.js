@@ -151,7 +151,11 @@ function getCurrentRoleNotifications() {
 }
 
 function shouldShowNotificationInMailbox(notification) {
-    return notification.type == "payment-success";
+    return notification.type == "payment-success" ||
+        notification.type == "task-cancelled" ||
+        notification.type == "task-accepted" ||
+        notification.type == "performer-task-responsibility" ||
+        notification.type == "performer-task-cancelled";
 }
 
 function refreshMailbox() {

@@ -1119,7 +1119,8 @@ hr {
 
 .statusOpen,
 .statusProgress,
-.statusDone {
+.statusDone,
+.statusCancelled {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 12px;
@@ -1139,6 +1140,11 @@ hr {
 .statusDone {
   background-color: #dfecff;
   color: #42658e;
+}
+
+.statusCancelled {
+  background-color: #f4d1c9;
+  color: #8a3e35;
 }
 
 .formNote {

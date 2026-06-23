@@ -62,6 +62,78 @@
   font-size: 14px;
 }
 
+.performerFilterLocationField {
+  position: relative;
+}
+
+.performerFilterLocationButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #e5bf84;
+  border-radius: 4px;
+  background-color: #fffdfb;
+  color: #6a5946;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.performerFilterLocationArrow {
+  margin-left: 10px;
+}
+
+.performerFilterLocationOptions {
+  display: none;
+  position: absolute;
+  top: 43px;
+  left: 0;
+  right: 0;
+  max-height: 245px;
+  overflow-y: auto;
+  border: 1px solid #92734b;
+  background-color: #fffdfb;
+  box-shadow: 0 8px 16px rgba(63, 51, 39, 0.22);
+  z-index: 40;
+}
+
+.openPerformerFilterLocationOptions {
+  display: block;
+}
+
+.performerFilterLocationOption {
+  display: block;
+  width: 100%;
+  min-height: 31px;
+  padding: 5px 12px;
+  border: none;
+  background-color: #fffdfb;
+  color: #6a5946;
+  text-align: left;
+  font-size: 14px;
+  line-height: 21px;
+  cursor: pointer;
+}
+
+.performerFilterLocationOption:hover,
+.performerFilterLocationOption:focus,
+.selectedPerformerFilterLocationOption {
+  background-color: #92734b;
+  color: white;
+}
+
+.performerFilterLocationStatus {
+  min-height: 16px;
+  margin: 6px 0 0 0;
+  color: #8a7358;
+  font-size: 11px;
+  line-height: 16px;
+}
+
 .filterRangeHeader {
   display: flex;
   align-items: center;

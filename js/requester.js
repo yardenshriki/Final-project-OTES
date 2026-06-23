@@ -9,6 +9,7 @@ var taskProgressSteps = [
   "Finalizing the task",
   "Task completed",
 ];
+var performerCancelWindowMinutes = 5;
 
 function scrollToAllTasks() {
   closeMenu();
@@ -520,6 +521,45 @@ function connectTakeTaskButton(selectedTask) {
         console.log(error.message);
       });
   };
+}
+
+function createTaskAcceptedNotifications(selectedTask) {
+    if (typeof addNotification != "function") {
+        return;
+    }
+
+    var performerName = selectedTask.performerName || "John Designer";
+
+    addNotification({
+        toRole: "Requester",
+        type: "task-accepted",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        performerName: performerName,
+        title: "Task accepted",
+        message: performerName + " accepted your task " + selectedTask.taskTitle + " and confirmed responsibility for it."
+    });
+
+    addNotification({
+        toRole: "Performer",
+        type: "performer-task-responsibility",
+        taskId: selectedTask.id,
+        taskTitle: selectedTask.taskTitle,
+        title: "Task responsibility",
+        message: "You accepted " + selectedTask.taskTitle + ". Contact the requester in the chat for any additional task details."
+    });
+}
+
+function openPerformerAcceptedTaskModal(selectedTask) {
+    if (document.getElementById("performerAcceptedTaskMessage") == null) {
+        window.location.href = "performer.html";
+        return;
+    }
+
+    document.getElementById("performerAcceptedTaskMessage").innerHTML =
+        "<b>" + selectedTask.taskTitle + "</b> is now your responsibility. Please contact the Requester through the chat for additional task details.";
+    document.getElementById("performerAcceptedTaskOverlay").style.display = "block";
+    document.getElementById("performerAcceptedTaskModal").style.display = "block";
 }
 
 function renderMyTasks(tasks) {

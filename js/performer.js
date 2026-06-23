@@ -202,6 +202,11 @@ function openPerformerFilter() {
     document.getElementById("filterLocation").value = performerFilters.location;
     document.getElementById("filterCategory").value = performerFilters.category;
     document.getElementById("filterMaxPrice").value = performerFilters.maxPrice;
+
+    if (typeof syncPerformerFilterLocationButton == "function") {
+        syncPerformerFilterLocationButton(performerFilters.location);
+    }
+
     updateFilterPriceText();
 
     document.getElementById("performerFilterOverlay").style.display = "block";
@@ -244,6 +249,11 @@ function resetPerformerFilters() {
     document.getElementById("filterLocation").value = "";
     document.getElementById("filterCategory").value = "";
     document.getElementById("filterMaxPrice").value = "1000";
+
+    if (typeof syncPerformerFilterLocationButton == "function") {
+        syncPerformerFilterLocationButton("");
+    }
+
     updateFilterPriceText();
 
     renderPerformerAvailableTasks();
@@ -275,6 +285,10 @@ function getPerformerStatusClass(state) {
         return "statusDone";
     }
 
+    if (state == "cancelled") {
+        return "statusCancelled";
+    }
+
     return "statusProgress";
 }
 
@@ -284,4 +298,3 @@ function checkPayment() {
     showScreen("profileScreen");
     return false;
 }
-
