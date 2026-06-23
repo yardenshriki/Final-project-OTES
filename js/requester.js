@@ -76,6 +76,8 @@ function createTaskOnServer(task) {
 }
 
 function updateTaskOnServer(task) {
+  task.deadline = formatServerDate(task.deadline);
+
   return fetch(tasksApiUrl + "/" + task.id, {
     method: "PUT",
     headers: {
@@ -83,6 +85,14 @@ function updateTaskOnServer(task) {
     },
     body: JSON.stringify(task),
   }).then(parseServerResponse);
+}
+
+function formatServerDate(dateValue) {
+  if (dateValue == null || dateValue == "") {
+    return null;
+  }
+
+  return String(dateValue).split("T")[0];
 }
 
 function getCurrentUserName(defaultRole) {
