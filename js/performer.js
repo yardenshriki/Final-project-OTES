@@ -19,13 +19,18 @@ function loadPerformerTasks() {
             return response.json();
         })
         .then(function (tasks) {
+            if (Array.isArray(tasks) == false && Array.isArray(tasks.value) == true) {
+                tasks = tasks.value;
+            }
+
             performerTasks = normalizePerformerTasks(tasks);
             fillPerformerFilterCategories();
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
         })
-        .catch(function () {
+        .catch(function (error) {
+            console.log(error.message);
             performerTasks = [];
             fillPerformerFilterCategories();
             renderPerformerActiveTasks();
@@ -36,9 +41,10 @@ function loadPerformerTasks() {
 
 function getCurrentPerformerId() {
     var savedId = localStorage.getItem("loggedInUserId");
+    var performerId = Number(savedId);
 
-    if (savedId != null && savedId != "") {
-        return Number(savedId);
+    if (savedId != null && savedId != "" && isNaN(performerId) == false) {
+        return performerId;
     }
 
     return 2;
@@ -145,6 +151,10 @@ function renderPerformerActiveTasks() {
             activeTasksList.innerHTML += createPerformerTaskCard(performerTasks[i], "View");
         }
     }
+
+    if (activeTasksList.innerHTML == "") {
+        activeTasksList.innerHTML = '<p class="emptyTaskMessage">No active tasks yet</p>';
+    }
 }
 
 function renderPerformerAvailableTasks() {
@@ -187,6 +197,10 @@ function renderPerformerAvailableTasks() {
 
     for (var i = 0; i < availableTasks.length; i++) {
         availableTasksList.innerHTML += createPerformerAvailableTaskCard(availableTasks[i]);
+    }
+
+    if (availableTasksList.innerHTML == "") {
+        availableTasksList.innerHTML = '<p class="emptyTaskMessage">No available tasks found</p>';
     }
 }
 
