@@ -1,0 +1,29 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server side for Online Task Execution System.",
+  "homepage": "https://github.com/liorZahavi/OTES-server#readme",
+  "bugs": {
+    "url": "https://github.com/liorZahavi/OTES-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liorZahavi/OTES-server.git"
+  },
+  "license": "ISC",
+  "author": "lior zahavi",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node js/app.js",
+    "dev": "nodemon js/app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.5",
+    "nodemon": "^3.1.14"
+  }
+}
