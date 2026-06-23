@@ -28,7 +28,7 @@ function loadRequesterTasks() {
       throw new Error("Failed to load requester tasks");
     })
     .then((tasksData) => {
-      requesterTasks = getCurrentRequesterTasks(tasksData);
+      requesterTasks = getTasksForCurrentPage(tasksData);
       renderCategoryOptions(requesterTasks);
       renderRequesterTasks(requesterTasks);
       renderTaskPage();
@@ -41,6 +41,18 @@ function loadRequesterTasks() {
     .catch((error) => {
       console.log(error.message);
     });
+}
+
+function isTaskDetailsPage() {
+  return document.getElementById("taskDetailsScreen") != null;
+}
+
+function getTasksForCurrentPage(tasks) {
+  if (isTaskDetailsPage()) {
+    return tasks;
+  }
+
+  return getCurrentRequesterTasks(tasks);
 }
 
 function getCurrentRequesterTasks(tasks) {
@@ -365,11 +377,7 @@ function connectNextStepButton(selectedTask) {
           createTaskCompletionNotification(selectedTask);
         }
 
-        document.getElementById("taskDetailsStatus").innerHTML =
-          selectedTask.state;
-        document.getElementById("taskDetailsStatus").className = getStatusClass(
-          selectedTask.state,
-        );
+        renderTaskDetails(selectedTask);
         renderPerformerProgress(selectedTask);
         updateTaskPageByRole(selectedTask);
       })

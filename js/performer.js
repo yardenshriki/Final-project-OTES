@@ -1,5 +1,6 @@
 ﻿//yarden shriki, lior zahavi
 var performerTasks = [];
+var tasksApiUrl = "http://localhost:5000/api/tasks";
 var sortNewestFirst = true;
 var performerFilters = {
     difficulty: "",
@@ -9,17 +10,34 @@ var performerFilters = {
 };
 
 function loadPerformerTasks() {
-    fetch("data/tasks.json")
+    fetch(tasksApiUrl)
         .then(function (response) {
-            return response.json();
+            if (response.status == 200) {
+                return response.json();
+            }
+
+            throw new Error("Failed to load performer tasks");
         })
         .then(function (tasks) {
-            performerTasks = applyLocalTaskAssignments(tasks.concat(getLocalCreatedTasks()));
+            performerTasks = tasks;
             fillPerformerFilterCategories();
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
+        })
+        .catch(function (error) {
+            console.log(error.message);
         });
+}
+
+function getCurrentUserId(defaultId) {
+    var savedUserId = localStorage.getItem("loggedInUserId");
+
+    if (savedUserId != null && savedUserId != "") {
+        return Number(savedUserId);
+    }
+
+    return defaultId;
 }
 
 function connectPerformerActions() {
@@ -85,9 +103,10 @@ function renderPerformerActiveTasks() {
     }
 
     activeTasksList.innerHTML = "";
+    var performerId = getCurrentUserId(2);
 
     for (var i = 0; i < performerTasks.length; i++) {
-        if (performerTasks[i].performer_id != null && performerTasks[i].state != "completed") {
+        if (performerTasks[i].performer_id == performerId && performerTasks[i].state != "completed") {
             activeTasksList.innerHTML += createPerformerTaskCard(performerTasks[i], "View");
         }
     }
@@ -278,7 +297,15 @@ function getPerformerStatusClass(state) {
     return "statusProgress";
 }
 
-document.addEventListener("DOMContentLoaded", loadPerformerTasks);
+var previousWindowOnload = window.onload;
+
+window.onload = function () {
+    if (typeof previousWindowOnload == "function") {
+        previousWindowOnload();
+    }
+
+    loadPerformerTasks();
+};
 
 function checkPayment() {
     showScreen("profileScreen");
