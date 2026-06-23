@@ -211,6 +211,27 @@ body:has(#adminHomeScreen) .systemBox.adminDashboard {
   text-align: center;
 }
 
+.adminTopNav {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.adminNavMain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  grid-column: 2;
+}
+
+.adminLogoutButton {
+  grid-column: 3;
+  justify-self: end;
+}
+
 .adminNavButton {
   display: inline-flex;
   align-items: center;
@@ -1898,6 +1919,25 @@ body:has(#adminHomeScreen) .systemBox.adminDashboard {
         flex-wrap: nowrap;
         padding: 10px 12px;
         scroll-snap-type: x proximity;
+    }
+
+    .adminTopNav {
+        display: flex;
+        align-items: center;
+        width: max-content;
+        min-width: 100%;
+        gap: 8px;
+    }
+
+    .adminNavMain {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    .adminLogoutButton {
+        margin-left: 12px;
     }
 
     .adminNavButton {

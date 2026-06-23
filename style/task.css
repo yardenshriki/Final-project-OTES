@@ -240,6 +240,50 @@
   background-color: #d9b37c;
 }
 
+.cancelTaskPanel,
+.performerCancelTaskPanel {
+  grid-column: 1 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 28px;
+  border: 2px solid #d9b37c;
+  border-radius: 8px;
+  background-color: #fff2df;
+  box-sizing: border-box;
+}
+
+.cancelTaskPanel h3,
+.performerCancelTaskPanel h3 {
+  margin: 0 0 6px 0;
+  color: #3f3327;
+}
+
+.cancelTaskPanel p,
+.performerCancelTaskPanel p {
+  margin: 0;
+  color: #6a5946;
+}
+
+.cancelTaskPanel button,
+.performerCancelTaskPanel button {
+  min-width: 130px;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  background-color: #b85c50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.performerCancelTaskPanel {
+  display: none;
+  border-color: #c46b5f;
+  background-color: #fff7ee;
+}
+
 .communicationPanel p {
   margin: 0;
   color: #6a5946;
@@ -273,6 +317,142 @@
   margin-top: 0;
 }
 
+.cancelTaskOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(63, 51, 39, 0.58);
+  z-index: 45;
+}
+
+.cancelTaskModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 460px;
+  max-width: 92vw;
+  padding: 30px;
+  border: 3px solid #d9b37c;
+  border-radius: 12px;
+  background-color: #fff2df;
+  color: #3f3327;
+  text-align: left;
+  box-shadow: 0 18px 34px rgba(63, 51, 39, 0.28);
+  transform: translate(-50%, -50%);
+  z-index: 46;
+  box-sizing: border-box;
+}
+
+.performerAcceptedTaskOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(63, 51, 39, 0.58);
+  z-index: 47;
+}
+
+.performerAcceptedTaskModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 460px;
+  max-width: 92vw;
+  padding: 30px;
+  border: 3px solid #d9b37c;
+  border-radius: 12px;
+  background-color: #fff2df;
+  color: #3f3327;
+  text-align: left;
+  box-shadow: 0 18px 34px rgba(63, 51, 39, 0.28);
+  transform: translate(-50%, -50%);
+  z-index: 48;
+  box-sizing: border-box;
+}
+
+.performerAcceptedTaskModal h2 {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+}
+
+.performerAcceptedTaskModal p {
+  margin: 0 0 22px 0;
+  color: #6a5946;
+  line-height: 24px;
+}
+
+#acceptedTaskOkButton {
+  width: 100%;
+  min-height: 46px;
+  border: none;
+  border-radius: 8px;
+  background-color: #d9b37c;
+  color: #3f3327;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cancelTaskModal h2 {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+}
+
+.cancelTaskModal p {
+  margin: 0 0 18px 0;
+  color: #6a5946;
+  line-height: 22px;
+}
+
+.cancelTaskSummary {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 8px;
+  background-color: #fff8ed;
+}
+
+.cancelTaskSummary div {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 14px;
+}
+
+.cancelTaskSummary span {
+  color: #8a7358;
+}
+
+.cancelTaskSummary b {
+  color: #3f3327;
+  font-weight: bold;
+}
+
+.cancelTaskActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.cancelTaskActions button {
+  min-height: 46px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#confirmCancelTaskButton {
+  border: none;
+  background-color: #b85c50;
+  color: white;
+}
+
+#keepTaskButton {
+  border: 2px solid #d9b37c;
+  background-color: #fffdfb;
+  color: #3f3327;
+}
+
 @media screen and (max-width: 900px) {
   .taskDetailsLayout,
   .performerProgressPanel {
@@ -281,6 +461,11 @@
   }
 
   .communicationPanel {
+    grid-column: auto;
+  }
+
+  .cancelTaskPanel,
+  .performerCancelTaskPanel {
     grid-column: auto;
   }
 
@@ -311,5 +496,21 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .cancelTaskPanel,
+  .performerCancelTaskPanel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cancelTaskPanel button,
+  .performerCancelTaskPanel button {
+    width: 100%;
+  }
+
+  .cancelTaskActions,
+  .cancelTaskSummary div {
+    grid-template-columns: 1fr;
   }
 }

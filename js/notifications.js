@@ -112,9 +112,9 @@ function saveNotifications(notifications) {
 
 function addNotification(notification) {
     var notifications = getNotifications();
-    notification.id = Date.now();
-    notification.is_read = false;
-    notification.created_at = getNotificationDateText();
+    notification.id = Date.now() + notifications.length;
+    notification.read = false;
+    notification.createdAt = getNotificationDateText();
     notifications.push(notification);
     saveNotifications(notifications);
     refreshMailbox();
@@ -151,7 +151,11 @@ function getCurrentRoleNotifications() {
 }
 
 function shouldShowNotificationInMailbox(notification) {
-    return notification.type == "payment-success";
+    return notification.type == "payment-success" ||
+        notification.type == "task-cancelled" ||
+        notification.type == "task-accepted" ||
+        notification.type == "performer-task-responsibility" ||
+        notification.type == "performer-task-cancelled";
 }
 
 function refreshMailbox() {
