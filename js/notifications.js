@@ -112,9 +112,9 @@ function saveNotifications(notifications) {
 
 function addNotification(notification) {
     var notifications = getNotifications();
-    notification.id = Date.now() + notifications.length;
-    notification.read = false;
-    notification.createdAt = getNotificationDateText();
+    notification.id = Date.now();
+    notification.is_read = false;
+    notification.created_at = getNotificationDateText();
     notifications.push(notification);
     saveNotifications(notifications);
     refreshMailbox();
@@ -169,7 +169,7 @@ function openPendingTaskCompletionNotification() {
 
     for (var i = 0; i < notifications.length; i++) {
         if (notifications[i].toRole == userRole && notifications[i].type == "task-completion" && notifications[i].resolved != true) {
-            notifications[i].read = true;
+            notifications[i].is_read = true;
             pendingNotification = notifications[i];
             break;
         }
@@ -195,7 +195,7 @@ function updateMailBadge() {
     var unreadCount = 0;
 
     for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].read == false) {
+        if (notifications[i].is_read == false) {
             unreadCount++;
         }
     }
@@ -222,7 +222,7 @@ function renderMailList() {
     for (var i = notifications.length - 1; i >= 0; i--) {
         var className = "mailItem";
 
-        if (notifications[i].read == false) {
+        if (notifications[i].is_read == false) {
             className += " mailItemUnread";
         }
 
@@ -241,7 +241,7 @@ function createNotificationItem(notification, className) {
         '<h4>' + notification.title + '</h4>' +
         '<p>' + notification.message + '</p>' +
         receiptButton +
-        '<small>' + notification.createdAt + '</small>' +
+        '<small>' + notification.created_at + '</small>' +
         '</div>';
 }
 
@@ -262,7 +262,7 @@ function openNotification(notificationId) {
 
     for (var i = 0; i < notifications.length; i++) {
         if (notifications[i].id == notificationId) {
-            notifications[i].read = true;
+            notifications[i].is_read = true;
             selectedNotification = notifications[i];
         }
     }
@@ -277,7 +277,7 @@ function openNotification(notificationId) {
 
 function openTaskCompletionModal(notification) {
     selectedNotificationId = notification.id;
-    document.getElementById("taskCompletionMessage").innerHTML = '<b>' + notification.taskTitle + '</b> has been marked as finished.';
+    document.getElementById("taskCompletionMessage").innerHTML = '<b>' + notification.task_title + '</b> has been marked as finished.';
     document.getElementById("messageModalOverlay").style.display = "block";
     document.getElementById("taskCompletionModal").style.display = "block";
 }
@@ -319,19 +319,19 @@ function addPaymentSuccessNotification(taskCompletionNotification) {
     addNotification({
         toRole: "Requester",
         type: "payment-success",
-        taskId: taskCompletionNotification.taskId,
-        taskTitle: taskCompletionNotification.taskTitle,
+        task_id: taskCompletionNotification.task_id,
+        task_title: taskCompletionNotification.task_title,
         title: "Payment successful",
-        message: "The payment for " + taskCompletionNotification.taskTitle + " has been successfully transferred. A confirmation has been sent to your email."
+        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred. A confirmation has been sent to your email."
     });
 
     addNotification({
         toRole: "Performer",
         type: "payment-success",
-        taskId: taskCompletionNotification.taskId,
-        taskTitle: taskCompletionNotification.taskTitle,
+        task_id: taskCompletionNotification.task_id,
+        task_title: taskCompletionNotification.task_title,
         title: "Payment received",
-        message: "The payment for " + taskCompletionNotification.taskTitle + " has been successfully transferred to you. A confirmation has been sent to your email."
+        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred to you. A confirmation has been sent to your email."
     });
 }
 
@@ -355,9 +355,9 @@ function openRatingModal(notification) {
     selectedRatingNotification = notification;
     selectedRatingValue = 0;
 
-    document.getElementById("ratingPerformerName").innerHTML = notification.performerName || "John Designer";
+    document.getElementById("ratingPerformerName").innerHTML = notification.performer_name || "John Designer";
     document.getElementById("ratingDate").innerHTML = getNotificationDateText();
-    document.getElementById("ratingTaskName").innerHTML = notification.taskTitle;
+    document.getElementById("ratingTaskName").innerHTML = notification.task_title;
     document.getElementById("ratingFeedback").value = "";
     markRatingStars();
 
@@ -395,12 +395,12 @@ function submitRating() {
     }
 
     savePerformerRating({
-        taskId: selectedRatingNotification.taskId,
-        taskTitle: selectedRatingNotification.taskTitle,
-        performerName: selectedRatingNotification.performerName || "John Designer",
+        task_id: selectedRatingNotification.task_id,
+        task_title: selectedRatingNotification.task_title,
+        performer_name: selectedRatingNotification.performer_name || "John Designer",
         rating: selectedRatingValue,
         feedback: document.getElementById("ratingFeedback").value,
-        createdAt: getNotificationDateText()
+        created_at: getNotificationDateText()
     });
 
     closeRatingModal();
@@ -425,14 +425,14 @@ function downloadReceipt(notificationId, event) {
     }
 
     var receiptText = "OTES Payment Receipt\n" +
-        "Task: " + selectedNotification.taskTitle + "\n" +
+        "Task: " + selectedNotification.task_title + "\n" +
         "Status: Payment transferred\n" +
-        "Date: " + selectedNotification.createdAt + "\n";
+        "Date: " + selectedNotification.created_at + "\n";
     var receiptFile = new Blob([receiptText], { type: "text/plain" });
     var receiptLink = document.createElement("a");
 
     receiptLink.href = URL.createObjectURL(receiptFile);
-    receiptLink.download = "receipt-" + selectedNotification.taskId + ".txt";
+    receiptLink.download = "receipt-" + selectedNotification.task_id + ".txt";
     receiptLink.click();
     URL.revokeObjectURL(receiptLink.href);
 }
