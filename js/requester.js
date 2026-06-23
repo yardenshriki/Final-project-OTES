@@ -1,6 +1,7 @@
 ﻿//yarden shriki, lior zahavi
 var requesterTasks = [];
 var selectedTaskState = "all";
+var tasksApiUrl = "http://localhost:5000/api/tasks";
 var taskProgressSteps = [
   "Task accepted",
   "On my way",
@@ -19,7 +20,7 @@ function scrollToAllTasks() {
 }
 
 function loadRequesterTasks() {
-  fetch("http://localhost:5000/api/tasks")
+  fetch(tasksApiUrl)
     .then((response) => {
       if (response.status === 200) {
         return response.json();
@@ -27,7 +28,7 @@ function loadRequesterTasks() {
       throw new Error("Failed to load requester tasks");
     })
     .then((tasksData) => {
-      requesterTasks = tasksData;
+      requesterTasks = getCurrentRequesterTasks(tasksData);
       renderCategoryOptions(requesterTasks);
       renderRequesterTasks(requesterTasks);
       renderTaskPage();
@@ -40,6 +41,67 @@ function loadRequesterTasks() {
     .catch((error) => {
       console.log(error.message);
     });
+}
+
+function getCurrentRequesterTasks(tasks) {
+  var requesterId = getCurrentUserId(1);
+  var currentRequesterTasks = [];
+
+  for (var i = 0; i < tasks.length; i++) {
+    if (tasks[i].requester_id == requesterId) {
+      currentRequesterTasks.push(tasks[i]);
+    }
+  }
+
+  return currentRequesterTasks;
+}
+
+function parseServerResponse(response) {
+  if (response.status >= 200 && response.status < 300) {
+    return response.json();
+  }
+
+  throw new Error("Server request failed");
+}
+
+function createTaskOnServer(task) {
+  return fetch(tasksApiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(task),
+  }).then(parseServerResponse);
+}
+
+function updateTaskOnServer(task) {
+  return fetch(tasksApiUrl + "/" + task.id, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(task),
+  }).then(parseServerResponse);
+}
+
+function getCurrentUserName(defaultRole) {
+  var savedUsername = localStorage.getItem("loggedInUsername");
+
+  if (savedUsername != null && savedUsername != "") {
+    return savedUsername;
+  }
+
+  return defaultRole;
+}
+
+function getCurrentUserId(defaultId) {
+  var savedUserId = localStorage.getItem("loggedInUserId");
+
+  if (savedUserId != null && savedUserId != "") {
+    return Number(savedUserId);
+  }
+
+  return defaultId;
 }
 
 function renderCategoryOptions(tasks) {
@@ -166,46 +228,54 @@ function createTaskCard(task) {
   );
 }
 
-function getTaskIdFromUrl() {
-  var urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("id");
-}
-
 function renderTaskPage() {
   if (document.getElementById("taskDetailsTitle") == null) {
     return;
   }
 
-  var taskId = getTaskIdFromUrl();
+  var urlParams = new URLSearchParams(window.location.search);
+  var taskId = urlParams.get("id");
   var selectedTask = findTaskById(taskId);
 
   if (selectedTask == null) {
-    document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
-    document.getElementById("taskDetailsDescription").innerHTML =
-      "The selected task could not be found.";
+    renderTaskNotFound();
     return;
   }
 
-  document.getElementById("taskDetailsTitle").innerHTML =
-    selectedTask.title;
-  document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
+  renderTaskDetails(selectedTask);
+  connectTaskPageActions(selectedTask);
+}
+
+function renderTaskNotFound() {
+  document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
+  document.getElementById("taskDetailsDescription").innerHTML =
+    "The selected task could not be found.";
+}
+
+function renderTaskDetails(selectedTask) {
+  var taskFields = {
+    taskDetailsTitle: selectedTask.title,
+    taskDetailsStatus: selectedTask.state,
+    taskDetailsPosted: "Posted on " + selectedTask.created_at,
+    taskDetailsDescription:
+      selectedTask.description + "<br><br>" + selectedTask.additional_details,
+    taskDetailsPayment: "$" + selectedTask.payment,
+    taskDetailsDeadline: selectedTask.deadline || "Not set",
+    taskDetailsCategory: selectedTask.category,
+    taskDetailsDifficulty: selectedTask.difficulty,
+    taskDetailsPostedDate: selectedTask.created_at,
+  };
+
+  for (var fieldId in taskFields) {
+    document.getElementById(fieldId).innerHTML = taskFields[fieldId];
+  }
+
   document.getElementById("taskDetailsStatus").className = getStatusClass(
     selectedTask.state,
   );
-  document.getElementById("taskDetailsPosted").innerHTML =
-    "Posted on " + selectedTask.created_at;
-  document.getElementById("taskDetailsDescription").innerHTML =
-    selectedTask.description + "<br><br>" + selectedTask.additional_details;
-  document.getElementById("taskDetailsPayment").innerHTML =
-    "$" + selectedTask.payment;
-  document.getElementById("taskDetailsDeadline").innerHTML =
-    selectedTask.deadline || "Not set";
-  document.getElementById("taskDetailsCategory").innerHTML =
-    selectedTask.category;
-  document.getElementById("taskDetailsDifficulty").innerHTML =
-    selectedTask.difficulty;
-  document.getElementById("taskDetailsPostedDate").innerHTML =
-    selectedTask.created_at;
+}
+
+function connectTaskPageActions(selectedTask) {
   connectTakeTaskButton(selectedTask);
   connectNextStepButton(selectedTask);
   renderPerformerProgress(selectedTask);
@@ -279,27 +349,33 @@ function connectNextStepButton(selectedTask) {
     }
 
     selectedTask.work_status = taskProgressSteps[currentStepIndex + 1];
-    saveLocalTaskWorkStatus(selectedTask.id, selectedTask.work_status);
     updateTaskStateByWorkStatus(selectedTask);
     ensureTaskChatParticipants(selectedTask);
 
-    if (typeof addTaskChatSystemMessage == "function") {
-      addTaskChatSystemMessage(
-        selectedTask,
-        "Performer finished the step of: " + selectedTask.work_status,
-      );
-    }
+    updateTaskOnServer(selectedTask)
+      .then(() => {
+        if (typeof addTaskChatSystemMessage == "function") {
+          addTaskChatSystemMessage(
+            selectedTask,
+            "Performer finished the step of: " + selectedTask.work_status,
+          );
+        }
 
-    if (selectedTask.work_status == "Task completed") {
-      createTaskCompletionNotification(selectedTask);
-    }
+        if (selectedTask.work_status == "Task completed") {
+          createTaskCompletionNotification(selectedTask);
+        }
 
-    document.getElementById("taskDetailsStatus").innerHTML = selectedTask.state;
-    document.getElementById("taskDetailsStatus").className = getStatusClass(
-      selectedTask.state,
-    );
-    renderPerformerProgress(selectedTask);
-    updateTaskPageByRole(selectedTask);
+        document.getElementById("taskDetailsStatus").innerHTML =
+          selectedTask.state;
+        document.getElementById("taskDetailsStatus").className = getStatusClass(
+          selectedTask.state,
+        );
+        renderPerformerProgress(selectedTask);
+        updateTaskPageByRole(selectedTask);
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
   };
 }
 
@@ -313,7 +389,7 @@ function createTaskCompletionNotification(selectedTask) {
     type: "task-completion",
     task_id: selectedTask.id,
     task_title: selectedTask.title,
-    performer_name: selectedTask.performer_name || "John Designer",
+    performer_name: selectedTask.performer_name || getCurrentUserName("Performer"),
     title: "Task completion",
     message: selectedTask.title + " has been marked as finished.",
   });
@@ -382,14 +458,12 @@ function ensureTaskChatParticipants(task) {
   }
 
   if (task.requester_name == null || task.requester_name == "") {
-    task.requester_name = "Sarah Johnson";
+    task.requester_name = getCurrentUserName("Requester");
   }
 
   if (task.performer_name == null || task.performer_name == "") {
-    task.performer_name = "John Designer";
+    task.performer_name = getCurrentUserName("Performer");
   }
-
-  saveLocalTaskParticipants(task.id, task.requester_name, task.performer_name);
 }
 
 function getTaskElementDisplay(element) {
@@ -424,26 +498,27 @@ function connectTakeTaskButton(selectedTask) {
   }
 
   takeTaskButton.onclick = function () {
-    takeLocalTask(selectedTask.id);
-    selectedTask.performer_id = selectedTask.performer_id || 2;
+    selectedTask.performer_id =
+      selectedTask.performer_id || getCurrentUserId(2);
     selectedTask.requester_name =
-      selectedTask.requester_name || "Sarah Johnson";
+      selectedTask.requester_name || getCurrentUserName("Requester");
     selectedTask.performer_name =
-      selectedTask.performer_name || "John Designer";
-    saveLocalTaskParticipants(
-      selectedTask.id,
-      selectedTask.requester_name,
-      selectedTask.performer_name,
-    );
+      selectedTask.performer_name || getCurrentUserName("Performer");
     selectedTask.work_status = "Task accepted";
     updateTaskStateByWorkStatus(selectedTask);
 
-    if (typeof createTaskChat == "function") {
-      createTaskChat(selectedTask);
-    }
+    updateTaskOnServer(selectedTask)
+      .then(function () {
+        if (typeof createTaskChat == "function") {
+          createTaskChat(selectedTask);
+        }
 
-    localStorage.setItem("userRole", "Performer");
-    window.location.href = "performer.html";
+        localStorage.setItem("userRole", "Performer");
+        window.location.href = "performer.html";
+      })
+      .catch(function (error) {
+        console.log(error.message);
+      });
   };
 }
 
@@ -485,25 +560,26 @@ function openTaskDetails(taskId, shouldOpenScreen) {
     return;
   }
 
-  document.getElementById("detailsTitle").innerHTML = selectedTask.title;
-  document.getElementById("detailsSubTitle").innerHTML = "Current task details";
-  document.getElementById("detailsDescription").innerHTML =
-    selectedTask.description;
-  document.getElementById("detailsAdditional").innerHTML =
-    selectedTask.additional_details;
-  document.getElementById("detailsCategory").innerHTML =
-    selectedTask.category;
-  document.getElementById("detailsLocation").innerHTML = selectedTask.location;
-  document.getElementById("detailsDifficulty").innerHTML =
-    selectedTask.difficulty;
+  var taskFields = {
+    detailsTitle: selectedTask.title,
+    detailsSubTitle: "Current task details",
+    detailsDescription: selectedTask.description,
+    detailsAdditional: selectedTask.additional_details,
+    detailsCategory: selectedTask.category,
+    detailsLocation: selectedTask.location,
+    detailsDifficulty: selectedTask.difficulty,
+    detailsPayment: "$" + selectedTask.payment,
+    detailsSideCategory: selectedTask.category,
+  };
+
+  for (var fieldId in taskFields) {
+    document.getElementById(fieldId).innerHTML = taskFields[fieldId];
+  }
+
   document.getElementById("detailsState").innerHTML = selectedTask.state;
   document.getElementById("detailsState").className = getStatusClass(
     selectedTask.state,
   );
-  document.getElementById("detailsPayment").innerHTML =
-    "$" + selectedTask.payment;
-  document.getElementById("detailsSideCategory").innerHTML =
-    selectedTask.category;
 
   if (shouldOpenScreen == true) {
     showScreen("requesterTaskDetailsScreen");
@@ -599,7 +675,15 @@ function countTasksByState(tasks, state) {
   return counter;
 }
 
-document.addEventListener("DOMContentLoaded", loadRequesterTasks);
+var previousWindowOnload = window.onload;
+
+window.onload = function () {
+  if (typeof previousWindowOnload == "function") {
+    previousWindowOnload();
+  }
+
+  loadRequesterTasks();
+};
 
 function getPaymentNumber() {
   var taskPayment = document.getElementById("taskPayment");
@@ -643,40 +727,38 @@ function changePayment(changeAmount) {
   taskPayment.value = newPayment.toFixed(2);
 }
 
-function getTodayText() {
-  var today = new Date();
-  var month = today.getMonth() + 1;
-  var day = today.getDate();
+function getFormFieldValue(fieldId) {
+  var field = document.getElementById(fieldId);
 
-  if (month < 10) {
-    month = "0" + month;
+  if (field == null) {
+    return "";
   }
 
-  if (day < 10) {
-    day = "0" + day;
-  }
-
-  return today.getFullYear() + "-" + month + "-" + day;
+  return field.value;
 }
 
 function createTaskFromForm() {
-  return {
-    id: Date.now(),
-    title: document.getElementById("taskTitle").value,
-    description: document.getElementById("taskDescription").value,
-    location: document.getElementById("taskLocation").value,
-    difficulty: document.getElementById("difficultyLevel").value,
-    payment: parseFloat(document.getElementById("taskPayment").value),
-    additional_details: document.getElementById("additionalDetails").value,
-    category: "General",
-    requester_id: 1,
+  var taskFields = {
+    title: "taskTitle",
+    description: "taskDescription",
+    location: "taskLocation",
+    difficulty: "difficultyLevel",
+    additional_details: "additionalDetails",
+  };
+  var task = {
+    requester_id: getCurrentUserId(1),
     performer_id: null,
-    requester_name: "Sarah Johnson",
-    performer_name: "",
+    category: "General",
+    payment: parseFloat(getFormFieldValue("taskPayment")),
     state: "open",
     work_status: "Available",
-    created_at: getTodayText(),
   };
+
+  for (var fieldName in taskFields) {
+    task[fieldName] = getFormFieldValue(taskFields[fieldName]);
+  }
+
+  return task;
 }
 
 function checkTask() {
@@ -710,8 +792,13 @@ function checkTask() {
   }
 
   formatPayment();
-  saveLocalCreatedTask(createTaskFromForm());
-  window.location.href = "requester.html";
+  createTaskOnServer(createTaskFromForm())
+    .then(function () {
+      window.location.href = "requester.html";
+    })
+    .catch(function (error) {
+      showMessage("taskMessage", error.message);
+    });
   return false;
 }
 
