@@ -48,7 +48,10 @@ function isChatMessageUnread(message, roleName) {
     return false;
   }
 
-  if (message.receiver_id != null && message.receiver_id != getCurrentChatUserId()) {
+  if (
+    message.receiver_id != null &&
+    message.receiver_id != getCurrentChatUserId()
+  ) {
     return false;
   }
 
