@@ -1,7 +1,8 @@
-﻿//yarden shriki, lior zahavi
-var LOGIN_ADMIN_DATA_STORAGE_KEY = "otesAdminData";
+//yarden shriki, lior zahavi
+var LOGIN_API_URL = "http://localhost:5000/api/users/login";
+
 function checkLogin() {
-    var username = document.getElementById("username").value;
+    var username = document.getElementById("username").value.trim();
     var password = document.getElementById("password").value;
 
     clearMessage("loginMessage");
@@ -11,88 +12,138 @@ function checkLogin() {
         return false;
     }
 
-    if (username.toUpperCase().indexOf("ADMIN") == 0) {
-        localStorage.setItem("userRole", "Admin");
-        localStorage.setItem("adminUsername", username);
-        window.location.href = "admin.html";
-        return false;
-    }
+    loginWithServer(username, password);
+    return false;
+}
 
-    fetch("data/admin-data.json")
+function loginWithServer(username, password) {
+    fetch(LOGIN_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(buildLoginRequest(username, password))
+    })
         .then(function (response) {
-            return response.json();
+            return response.json().then(function (data) {
+                if (!response.ok) {
+                    throw data;
+                }
+
+                return data;
+            });
         })
-        .then(function (adminData) {
-            var loginData = getLoginAdminData(adminData);
-            var user = findLoginUser(loginData.users, username);
+        .then(function (loginData) {
+            var user = loginData.user;
 
             if (user != null && isUserBlockedFromLogin(user)) {
                 showMessage("loginMessage", getBlockedLoginMessage(user));
                 return;
             }
 
-            if (user != null && user.password != null && user.password != "" && user.password != password) {
+            if (user == null) {
                 showMessage("loginMessage", "Invalid username or password");
                 return;
             }
 
-            localStorage.setItem("loggedInUsername", username);
-            window.location.href = "requester.html";
+            saveLoggedInUser(user, username);
+            redirectLoggedInUser(user);
         })
-        .catch(function () {
-            showMessage("loginMessage", "Login data could not be loaded");
+        .catch(function (error) {
+            showMessage("loginMessage", getLoginErrorMessage(error));
         });
-
-    return false;
 }
 
-
-function getLoginAdminData(fetchedData) {
-    var savedData = localStorage.getItem(LOGIN_ADMIN_DATA_STORAGE_KEY);
-
-    if (savedData == null || savedData == "") {
-        return fetchedData;
+function buildLoginRequest(username, password) {
+    if (username.indexOf("@") >= 0) {
+        return {
+            email: username,
+            password: password
+        };
     }
 
-    try {
-        return JSON.parse(savedData);
-    } catch (error) {
-        return fetchedData;
+    return {
+        username: username,
+        password: password
+    };
+}
+
+function saveLoggedInUser(user, loginName) {
+    var username = user.username || loginName;
+    var role = getUserRole(user);
+
+    localStorage.setItem("currentUser", JSON.stringify(user));
+    localStorage.setItem("loggedInUserId", user.id || "");
+    localStorage.setItem("loggedInUsername", username);
+    localStorage.setItem("loggedInFullName", user.full_name || user.fullName || username);
+    localStorage.setItem("loggedInEmail", user.email || "");
+    localStorage.setItem("userRole", role);
+
+    if (role == "Admin") {
+        localStorage.setItem("adminUsername", username);
+    } else {
+        localStorage.removeItem("adminUsername");
     }
 }
-function findLoginUser(users, username) {
-    if (users == null) {
-        return null;
+
+function redirectLoggedInUser(user) {
+    var role = getUserRole(user);
+
+    if (role == "Admin") {
+        window.location.href = "admin.html";
+        return;
     }
 
-    for (var i = 0; i < users.length; i++) {
-        if (String(users[i].username).toLowerCase() == String(username).toLowerCase()) {
-            return users[i];
-        }
+    if (role == "Performer") {
+        window.location.href = "performer.html";
+        return;
     }
 
-    return null;
+    window.location.href = "requester.html";
+}
+
+function getUserRole(user) {
+    var username = String(user.username || "");
+    var role = String(user.role || "");
+    var normalizedRole = role.toLowerCase();
+
+    if (username.toUpperCase().indexOf("ADMIN") == 0 || normalizedRole == "admin") {
+        return "Admin";
+    }
+
+    if (normalizedRole == "performer") {
+        return "Performer";
+    }
+
+    return "Requester";
 }
 
 function isUserBlockedFromLogin(user) {
     var status = String(user.status || "").toLowerCase();
-    var restrictionType = String(user.restrictionType || "").toLowerCase();
+    var restrictionType = String(user.restrictionType || user.restriction_type || "").toLowerCase();
 
     return status == "blocked" || status == "suspended" || status == "immediate block" ||
         restrictionType == "blocked" || restrictionType == "suspended" || restrictionType == "immediate block";
 }
 
 function getBlockedLoginMessage(user) {
-    var status = String(user.status || user.restrictionType || "Blocked");
+    var status = String(user.status || user.restrictionType || user.restriction_type || "Blocked");
 
-    if (status == "Immediate Block" || String(user.restrictionType || "") == "Immediate Block") {
+    if (status == "Immediate Block" || String(user.restrictionType || user.restriction_type || "") == "Immediate Block") {
         return "Access denied: this user is blocked immediately.";
     }
 
-    if (status == "Suspended" || String(user.restrictionType || "") == "Suspended") {
+    if (status == "Suspended" || String(user.restrictionType || user.restriction_type || "") == "Suspended") {
         return "Access denied: this user is temporarily blocked.";
     }
 
     return "Access denied: this user is blocked.";
 }
 
+function getLoginErrorMessage(error) {
+    if (error != null && error.message != null && error.message != "") {
+        return error.message;
+    }
+
+    return "Login failed. Please check that the server and database are running.";
+}
