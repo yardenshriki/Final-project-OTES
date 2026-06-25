@@ -1,4 +1,6 @@
 //yarden shriki, lior zahavi
+var SIGNUP_API_URL = "http://localhost:5000/api/users";
+
 function setSignupError(inputName, errorName, text) {
     document.getElementById(inputName).style.borderColor = "red";
     document.getElementById(errorName).innerHTML = "* " + text;
@@ -328,13 +330,112 @@ function checkPayment() {
         return false;
     }
 
-    userRole = "Requester";
-    localStorage.setItem("userRole", userRole);
-    localStorage.setItem("showWelcomePopup", "yes");
-    showScreen("requesterHomeScreen");
+    createSignupUser();
     return false;
 }
 
-setSignupLimits();
-fillExpiryYears();
-fillExpiryMonths();
+function createSignupUser() {
+    clearMessage("paymentMessage");
+
+    fetch(SIGNUP_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(buildSignupRequest())
+    })
+        .then(function (response) {
+            return response.json().then(function (data) {
+                if (!response.ok) {
+                    throw data;
+                }
+
+                return data;
+            });
+        })
+        .then(function (data) {
+            saveSignupUser(data);
+            showScreen("successScreen");
+        })
+        .catch(function (error) {
+            showMessage("paymentMessage", getSignupErrorMessage(error));
+        });
+}
+
+function buildSignupRequest() {
+    var email = document.getElementById("email").value.trim();
+    var profilePictureInput = document.getElementById("profilePicture");
+    var profilePicture = "";
+
+    if (profilePictureInput.files != null && profilePictureInput.files.length > 0) {
+        profilePicture = profilePictureInput.files[0].name;
+    }
+
+    return {
+        full_name: document.getElementById("fullName").value.trim(),
+        username: buildSignupUsername(email),
+        email: email,
+        password: document.getElementById("signupPassword").value,
+        birth_date: document.getElementById("birthDate").value,
+        phone_number: null,
+        gender: document.getElementById("gender").value,
+        profile_picture: profilePicture,
+        role: "Requester"
+    };
+}
+
+function buildSignupUsername(email) {
+    var username = email.split("@")[0];
+
+    if (username == "") {
+        username = document.getElementById("fullName").value.trim().replace(/\s+/g, "_");
+    }
+
+    return username.toLowerCase();
+}
+
+function saveSignupUser(data) {
+    var email = document.getElementById("email").value.trim();
+    var username = buildSignupUsername(email);
+    var fullName = document.getElementById("fullName").value.trim();
+    var role = data.role || "Requester";
+
+    userRole = role;
+    localStorage.setItem("currentUser", JSON.stringify({
+        id: data.userId,
+        full_name: fullName,
+        username: username,
+        email: email,
+        role: role
+    }));
+    localStorage.setItem("loggedInUserId", data.userId || "");
+    localStorage.setItem("loggedInUsername", username);
+    localStorage.setItem("loggedInFullName", fullName);
+    localStorage.setItem("loggedInEmail", email);
+    localStorage.setItem("userRole", role);
+    localStorage.setItem("showWelcomePopup", "yes");
+}
+
+function getSignupErrorMessage(error) {
+    if (error != null && error.message != null && error.message != "") {
+        return error.message;
+    }
+
+    return "Registration failed. Please check that the server and database are running.";
+}
+
+function initSignupPage() {
+    setSignupLimits();
+    fillExpiryYears();
+    fillExpiryMonths();
+}
+
+var signupPreviousWindowOnload = window.onload;
+
+window.onload = function () {
+    if (typeof signupPreviousWindowOnload == "function") {
+        signupPreviousWindowOnload();
+    }
+
+    initSignupPage();
+};
