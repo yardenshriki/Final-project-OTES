@@ -385,13 +385,7 @@ function buildSignupRequest() {
 }
 
 function buildSignupUsername(email) {
-    var username = email.split("@")[0];
-
-    if (username == "") {
-        username = document.getElementById("fullName").value.trim().replace(/\s+/g, "_");
-    }
-
-    return username.toLowerCase();
+    return document.getElementById("fullName").value.trim();
 }
 
 function saveSignupUser(data) {
