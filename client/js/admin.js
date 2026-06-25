@@ -1,7 +1,6 @@
 ﻿//yarden shriki, lior zahavi
-var ADMIN_API_URL = "PASTE_ADMIN_API_URL_HERE";
-var ADMIN_DATA_FILE = "data/admin-data.json";
-var ADMIN_DATA_STORAGE_KEY = "otesAdminData";
+var ADMIN_API_BASE_URL = "http://localhost:5000/api";
+var ADMIN_RUNTIME_STORAGE_KEY = "otesAdminRuntimeUpdates";
 var adminData = null;
 var selectedAdminUser = null;
 var selectedAdminPayment = null;
@@ -9,22 +8,44 @@ var selectedAdminTask = null;
 var adminProfileBackSection = "adminUsersSection";
 var adminTaskBackSection = "adminTasksSection";
 
-function getSavedAdminData() {
-    var savedData = localStorage.getItem(ADMIN_DATA_STORAGE_KEY);
+function getSavedAdminRuntimeUpdates() {
+    var savedData = localStorage.getItem(ADMIN_RUNTIME_STORAGE_KEY);
 
     if (savedData == null || savedData == "") {
-        return null;
+        return {};
     }
 
     try {
         return JSON.parse(savedData);
     } catch (error) {
-        return null;
+        return {};
     }
 }
 
 function saveAdminData() {
-    localStorage.setItem(ADMIN_DATA_STORAGE_KEY, JSON.stringify(adminData));
+    if (!selectedAdminUser) {
+        return;
+    }
+
+    var updates = getSavedAdminRuntimeUpdates();
+    var userKey = selectedAdminUser.dbId || selectedAdminUser.username;
+
+    if (updates.users == null) {
+        updates.users = {};
+    }
+
+    updates.users[userKey] = {
+        warningSent: selectedAdminUser.warningSent,
+        warningDate: selectedAdminUser.warningDate,
+        restrictionType: selectedAdminUser.restrictionType,
+        restrictionDuration: selectedAdminUser.restrictionDuration,
+        restrictionReason: selectedAdminUser.restrictionReason,
+        restrictionEmailSent: selectedAdminUser.restrictionEmailSent,
+        restrictionEmailDate: selectedAdminUser.restrictionEmailDate,
+        status: selectedAdminUser.status
+    };
+
+    localStorage.setItem(ADMIN_RUNTIME_STORAGE_KEY, JSON.stringify(updates));
 }
 function setAdminDataStatus(text) {
     var statusElement = document.getElementById("adminApiStatus");
@@ -61,15 +82,7 @@ function logoutAdmin() {
 }
 
 function getAdminDataSourceText() {
-    if (ADMIN_API_URL != "" && ADMIN_API_URL != "PASTE_ADMIN_API_URL_HERE") {
-        return "External database API";
-    }
-
-    if (localStorage.getItem(ADMIN_DATA_STORAGE_KEY) != null) {
-        return "Local DATA mock: admin-data + saved browser updates";
-    }
-
-    return "Local DATA file: client/data/admin-data.json";
+    return "Server API: " + ADMIN_API_BASE_URL;
 }
 
 function countAdminExceptions() {
@@ -179,40 +192,388 @@ function markActiveAdminNav(sectionId) {
         }
     }
 }
-function loadAdminData() {
-    var dataSource = ADMIN_DATA_FILE;
 
-    if (ADMIN_API_URL != "" && ADMIN_API_URL != "PASTE_ADMIN_API_URL_HERE") {
-        dataSource = ADMIN_API_URL;
+function fetchAdminEndpoint(path) {
+    return fetch(ADMIN_API_BASE_URL + path)
+        .then(function (response) {
+            return response.json().then(function (data) {
+                if (!response.ok) {
+                    throw data;
+                }
+
+                return data;
+            });
+        });
+}
+
+function adminArray(data) {
+    return Array.isArray(data) ? data : [];
+}
+
+function formatAdminDateValue(value) {
+    if (value == null || value == "") {
+        return "--";
     }
 
-    fetch(dataSource)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            adminData = getSavedAdminData() || data;
+    var date = new Date(value);
 
-            if (data.software != null) {
-                adminData.software = data.software;
+    if (isNaN(date.getTime())) {
+        return String(value).substring(0, 10);
+    }
+
+    return date.toISOString().substring(0, 10);
+}
+
+function getAdminUserNameById(users, userId) {
+    for (var i = 0; i < users.length; i++) {
+        if (String(users[i].id) == String(userId)) {
+            return users[i].full_name || users[i].username || "User " + userId;
+        }
+    }
+
+    return userId == null || userId == "" ? "--" : "User " + userId;
+}
+
+function getAdminTaskById(tasks, taskId) {
+    for (var i = 0; i < tasks.length; i++) {
+        if (String(tasks[i].id) == String(taskId)) {
+            return tasks[i];
+        }
+    }
+
+    return null;
+}
+
+function getAdminTaskStatus(task) {
+    if (task == null) {
+        return "open";
+    }
+
+    if (task.completed_at != null && task.completed_at != "") {
+        return "completed";
+    }
+
+    if (task.performer_id != null && task.performer_id != "") {
+        return "in-progress";
+    }
+
+    return task.state || task.work_status || "open";
+}
+
+function getDefaultAdminSoftware() {
+    return {
+        versionName: "v2.5.0",
+        versionDate: "2026-02-01",
+        changes: [
+            "Improved system performance and load times",
+            "Enhanced security features for user data protection",
+            "Added new reporting and analytics dashboard",
+            "Fixed bugs in payment processing system",
+            "Updated user interface with modern design elements"
+        ]
+    };
+}
+
+function getDefaultAdminDashboardCards() {
+    return [
+        { title: "New reports today", subtitle: "View recent anomaly reports", sectionId: "adminReportsSection", icon: "documentIcon" },
+        { title: "User Account Management", subtitle: "Manage all system users", sectionId: "adminUsersSection", icon: "usersIcon" },
+        { title: "Payment pending", subtitle: "Pending transactions", sectionId: "adminPaymentsSection", icon: "paymentIcon", iconText: "$" },
+        { title: "System log of tasks", subtitle: "View task activity", sectionId: "adminTasksSection", icon: "clipboardIcon" },
+        { title: "Software update details", subtitle: "Latest version information", sectionId: "adminSoftwareSection", icon: "downloadIcon" },
+        { title: "Analytics & Graphs", subtitle: "System performance metrics", sectionId: "adminAnalyticsSection", icon: "chartIcon" }
+    ];
+}
+
+function normalizeServerReportStatus(status) {
+    var value = normalizeAdminValue(status);
+
+    if (value == "closed") {
+        return "Closed";
+    }
+
+    if (value == "in-review") {
+        return "Review";
+    }
+
+    return "New";
+}
+
+function normalizeAdminReportsFromServer(reports) {
+    var result = [];
+
+    for (var i = 0; i < reports.length; i++) {
+        result.push({
+            id: reports[i].id,
+            date: formatAdminDateValue(reports[i].created_at),
+            username: reports[i].reported_user_name || reports[i].reporter_name || "User " + reports[i].reporter_id,
+            type: reports[i].reason || "Report",
+            description: reports[i].description || reports[i].task_title || "",
+            status: normalizeServerReportStatus(reports[i].status),
+            reporterId: reports[i].reporter_id,
+            reportedUserId: reports[i].reported_user_id,
+            taskId: reports[i].task_id
+        });
+    }
+
+    return result;
+}
+
+function getUserPaymentStatus(payments, userId) {
+    for (var i = 0; i < payments.length; i++) {
+        if (String(payments[i].requester_id) == String(userId) || String(payments[i].performer_id) == String(userId)) {
+            return payments[i].status || "pending";
+        }
+    }
+
+    return "none";
+}
+
+function getUserLateDays(tasks, userId) {
+    var today = new Date();
+    var maxDaysLate = 0;
+
+    for (var i = 0; i < tasks.length; i++) {
+        var task = tasks[i];
+        var isRelated = String(task.requester_id) == String(userId) || String(task.performer_id) == String(userId);
+
+        if (!isRelated || task.deadline == null || normalizeAdminValue(getAdminTaskStatus(task)) == "completed") {
+            continue;
+        }
+
+        var deadline = new Date(task.deadline);
+
+        if (isNaN(deadline.getTime()) || deadline >= today) {
+            continue;
+        }
+
+        var daysLate = Math.ceil((today.getTime() - deadline.getTime()) / (24 * 60 * 60 * 1000));
+
+        if (daysLate > maxDaysLate) {
+            maxDaysLate = daysLate;
+        }
+    }
+
+    return maxDaysLate;
+}
+
+function normalizeAdminAnomaliesFromServer(reports, users, tasks, payments) {
+    var grouped = {};
+    var result = [];
+
+    for (var i = 0; i < reports.length; i++) {
+        var report = reports[i];
+        var userId = report.reported_user_id || report.reporter_id;
+
+        if (userId == null || userId == "") {
+            continue;
+        }
+
+        if (grouped[userId] == null) {
+            grouped[userId] = {
+                username: report.reported_user_name || getAdminUserNameById(users, userId),
+                reports: 0,
+                daysLate: getUserLateDays(tasks, userId),
+                paymentStatus: getUserPaymentStatus(payments, userId),
+                description: report.description || report.reason || "Reports pending review"
+            };
+        }
+
+        grouped[userId].reports++;
+    }
+
+    for (var key in grouped) {
+        result.push(grouped[key]);
+    }
+
+    return result;
+}
+
+function normalizeAdminPaymentsFromServer(payments, tasks) {
+    var result = [];
+
+    for (var i = 0; i < payments.length; i++) {
+        var task = getAdminTaskById(tasks, payments[i].task_id);
+        var transactionId = payments[i].receipt_number || "PAY-" + payments[i].id;
+
+        result.push({
+            id: payments[i].id,
+            transactionId: transactionId,
+            payer: payments[i].requester_name || "User " + payments[i].requester_id,
+            payee: payments[i].performer_name || "User " + payments[i].performer_id,
+            status: payments[i].status || "pending",
+            receipt: payments[i].receipt_number ? "Yes" : "No",
+            date: formatAdminDateValue(payments[i].paid_at || payments[i].created_at),
+            taskName: payments[i].task_title || (task ? task.title : "Task " + payments[i].task_id),
+            description: "Payment amount: $" + (payments[i].amount || "0"),
+            taskStatus: getAdminTaskStatus(task)
+        });
+    }
+
+    return result;
+}
+
+function normalizeAdminTaskLogsFromServer(tasks, reports) {
+    var result = [];
+    var reportedTasks = {};
+
+    for (var i = 0; i < reports.length; i++) {
+        if (reports[i].task_id != null) {
+            reportedTasks[reports[i].task_id] = true;
+        }
+    }
+
+    for (var j = 0; j < tasks.length; j++) {
+        result.push({
+            id: tasks[j].id,
+            fullName: tasks[j].performer_name || tasks[j].requester_name || "--",
+            lastTask: tasks[j].title || "Task " + tasks[j].id,
+            activeStatus: getAdminTaskStatus(tasks[j]),
+            date: formatAdminDateValue(tasks[j].created_at),
+            requester: tasks[j].requester_name || "User " + tasks[j].requester_id,
+            performer: tasks[j].performer_name || "Not assigned",
+            requesterId: tasks[j].requester_id || "--",
+            performerId: tasks[j].performer_id || "--",
+            anomaly: reportedTasks[tasks[j].id] ? "yes" : "no"
+        });
+    }
+
+    return result;
+}
+
+function normalizeAdminUsersFromServer(users, tasks, reports, payments) {
+    var result = [];
+    var updates = getSavedAdminRuntimeUpdates();
+
+    for (var i = 0; i < users.length; i++) {
+        var user = users[i];
+        var userTasks = [];
+        var userPayments = [];
+        var userReports = [];
+        var lastTask = "--";
+        var completedTasks = 0;
+        var activeTasks = 0;
+        var earnings = 0;
+
+        for (var t = 0; t < tasks.length; t++) {
+            var relatedTask = String(tasks[t].requester_id) == String(user.id) || String(tasks[t].performer_id) == String(user.id);
+
+            if (!relatedTask) {
+                continue;
             }
 
-            if (data.dashboardCards != null) {
-                adminData.dashboardCards = data.dashboardCards;
+            var status = normalizeAdminValue(getAdminTaskStatus(tasks[t]));
+            userTasks.push(tasks[t].title || "Task " + tasks[t].id);
+            lastTask = tasks[t].title || lastTask;
+
+            if (status == "completed") {
+                completedTasks++;
+            } else if (status != "cancelled" && status != "canceled") {
+                activeTasks++;
+            }
+        }
+
+        for (var p = 0; p < payments.length; p++) {
+            if (String(payments[p].requester_id) == String(user.id) || String(payments[p].performer_id) == String(user.id)) {
+                userPayments.push((payments[p].receipt_number || "PAY-" + payments[p].id) + " - " + (payments[p].status || "pending"));
             }
 
+            if (String(payments[p].performer_id) == String(user.id) && normalizeAdminValue(payments[p].status) == "paid") {
+                earnings += Number(payments[p].amount || 0);
+            }
+        }
+
+        for (var r = 0; r < reports.length; r++) {
+            if (String(reports[r].reported_user_id) == String(user.id) || String(reports[r].reporter_id) == String(user.id)) {
+                userReports.push(formatAdminDateValue(reports[r].created_at) + " - " + (reports[r].reason || "Report"));
+            }
+        }
+
+        var runtimeUser = updates.users && (updates.users[user.id] || updates.users[user.username]) ? (updates.users[user.id] || updates.users[user.username]) : {};
+        var normalizedUser = {
+            dbId: user.id,
+            username: user.username || user.full_name || "User " + user.id,
+            name: user.full_name || user.username || "User " + user.id,
+            idNumber: user.id,
+            email: user.email || "",
+            password: "",
+            passwordUpdated: "",
+            bio: "",
+            skills: "",
+            rating: "",
+            ratingCount: 0,
+            completedTasks: completedTasks,
+            activeTasks: activeTasks,
+            earnings: earnings,
+            joinDate: formatAdminDateValue(user.created_at),
+            lastTask: lastTask,
+            status: "Active",
+            tasks: userTasks,
+            ratings: [],
+            payments: userPayments,
+            warningSent: false,
+            warningDate: "",
+            restrictionType: "",
+            restrictionDuration: "",
+            restrictionReason: "",
+            restrictionEmailSent: false,
+            restrictionEmailDate: "",
+            reportsFiled: userReports.length,
+            hasComplaint: userReports.length > 0,
+            lastReportDate: userReports.length > 0 ? userReports[0].split(" - ")[0] : "",
+            reportHistory: userReports
+        };
+
+        for (var key in runtimeUser) {
+            normalizedUser[key] = runtimeUser[key];
+        }
+
+        result.push(normalizedUser);
+    }
+
+    return result;
+}
+
+function buildAdminDataFromServer(serverData) {
+    var users = adminArray(serverData.users);
+    var tasks = adminArray(serverData.tasks);
+    var reports = adminArray(serverData.reports);
+    var payments = adminArray(serverData.payments);
+
+    return {
+        reports: normalizeAdminReportsFromServer(reports),
+        anomalies: normalizeAdminAnomaliesFromServer(reports, users, tasks, payments),
+        users: normalizeAdminUsersFromServer(users, tasks, reports, payments),
+        payments: normalizeAdminPaymentsFromServer(payments, tasks),
+        taskLogs: normalizeAdminTaskLogsFromServer(tasks, reports),
+        software: getDefaultAdminSoftware(),
+        dashboardCards: getDefaultAdminDashboardCards()
+    };
+}
+
+function loadAdminData() {
+    setAdminDataStatus("Loading data from server API...");
+
+    Promise.all([
+        fetchAdminEndpoint("/users"),
+        fetchAdminEndpoint("/tasks"),
+        fetchAdminEndpoint("/report"),
+        fetchAdminEndpoint("/payment")
+    ])
+        .then(function (responses) {
+            adminData = buildAdminDataFromServer({
+                users: responses[0],
+                tasks: responses[1],
+                reports: responses[2],
+                payments: responses[3]
+            });
             updateAdminWelcomeName();
-
-            if (dataSource == ADMIN_DATA_FILE) {
-                setAdminDataStatus("Data source: client/data/admin-data.json. Replace ADMIN_API_URL in js/admin.js when the external API is ready.");
-            } else {
-                setAdminDataStatus("Data source: external database API connected.");
-            }
-
+            setAdminDataStatus("Data source: server API connected.");
             renderAdminDashboard();
         })
-        .catch(function () {
-            setAdminDataStatus("Data source error: admin data could not be loaded.");
+        .catch(function (error) {
+            var message = error != null && error.message != null ? error.message : "Admin data could not be loaded from server.";
+            setAdminDataStatus("Data source error: " + cleanAdminText(message));
         });
 }
 
@@ -365,8 +726,13 @@ function getAdminStatusClass(status) {
 }
 
 function openAdminUserByUsername(username, backSection) {
+    var searchedUsername = normalizeAdminValue(username);
+
     for (var i = 0; i < adminData.users.length; i++) {
-        if (adminData.users[i].username == username) {
+        var userUsername = normalizeAdminValue(adminData.users[i].username);
+        var userName = normalizeAdminValue(adminData.users[i].name);
+
+        if (userUsername == searchedUsername || userName == searchedUsername) {
             openAdminUser(i, backSection || "adminAnomaliesSection");
             return;
         }
@@ -415,7 +781,7 @@ function showProfileInfo(type) {
         items = selectedAdminUser.payments || [];
     } else {
         title = "Chats";
-        items = ["No chat records in admin-data yet"];
+        items = ["No chat records are available from the server yet"];
     }
 
     var html = "<h3>" + cleanAdminText(title) + "</h3>";
@@ -457,6 +823,7 @@ function sendWarningEmail() {
 
     selectedAdminUser.warningSent = true;
     selectedAdminUser.warningDate = getTodayString();
+    saveAdminData();
     document.getElementById("warningExistingInfo").innerHTML = "Warning email sent on " + selectedAdminUser.warningDate + ".";
     renderUsers();
 }
@@ -546,7 +913,7 @@ function openAdminTaskFromPayment(taskName) {
     var taskIndex = findAdminTaskByName(taskName);
 
     if (taskIndex == -1) {
-        alert("Task details were not found in admin-data yet");
+        alert("Task details were not found in the server data yet");
         return;
     }
 
@@ -627,9 +994,10 @@ function viewPaymentTaskRating() {
 
     var details = document.getElementById("paymentRatingDetails");
     var names = [selectedAdminPayment.payer, selectedAdminPayment.payee];
-    var task = findAdminTaskByName(selectedAdminPayment.taskName);
+    var taskIndex = findAdminTaskByName(selectedAdminPayment.taskName);
 
-    if (task) {
+    if (taskIndex != -1) {
+        var task = adminData.taskLogs[taskIndex];
         names.push(task.requester);
         names.push(task.performer);
     }
@@ -769,7 +1137,7 @@ function viewTaskChat() {
     var html = "<h3>Task Chat</h3>";
 
     if (chatItems.length == 0) {
-        html += "<p>No chat records in admin-data yet.</p>";
+        html += "<p>No chat records are available from the server yet.</p>";
     } else {
         for (var i = 0; i < chatItems.length; i++) {
             html += "<p>" + cleanAdminText(chatItems[i]) + "</p>";
