@@ -1,3 +1,4 @@
+var PROFILE_API_BASE_URL = "http://localhost:5000/api";
 var profileRole = localStorage.getItem("userRole") || "Requester";
 var profileData = {};
 var currentProfile = null;
@@ -39,29 +40,162 @@ function markProfileRole() {
     }
 }
 
-function loadProfileData(done) {
-    var savedData = localStorage.getItem("otesAdminData");
-
-    if (savedData != null && savedData != "") {
-        try {
-            done(JSON.parse(savedData));
-            return;
-        } catch (error) {
-        }
+function parseProfileServerResponse(response) {
+    if (response.status >= 200 && response.status < 300) {
+        return response.json();
     }
 
-    fetch("data/admin-data.json")
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            done(data);
+    throw new Error("Profile server request failed");
+}
+
+function fetchProfileEndpoint(path) {
+    return fetch(PROFILE_API_BASE_URL + path).then(parseProfileServerResponse);
+}
+
+function getLoggedInProfileUserId() {
+    var userId = Number(localStorage.getItem("loggedInUserId"));
+
+    if (isNaN(userId) == false && userId > 0) {
+        return userId;
+    }
+
+    return null;
+}
+
+function loadProfileData(done) {
+    var userId = getLoggedInProfileUserId();
+    var userRequest = userId != null ? fetchProfileEndpoint("/users/" + userId) : fetchProfileEndpoint("/users");
+
+    Promise.all([
+        userRequest,
+        fetchProfileEndpoint("/tasks"),
+        fetchProfileEndpoint("/payment")
+    ])
+        .then(function (responses) {
+            done(buildProfileDataFromServer(responses[0], responses[1], responses[2]));
         })
         .catch(function () {
             done(getDefaultProfileData());
         });
 }
 
+function buildProfileDataFromServer(userData, tasksData, paymentsData) {
+    var users = Array.isArray(userData) ? userData : [userData];
+    var currentUser = findProfileUserFromList(users) || users[0] || {};
+    var normalizedUser = normalizeProfileUserFromServer(currentUser);
+    var taskLogs = normalizeProfileTasksFromServer(tasksData || [], normalizedUser);
+    var payments = normalizeProfilePaymentsFromServer(paymentsData || [], normalizedUser);
+
+    return {
+        users: [normalizedUser],
+        taskLogs: taskLogs,
+        payments: payments
+    };
+}
+
+function findProfileUserFromList(users) {
+    var userId = getLoggedInProfileUserId();
+    var username = localStorage.getItem("loggedInUsername") || "";
+
+    for (var i = 0; i < users.length; i++) {
+        if (userId != null && Number(users[i].id) == userId) {
+            return users[i];
+        }
+
+        if (normalizeProfileText(users[i].username) == normalizeProfileText(username)) {
+            return users[i];
+        }
+    }
+
+    return null;
+}
+
+function normalizeProfileUserFromServer(user) {
+    return {
+        id: user.id,
+        name: user.full_name || user.name || "User",
+        full_name: user.full_name || user.name || "User",
+        username: user.username || user.full_name || "User",
+        email: user.email || "",
+        birth_date: formatProfileDate(user.birth_date),
+        phone_number: user.phone_number || "",
+        gender: user.gender || "",
+        role: user.role || profileRole,
+        image: user.profile_picture || user.profileImage || "",
+        profile_picture: user.profile_picture || user.profileImage || "",
+        tasks: [],
+        ratings: []
+    };
+}
+
+function normalizeProfileTasksFromServer(tasks, user) {
+    var rows = [];
+    var userId = Number(user.id);
+
+    for (var i = 0; i < tasks.length; i++) {
+        if (Number(tasks[i].requester_id) != userId && Number(tasks[i].performer_id) != userId) {
+            continue;
+        }
+
+        rows.push({
+            fullName: user.name,
+            requester: tasks[i].requester_name || "Requester",
+            performer: tasks[i].performer_name || "Performer",
+            lastTask: tasks[i].title || "Task",
+            activeStatus: formatProfileTaskStatus(tasks[i].state || tasks[i].work_status),
+            date: formatProfileDate(tasks[i].created_at || tasks[i].deadline),
+            payment: Number(tasks[i].payment || 0)
+        });
+    }
+
+    return rows;
+}
+
+function normalizeProfilePaymentsFromServer(payments, user) {
+    var rows = [];
+    var userId = Number(user.id);
+
+    for (var i = 0; i < payments.length; i++) {
+        if (Number(payments[i].requester_id) != userId && Number(payments[i].performer_id) != userId) {
+            continue;
+        }
+
+        rows.push({
+            payee: payments[i].performer_name || user.name,
+            payee_id: payments[i].performer_id,
+            amount: Number(payments[i].amount || 0),
+            status: payments[i].status || "pending"
+        });
+    }
+
+    return rows;
+}
+
+function formatProfileTaskStatus(status) {
+    var normalizedStatus = normalizeProfileText(status);
+
+    if (normalizedStatus == "completed" || normalizedStatus == "task completed") {
+        return "completed";
+    }
+
+    if (normalizedStatus == "cancelled" || normalizedStatus == "canceled") {
+        return "cancelled";
+    }
+
+    if (normalizedStatus == "open" || normalizedStatus == "available") {
+        return "open";
+    }
+
+    return "in progress";
+}
+
+function formatProfileDate(value) {
+    if (value == null || value == "") {
+        return "";
+    }
+
+    return String(value).split("T")[0];
+}
 function getDefaultProfileData() {
     return {
         users: [
@@ -101,12 +235,9 @@ function buildCurrentProfile(data) {
     if (user == null) {
         user = getDefaultProfileData().users[0];
     }
-
-    var savedProfile = getSavedProfile(user.username);
     var profile = {};
 
     copyProfileFields(profile, user);
-    copyProfileFields(profile, savedProfile);
 
     profileOriginalUsername = user.username || username;
     profile.username = profile.username || username;
@@ -149,50 +280,65 @@ function findProfileUser(data, username) {
     return null;
 }
 
-function getSavedProfile(username) {
-    var savedProfile = localStorage.getItem("otesProfile_" + username);
-
-    if (savedProfile == null || savedProfile == "") {
-        return {};
-    }
-
-    try {
-        return JSON.parse(savedProfile);
-    } catch (error) {
-        return {};
-    }
-}
-
 function saveCurrentProfile() {
-    if (profileOriginalUsername != currentProfile.username) {
-        localStorage.removeItem("otesProfile_" + profileOriginalUsername);
-    }
-
-    localStorage.setItem("otesProfile_" + currentProfile.username, JSON.stringify(currentProfile));
-    updateProfileInAdminData();
     profileOriginalUsername = currentProfile.username;
 }
 
-function updateProfileInAdminData() {
-    var user = findProfileUser(profileData, profileOriginalUsername);
+function buildProfileUpdateRequest(password) {
+    var request = {
+        full_name: currentProfile.name,
+        username: currentProfile.username,
+        email: currentProfile.email,
+        birth_date: currentProfile.birth_date || null,
+        phone_number: currentProfile.phone_number || "",
+        gender: currentProfile.gender || "",
+        profile_picture: getServerProfilePictureValue(),
+        role: currentProfile.role || profileRole
+    };
 
-    if (user == null) {
-        return;
+    if (password != null && password != "") {
+        request.password = password;
     }
 
-    user.name = currentProfile.name;
-    user.username = currentProfile.username;
-    user.email = currentProfile.email;
-    user.bio = currentProfile.bio;
-    user.skills = currentProfile.skills;
-    user.profileImage = currentProfile.image;
-    if (currentProfile.password != null && currentProfile.password != "") {
-        user.password = currentProfile.password;
-        user.passwordUpdated = currentProfile.passwordUpdated;
-    }
-    localStorage.setItem("otesAdminData", JSON.stringify(profileData));
+    return request;
 }
 
+function getServerProfilePictureValue() {
+    var image = currentProfile.image || "";
+
+    if (image.length <= 255) {
+        return image;
+    }
+
+    return "";
+}
+
+function updateCurrentProfileOnServer(password) {
+    var userId = currentProfile.id || getLoggedInProfileUserId();
+
+    if (userId == null || userId == "") {
+        return Promise.reject(new Error("Cannot update profile because user id is missing"));
+    }
+
+    return fetch(PROFILE_API_BASE_URL + "/users/" + userId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(buildProfileUpdateRequest(password))
+    }).then(parseProfileServerResponse);
+}
+
+function saveProfileLoginState() {
+    localStorage.setItem("loggedInUsername", currentProfile.username);
+    localStorage.setItem("loggedInFullName", currentProfile.name);
+    localStorage.setItem("loggedInEmail", currentProfile.email);
+    localStorage.setItem("userRole", currentProfile.role || profileRole);
+
+    if (currentProfile.id != null && currentProfile.id != "") {
+        localStorage.setItem("loggedInUserId", currentProfile.id);
+    }
+}
 function renderProfile() {
     setProfileText("profileName", currentProfile.name);
     setProfileText("profileEmail", currentProfile.email);
@@ -370,16 +516,31 @@ function saveEditProfile() {
         currentProfile.password = password;
         currentProfile.passwordUpdated = new Date().toISOString().substring(0, 10);
     }
+    setProfileMessage("profileEditMessage", "Saving profile...", true);
 
-    localStorage.setItem("loggedInUsername", username);
-    saveCurrentProfile();
-    renderProfile();
-    fillEditForm();
-    showProfileView("profileView");
-    showProfileUpdatedPopup(changedDetails);
+    updateCurrentProfileOnServer(password)
+        .then(function () {
+            saveProfileLoginState();
+            saveCurrentProfile();
+            renderProfile();
+            fillEditForm();
+            showProfileView("profileView");
+            showProfileUpdatedPopup(changedDetails);
+        })
+        .catch(function (error) {
+            setProfileMessage("profileEditMessage", getProfileUpdateErrorMessage(error), false);
+        });
+
     return false;
 }
 
+function getProfileUpdateErrorMessage(error) {
+    if (error != null && error.message != null) {
+        return error.message;
+    }
+
+    return "Profile update failed. Please try again.";
+}
 function isValidProfileEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -587,7 +748,7 @@ function getCompletedCount(profile) {
         }
     }
 
-    return count || 24;
+    return count;
 }
 
 function getActiveCount(profile) {
@@ -601,7 +762,7 @@ function getActiveCount(profile) {
         }
     }
 
-    return count || 2;
+    return count;
 }
 
 function getEarnings(profile) {
@@ -610,12 +771,12 @@ function getEarnings(profile) {
     if (profileData.payments != null) {
         for (var i = 0; i < profileData.payments.length; i++) {
             if (normalizeProfileText(profileData.payments[i].payee) == normalizeProfileText(profile.name)) {
-                total += 150;
+                total += Number(profileData.payments[i].amount || 0);
             }
         }
     }
 
-    return total || 3250;
+    return total;
 }
 
 function getRatingFromText(ratings) {
@@ -698,3 +859,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+
+
