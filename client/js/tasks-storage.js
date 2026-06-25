@@ -1,4 +1,72 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
+var TASKS_STORAGE_API_URL = "http://localhost:5000/api/tasks";
+
+function parseTasksStorageResponse(response) {
+  if (response.status >= 200 && response.status < 300) {
+    return response.json();
+  }
+
+  throw new Error("Task server request failed");
+}
+
+function getTasksStorageCurrentUserId(defaultId) {
+  var savedUserId = localStorage.getItem("loggedInUserId");
+  var userId = Number(savedUserId);
+
+  if (savedUserId != null && savedUserId != "" && isNaN(userId) == false) {
+    return userId;
+  }
+
+  return defaultId;
+}
+
+function formatTasksStorageDate(dateValue) {
+  if (dateValue == null || dateValue == "") {
+    return null;
+  }
+
+  return String(dateValue).split("T")[0];
+}
+
+function buildTasksStoragePayload(task, changes) {
+  return {
+    title: changes.title || task.title || task.taskTitle,
+    description: changes.description || task.description,
+    location: changes.location || task.location,
+    difficulty: changes.difficulty || task.difficulty || task.difficultyLevel,
+    payment: changes.payment || task.payment,
+    additional_details: changes.additional_details || task.additional_details || task.additionalDetails || "",
+    category: changes.category || task.category || task.categories,
+    state: changes.state || task.state || "open",
+    work_status: changes.work_status || task.work_status || task.workStatus || "Available",
+    requester_id: changes.requester_id || task.requester_id || task.requesterId,
+    performer_id: changes.performer_id === undefined ? (task.performer_id || task.performerId || null) : changes.performer_id,
+    deadline: formatTasksStorageDate(changes.deadline || task.deadline)
+  };
+}
+
+function updateTaskStorageOnServer(taskId, changes) {
+  if (taskId == null || taskId == "") {
+    return;
+  }
+
+  fetch(TASKS_STORAGE_API_URL + "/" + taskId)
+    .then(parseTasksStorageResponse)
+    .then(function (task) {
+      return fetch(TASKS_STORAGE_API_URL + "/" + taskId, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(buildTasksStoragePayload(task, changes || {}))
+      });
+    })
+    .then(parseTasksStorageResponse)
+    .catch(function (error) {
+      console.log(error.message);
+    });
+}
+
 function getLocalCreatedTasks() {
   var savedTasks = localStorage.getItem("createdTasks");
 
@@ -102,8 +170,10 @@ function takeLocalTask(taskId, requesterName, performerName) {
   for (var i = 0; i < localTasks.length; i++) {
     if (localTasks[i].id == taskId) {
       localTasks[i].state = "in-progress";
+      localTasks[i].work_status = "Task accepted";
       localTasks[i].workStatus = "Task accepted";
       localTasks[i].assignedToPerformer = true;
+      localTasks[i].performer_id = getTasksStorageCurrentUserId(2);
       localTasks[i].requesterName = requesterName || localTasks[i].requesterName || "Sarah Johnson";
       localTasks[i].performerName = performerName || "John Designer";
       localTasks[i].acceptedAt = acceptedAt;
@@ -111,6 +181,11 @@ function takeLocalTask(taskId, requesterName, performerName) {
   }
 
   saveLocalCreatedTasks(localTasks);
+  updateTaskStorageOnServer(taskId, {
+    state: "in-progress",
+    work_status: "Task accepted",
+    performer_id: getTasksStorageCurrentUserId(2)
+  });
 }
 
 function getLocalTaskParticipants() {
@@ -160,15 +235,26 @@ function saveLocalTaskWorkStatus(taskId, work_status) {
 }
 
 function updateTaskStateByWorkStatus(task) {
-  if (task.work_status == "Task completed") {
+  var workStatus = task.work_status || task.workStatus || "Available";
+  task.work_status = workStatus;
+  task.workStatus = workStatus;
+
+  if (workStatus == "Task completed") {
     task.state = "completed";
     return task;
   }
 
-  if (task.work_status != "Available") {
-    task.state = "in-progress";
+  if (workStatus == "Cancelled") {
+    task.state = "cancelled";
+    return task;
   }
 
+  if (workStatus == "Available") {
+    task.state = task.state || "open";
+    return task;
+  }
+
+  task.state = "in-progress";
   return task;
 }
 
@@ -208,13 +294,20 @@ function cancelLocalTask(taskId) {
   for (var i = 0; i < localTasks.length; i++) {
     if (localTasks[i].id == taskId) {
       localTasks[i].state = "cancelled";
+      localTasks[i].work_status = "Cancelled";
       localTasks[i].workStatus = "Cancelled";
       localTasks[i].assignedToPerformer = false;
+      localTasks[i].performer_id = null;
       localTasks[i].cancelledAt = new Date().toISOString();
     }
   }
 
   saveLocalCreatedTasks(localTasks);
+  updateTaskStorageOnServer(taskId, {
+    state: "cancelled",
+    work_status: "Cancelled",
+    performer_id: null
+  });
 }
 
 function cancelTakenTaskByPerformer(taskId) {
@@ -238,14 +331,21 @@ function cancelTakenTaskByPerformer(taskId) {
   for (var j = 0; j < localTasks.length; j++) {
     if (localTasks[j].id == taskId) {
       localTasks[j].state = "open";
+      localTasks[j].work_status = "Available";
       localTasks[j].workStatus = "Available";
       localTasks[j].assignedToPerformer = false;
+      localTasks[j].performer_id = null;
       localTasks[j].performerName = "";
       localTasks[j].acceptedAt = "";
     }
   }
 
   saveLocalCreatedTasks(localTasks);
+  updateTaskStorageOnServer(taskId, {
+    state: "open",
+    work_status: "Available",
+    performer_id: null
+  });
 }
 
 function applyLocalTaskAssignments(tasks) {
@@ -257,8 +357,17 @@ function applyLocalTaskAssignments(tasks) {
     var savedParticipants = taskParticipants[tasks[i].id];
     var savedAcceptance = acceptanceData[tasks[i].id];
 
+    if (tasks[i].work_status == null && tasks[i].workStatus != null) {
+      tasks[i].work_status = tasks[i].workStatus;
+    }
+
+    if (tasks[i].workStatus == null && tasks[i].work_status != null) {
+      tasks[i].workStatus = tasks[i].work_status;
+    }
+
     if (savedWorkStatus != null) {
       tasks[i].work_status = savedWorkStatus;
+      tasks[i].workStatus = savedWorkStatus;
     }
 
     if (savedParticipants != null) {
@@ -280,6 +389,7 @@ function applyLocalTaskAssignments(tasks) {
 
     if (isTaskCancelled(tasks[i].id)) {
       tasks[i].state = "cancelled";
+      tasks[i].work_status = "Cancelled";
       tasks[i].workStatus = "Cancelled";
       tasks[i].assignedToPerformer = false;
       continue;
@@ -299,6 +409,7 @@ function applyLocalTaskAssignments(tasks) {
 
       if (tasks[i].work_status == "Available") {
         tasks[i].work_status = "Task accepted";
+        tasks[i].workStatus = "Task accepted";
       }
     }
 
@@ -307,3 +418,4 @@ function applyLocalTaskAssignments(tasks) {
 
   return tasks;
 }
+
