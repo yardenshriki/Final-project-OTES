@@ -1,4 +1,9 @@
 var reportUserRole = localStorage.getItem("userRole") || "Requester";
+var REPORTS_API_URL = "http://localhost:5000/api/report";
+var REPORT_USERS_API_URL = "http://localhost:5000/api/users";
+var REPORT_TASKS_API_URL = "http://localhost:5000/api/tasks";
+var reportUsers = [];
+var reportTasks = [];
 
 function getReportHomePath() {
     if (reportUserRole == "Performer") {
@@ -36,7 +41,7 @@ function markReportRole() {
 }
 
 function prepareReportScreen() {
-    var reportName = document.getElementById("reportName");
+    var reportName = getReportElement("reportName");
 
     clearReportMessage();
 
@@ -48,18 +53,13 @@ function prepareReportScreen() {
 }
 
 function cancelReportForm() {
-    var form = document.getElementById("reportForm");
-
-    if (form != null) {
-        form.reset();
-    }
-
+    resetReportForm();
     clearReportMessage();
     goToReportHome();
 }
 
 function clearReportMessage() {
-    var message = document.getElementById("reportMessage");
+    var message = getReportElement("reportMessage");
 
     if (message != null) {
         message.innerHTML = "";
@@ -68,7 +68,7 @@ function clearReportMessage() {
 }
 
 function setReportMessage(text, isSuccess) {
-    var message = document.getElementById("reportMessage");
+    var message = getReportElement("reportMessage");
 
     if (message == null) {
         return;
@@ -79,7 +79,7 @@ function setReportMessage(text, isSuccess) {
 }
 
 function showReportSuccessPopup() {
-    var popup = document.getElementById("reportSuccessPopup");
+    var popup = getReportElement("reportSuccessPopup");
 
     if (popup == null) {
         return;
@@ -90,7 +90,7 @@ function showReportSuccessPopup() {
 }
 
 function confirmReportSuccess() {
-    var popup = document.getElementById("reportSuccessPopup");
+    var popup = getReportElement("reportSuccessPopup");
 
     if (popup != null) {
         popup.style.display = "none";
@@ -100,39 +100,179 @@ function confirmReportSuccess() {
     goToReportHome();
 }
 
-function submitReportForm() {
-    var reportType = getInputValue("reportType");
-    var reportName = getInputValue("reportName");
-    var reportedTarget = getInputValue("reportedTarget");
-    var reportDescription = getInputValue("reportDescription");
+async function submitReportForm() {
+    var reportData = getReportFormData();
 
     clearReportMessage();
 
-    if (reportType == "" || reportName == "" || reportedTarget == "" || reportDescription == "") {
+    if (isMissingRequiredReportData(reportData) == true) {
         setReportMessage("Please fill all required fields", false);
         return false;
     }
 
     setReportMessage("Saving report...", true);
 
-    loadReportAdminData(function (data) {
-        var updatedData = addReportToAdminData(data, reportType, reportName, reportedTarget, reportDescription);
-        localStorage.setItem("otesAdminData", JSON.stringify(updatedData));
+    try {
+        var reportTarget = await findReportTargetFromServer(reportData.reportedTarget);
 
-        var form = document.getElementById("reportForm");
-        if (form != null) {
-            form.reset();
+        if (reportTarget.reported_user_id == null && reportTarget.task_id == null) {
+            setReportMessage("Reported task or user was not found", false);
+            return false;
         }
 
+        await createReportOnServer({
+            reporter_id: getCurrentReportUserId(),
+            reported_user_id: reportTarget.reported_user_id,
+            task_id: reportTarget.task_id,
+            reason: reportData.reportType,
+            description: reportData.reportDescription
+        });
+
+        resetReportForm();
         clearReportMessage();
         showReportSuccessPopup();
+    } catch (error) {
+        setReportMessage(error.message || "Report could not be submitted", false);
+    }
+
+    return false;
+}
+
+function getReportFormData() {
+    return {
+        reportType: getInputValue("reportType"),
+        reportName: getInputValue("reportName"),
+        reportedTarget: getInputValue("reportedTarget"),
+        reportDescription: getInputValue("reportDescription")
+    };
+}
+
+function isMissingRequiredReportData(reportData) {
+    return (
+        reportData.reportType == "" ||
+        reportData.reportName == "" ||
+        reportData.reportedTarget == "" ||
+        reportData.reportDescription == ""
+    );
+}
+
+function resetReportForm() {
+    var form = getReportElement("reportForm");
+
+    if (form != null) {
+        form.reset();
+    }
+}
+
+function getCurrentReportUserId() {
+    var savedUserId = localStorage.getItem("loggedInUserId");
+    var userId = Number(savedUserId);
+
+    if (savedUserId != null && savedUserId != "" && isNaN(userId) == false) {
+        return userId;
+    }
+
+    return 1;
+}
+
+async function parseReportServerResponse(response) {
+    if (response.status >= 200 && response.status < 300) {
+        return response.json();
+    }
+
+    var errorMessage = "Server request failed";
+
+    try {
+        var errorData = await response.json();
+        if (errorData.message != null && errorData.message != "") {
+            errorMessage = errorData.message;
+        }
+    } catch (error) {
+    }
+
+    throw new Error(errorMessage);
+}
+
+async function fetchReportJson(url) {
+    var response = await fetch(url);
+    return parseReportServerResponse(response);
+}
+
+async function loadReportServerData() {
+    reportUsers = await fetchReportJson(REPORT_USERS_API_URL);
+    reportTasks = await fetchReportJson(REPORT_TASKS_API_URL);
+}
+
+async function createReportOnServer(reportBody) {
+    var response = await fetch(REPORTS_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(reportBody)
     });
+
+    return parseReportServerResponse(response);
+}
+
+async function findReportTargetFromServer(reportedTarget) {
+    var normalizedTarget = normalizeReportText(reportedTarget);
+    var target = {
+        reported_user_id: null,
+        task_id: null
+    };
+
+    if (reportUsers.length == 0 || reportTasks.length == 0) {
+        await loadReportServerData();
+    }
+
+    for (var i = 0; i < reportUsers.length; i++) {
+        if (isMatchingReportUser(reportUsers[i], normalizedTarget) == true) {
+            target.reported_user_id = reportUsers[i].id;
+            return target;
+        }
+    }
+
+    for (var j = 0; j < reportTasks.length; j++) {
+        if (isMatchingReportTask(reportTasks[j], normalizedTarget) == true) {
+            target.task_id = reportTasks[j].id;
+
+            if (reportTasks[j].performer_id != null && reportTasks[j].performer_id != "") {
+                target.reported_user_id = reportTasks[j].performer_id;
+            }
+
+            return target;
+        }
+    }
+
+    return target;
+}
+
+function isMatchingReportUser(user, normalizedTarget) {
+    return isMatchingReportValue([
+        user.id,
+        user.username,
+        user.full_name,
+        user.email
+    ], normalizedTarget);
+}
+
+function isMatchingReportTask(task, normalizedTarget) {
+    return isMatchingReportValue([task.id, task.title], normalizedTarget);
+}
+
+function isMatchingReportValue(values, normalizedTarget) {
+    for (var i = 0; i < values.length; i++) {
+        if (normalizeReportText(values[i]) == normalizedTarget) {
+            return true;
+        }
+    }
 
     return false;
 }
 
 function getInputValue(id) {
-    var element = document.getElementById(id);
+    var element = getReportElement(id);
 
     if (element == null) {
         return "";
@@ -141,179 +281,24 @@ function getInputValue(id) {
     return element.value.trim();
 }
 
-function loadReportAdminData(done) {
-    var savedData = localStorage.getItem("otesAdminData");
-
-    if (savedData != null && savedData != "") {
-        try {
-            done(JSON.parse(savedData));
-            return;
-        } catch (error) {
-        }
-    }
-
-    fetch("data/admin-data.json")
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            done(data);
-        })
-        .catch(function () {
-            done(getDefaultReportAdminData());
-        });
-}
-
-function addReportToAdminData(data, reportType, reporterName, reportedTarget, reportDescription) {
-    var dateText = new Date().toISOString().substring(0, 10);
-    var targetUser = findReportedUser(data, reportedTarget);
-    var targetUsername = targetUser != null ? targetUser.username : reportedTarget;
-    var reporterUsername = localStorage.getItem("loggedInUsername") || reporterName;
-
-    if (data.reports == null) {
-        data.reports = [];
-    }
-
-    if (data.anomalies == null) {
-        data.anomalies = [];
-    }
-
-    if (data.users == null) {
-        data.users = [];
-    }
-
-    data.reports.unshift({
-        date: dateText,
-        username: targetUsername,
-        reportedTarget: reportedTarget,
-        reporterName: reporterName,
-        reporterUsername: reporterUsername,
-        type: reportType,
-        description: reportDescription,
-        status: "New"
-    });
-
-    if (targetUser != null) {
-        if (targetUser.reportHistory == null) {
-            targetUser.reportHistory = [];
-        }
-
-        targetUser.reportsFiled = Number(targetUser.reportsFiled || 0) + 1;
-        targetUser.hasComplaint = true;
-        targetUser.lastReportDate = dateText;
-        targetUser.reportHistory.unshift({
-            date: dateText,
-            type: reportType,
-            reporter: reporterName,
-            target: reportedTarget,
-            description: reportDescription,
-            status: "New"
-        });
-    }
-
-    updateReportAnomaly(data, targetUsername, reportType, reportDescription);
-    updateReportedTask(data, reportedTarget);
-
-    return data;
-}
-
-function findReportedUser(data, reportedTarget) {
-    var target = normalizeReportText(reportedTarget);
-
-    if (data.users != null) {
-        for (var i = 0; i < data.users.length; i++) {
-            var user = data.users[i];
-            var values = [user.username, user.name, user.idNumber, user.email];
-
-            for (var j = 0; j < values.length; j++) {
-                if (normalizeReportText(values[j]) == target) {
-                    return user;
-                }
-            }
-        }
-    }
-
-    if (data.taskLogs != null) {
-        for (var k = 0; k < data.taskLogs.length; k++) {
-            var task = data.taskLogs[k];
-
-            if (normalizeReportText(task.lastTask) == target) {
-                return findReportedUser(data, task.fullName || task.performer || task.requester);
-            }
-        }
-    }
-
-    return null;
-}
-
-function updateReportAnomaly(data, username, reportType, description) {
-    var anomaly = null;
-
-    for (var i = 0; i < data.anomalies.length; i++) {
-        if (normalizeReportText(data.anomalies[i].username) == normalizeReportText(username)) {
-            anomaly = data.anomalies[i];
-            break;
-        }
-    }
-
-    if (anomaly == null) {
-        anomaly = {
-            username: username,
-            reports: 0,
-            daysLate: 0,
-            paymentStatus: "pending",
-            description: description
-        };
-        data.anomalies.push(anomaly);
-    }
-
-    anomaly.reports = Number(anomaly.reports || 0) + 1;
-    anomaly.description = reportType + ": " + description;
-}
-
-function updateReportedTask(data, reportedTarget) {
-    var target = normalizeReportText(reportedTarget);
-
-    if (data.taskLogs == null) {
-        return;
-    }
-
-    for (var i = 0; i < data.taskLogs.length; i++) {
-        if (normalizeReportText(data.taskLogs[i].lastTask) == target) {
-            data.taskLogs[i].anomaly = "yes";
-        }
-    }
-}
-
 function normalizeReportText(value) {
     return String(value || "").toLowerCase().trim();
 }
 
-function getDefaultReportAdminData() {
-    return {
-        reports: [],
-        anomalies: [],
-        users: [
-            { username: "john_doe", name: "John Doe", idNumber: "123456789", email: "john@example.com", status: "Active", reportsFiled: 0, hasComplaint: false, reportHistory: [] },
-            { username: "sarah_j", name: "Sarah Johnson", idNumber: "987654321", email: "sarah@example.com", status: "Restricted", reportsFiled: 0, hasComplaint: false, reportHistory: [] },
-            { username: "anna_s", name: "Anna Smith", idNumber: "456789123", email: "anna@example.com", status: "Active", reportsFiled: 0, hasComplaint: false, reportHistory: [] }
-        ],
-        payments: [],
-        taskLogs: [],
-        dashboardCards: []
-    };
+function getReportElement(id) {
+    return document.getElementById(id);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    var reportForm = document.getElementById("reportForm");
-    var backButton = document.getElementById("reportBackButton");
-    var homeButton = document.getElementById("reportHomeButton");
-    var cancelButton = document.getElementById("reportCancelButton");
-    var successButton = document.getElementById("reportSuccessButton");
-    var requesterButton = document.getElementById("requesterButton");
-    var performerButton = document.getElementById("performerButton");
+function addReportClick(id, action) {
+    var element = getReportElement(id);
 
-    prepareReportScreen();
+    if (element != null) {
+        element.addEventListener("click", action);
+    }
+}
+
+function connectReportForm() {
+    var reportForm = getReportElement("reportForm");
 
     if (reportForm != null) {
         reportForm.addEventListener("submit", function (event) {
@@ -321,32 +306,36 @@ document.addEventListener("DOMContentLoaded", function () {
             submitReportForm();
         });
     }
+}
 
-    if (backButton != null) {
-        backButton.addEventListener("click", goToReportHome);
+function connectReportActions() {
+    connectReportForm();
+    addReportClick("reportBackButton", goToReportHome);
+    addReportClick("reportHomeButton", goToReportHome);
+    addReportClick("reportCancelButton", cancelReportForm);
+    addReportClick("reportSuccessButton", confirmReportSuccess);
+    addReportClick("requesterButton", function () {
+        switchReportRole("Requester");
+    });
+    addReportClick("performerButton", function () {
+        switchReportRole("Performer");
+    });
+}
+
+var reportPreviousWindowOnload = window.onload;
+
+window.onload = async function () {
+    if (typeof reportPreviousWindowOnload == "function") {
+        reportPreviousWindowOnload();
     }
 
-    if (homeButton != null) {
-        homeButton.addEventListener("click", goToReportHome);
+    prepareReportScreen();
+
+    try {
+        await loadReportServerData();
+    } catch (error) {
+        setReportMessage("Report data could not be loaded from the server", false);
     }
 
-    if (cancelButton != null) {
-        cancelButton.addEventListener("click", cancelReportForm);
-    }
-
-    if (successButton != null) {
-        successButton.addEventListener("click", confirmReportSuccess);
-    }
-
-    if (requesterButton != null) {
-        requesterButton.addEventListener("click", function () {
-            switchReportRole("Requester");
-        });
-    }
-
-    if (performerButton != null) {
-        performerButton.addEventListener("click", function () {
-            switchReportRole("Performer");
-        });
-    }
-});
+    connectReportActions();
+};
