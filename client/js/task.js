@@ -7,6 +7,9 @@ var taskProgressSteps = [
   "Task completed",
 ];
 var performerCancelWindowMinutes = 5;
+var taskPageRefreshTimer = null;
+var taskPageRefreshIntervalMs = 4000;
+var taskPageCurrentTaskId = null;
 
 function renderTaskPage() {
   if (document.getElementById("taskDetailsTitle") == null) {
@@ -15,26 +18,26 @@ function renderTaskPage() {
 
   var urlParams = new URLSearchParams(window.location.search);
   var taskId = urlParams.get("id");
+  taskPageCurrentTaskId = taskId;
 
-  if (userRole == "Performer") {
-    loadTaskPageForPerformer(taskId);
-    return;
-  }
-
-  var selectedTask = findTaskById(taskId);
-
-  if (selectedTask == null) {
+  if (taskId == null || taskId == "") {
     renderTaskNotFound();
     return;
   }
 
-  renderTaskDetails(selectedTask);
-  connectTaskPageActions(selectedTask);
+  loadTaskPageFromServer(taskId, true);
+  startTaskPageAutoRefresh();
 }
 
 function loadTaskPageForPerformer(taskId) {
+  loadTaskPageFromServer(taskId, true);
+}
+
+function loadTaskPageFromServer(taskId, shouldRenderNotFound) {
   if (taskId == null || taskId == "") {
-    renderTaskNotFound();
+    if (shouldRenderNotFound == true) {
+      renderTaskNotFound();
+    }
     return;
   }
 
@@ -56,8 +59,30 @@ function loadTaskPageForPerformer(taskId) {
       connectTaskPageActions(task);
     })
     .catch(function () {
-      renderTaskNotFound();
+      var selectedTask = findTaskById(taskId);
+
+      if (selectedTask != null) {
+        renderTaskDetails(selectedTask);
+        connectTaskPageActions(selectedTask);
+        return;
+      }
+
+      if (shouldRenderNotFound == true) {
+        renderTaskNotFound();
+      }
     });
+}
+
+function startTaskPageAutoRefresh() {
+  if (taskPageRefreshTimer != null) {
+    return;
+  }
+
+  taskPageRefreshTimer = setInterval(function () {
+    if (taskPageCurrentTaskId != null && taskPageCurrentTaskId != "") {
+      loadTaskPageFromServer(taskPageCurrentTaskId, false);
+    }
+  }, taskPageRefreshIntervalMs);
 }
 
 function isWithinCancelWindow(taskId) {
@@ -204,6 +229,10 @@ function connectNextStepButton(selectedTask) {
             selectedTask,
             "Performer finished the step of: " + selectedTask.work_status,
           );
+
+          if (selectedTask.work_status == "Task completed") {
+            addTaskChatSystemMessage(selectedTask, "Task ended");
+          }
         }
 
         if (selectedTask.work_status == "Task completed") {
@@ -469,6 +498,7 @@ function connectTakeTaskButton(selectedTask) {
           createTaskChat(selectedTask);
         }
 
+        localStorage.setItem("pendingChatTaskId", String(selectedTask.id));
         localStorage.setItem("userRole", "Performer");
         window.location.href = "performer.html";
       })

@@ -2,6 +2,8 @@
 var requesterTasks = [];
 var selectedTaskState = "all";
 var tasksApiUrl = "http://localhost:5000/api/tasks";
+var requesterRefreshTimer = null;
+var requesterRefreshIntervalMs = 6000;
 
 function scrollToAllTasks() {
   closeMenu();
@@ -23,19 +25,30 @@ function loadRequesterTasks() {
     .then(function (tasksData) {
       requesterTasks = getCurrentRequesterTasks(tasksData);
       renderCategoryOptions(requesterTasks);
-      renderRequesterTasks(requesterTasks);
+      renderRequesterFilteredViews();
       if (typeof renderTaskPage == "function") {
         renderTaskPage();
       }
-      renderMyTasks(requesterTasks);
-      renderProfileTaskHistory(requesterTasks);
       updateProfileStats(requesterTasks);
       updateRequesterStats(requesterTasks);
       connectRequesterFilters();
+      if (typeof onChatTasksLoaded == "function") {
+        onChatTasksLoaded();
+      }
     })
     .catch(function (error) {
       console.log(error.message);
     });
+}
+
+function startRequesterAutoRefresh() {
+  if (requesterRefreshTimer != null) {
+    return;
+  }
+
+  requesterRefreshTimer = setInterval(function () {
+    loadRequesterTasks();
+  }, requesterRefreshIntervalMs);
 }
 
 function getCurrentRequesterTasks(tasks) {
@@ -158,8 +171,22 @@ function connectRequesterFilters() {
 }
 
 function filterRequesterTasks() {
-  var searchText = document.getElementById("taskSearch").value.toLowerCase();
-  var category = document.getElementById("categoryFilter").value;
+  renderRequesterFilteredViews();
+}
+
+function getFilteredRequesterTasks() {
+  var searchInput = document.getElementById("taskSearch");
+  var categorySelect = document.getElementById("categoryFilter");
+  var searchText = "";
+  var category = "All Categories";
+
+  if (searchInput != null) {
+    searchText = searchInput.value.toLowerCase();
+  }
+
+  if (categorySelect != null) {
+    category = categorySelect.value;
+  }
 
   var filteredTasks = requesterTasks.filter(function (task) {
     var matchesSearch =
@@ -173,7 +200,15 @@ function filterRequesterTasks() {
     return matchesSearch && matchesCategory && matchesState;
   });
 
+  return filteredTasks;
+}
+
+function renderRequesterFilteredViews() {
+  var filteredTasks = getFilteredRequesterTasks();
+
   renderRequesterTasks(filteredTasks);
+  renderMyTasks(filteredTasks);
+  renderProfileTaskHistory(filteredTasks);
 }
 
 function markActiveStat(activeButton) {
@@ -396,6 +431,7 @@ window.onload = function () {
   }
 
   loadRequesterTasks();
+  startRequesterAutoRefresh();
 };
 
 function getPaymentNumber() {
