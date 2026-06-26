@@ -84,18 +84,25 @@ function renderTaskNotFound() {
     "The selected task could not be found.";
 }
 
+function formatDisplayDate(dateValue) {
+  if (dateValue == null || dateValue == "") {
+    return "";
+  }
+  return String(dateValue).split("T")[0];
+}
+
 function renderTaskDetails(selectedTask) {
   var taskFields = {
     taskDetailsTitle: selectedTask.title,
     taskDetailsStatus: selectedTask.state,
-    taskDetailsPosted: "Posted on " + selectedTask.created_at,
+    taskDetailsPosted: "Posted on " + formatDisplayDate(selectedTask.created_at),
     taskDetailsDescription:
       selectedTask.description + "<br><br>" + selectedTask.additional_details,
     taskDetailsPayment: "$" + selectedTask.payment,
-    taskDetailsDeadline: selectedTask.deadline || "Not set",
+    taskDetailsDeadline: formatDisplayDate(selectedTask.deadline) || "Not set",
     taskDetailsCategory: selectedTask.category,
     taskDetailsDifficulty: selectedTask.difficulty,
-    taskDetailsPostedDate: selectedTask.created_at,
+    taskDetailsPostedDate: formatDisplayDate(selectedTask.created_at),
   };
 
   for (var fieldId in taskFields) {
@@ -264,8 +271,7 @@ function updateTaskPageByRole(selectedTask) {
         ? getTaskElementDisplay(requesterItems[m])
         : "none";
     } else {
-      requesterItems[m].style.display =
-        isPerformerTaskPage && !isTakenTask ? "none" : "flex";
+      requesterItems[m].style.display = isPerformerTaskPage ? "none" : "flex";
     }
   }
 
@@ -313,61 +319,82 @@ function updateTaskPageByRole(selectedTask) {
   }
 }
 
+function openCancelModal(selectedTask) {
+  var titleEl = document.getElementById("cancelTaskTitle");
+  var locationEl = document.getElementById("cancelTaskLocation");
+  var paymentEl = document.getElementById("cancelTaskPayment");
+  var statusEl = document.getElementById("cancelTaskStatus");
+
+  if (titleEl != null) titleEl.innerHTML = selectedTask.title || "";
+  if (locationEl != null) locationEl.innerHTML = selectedTask.location || "";
+  if (paymentEl != null) paymentEl.innerHTML = "$" + (selectedTask.payment || 0);
+  if (statusEl != null) statusEl.innerHTML = selectedTask.state || "";
+
+  var overlay = document.getElementById("cancelTaskOverlay");
+  var modal = document.getElementById("cancelTaskModal");
+  if (overlay != null) overlay.style.display = "block";
+  if (modal != null) modal.style.display = "block";
+}
+
+function closeCancelModal() {
+  var overlay = document.getElementById("cancelTaskOverlay");
+  var modal = document.getElementById("cancelTaskModal");
+  if (overlay != null) overlay.style.display = "none";
+  if (modal != null) modal.style.display = "none";
+}
+
 function connectRequesterCancelButton(selectedTask) {
   var cancelButton = document.getElementById("cancelTaskButton");
-  var confirmButton = document.getElementById("confirmCancelTaskButton");
   var keepButton = document.getElementById("keepTaskButton");
-  var overlay = document.getElementById("cancelTaskOverlay");
+
+  if (keepButton != null) {
+    keepButton.onclick = closeCancelModal;
+  }
 
   if (cancelButton != null) {
     cancelButton.onclick = function () {
-      var titleEl = document.getElementById("cancelTaskTitle");
-      var locationEl = document.getElementById("cancelTaskLocation");
-      var paymentEl = document.getElementById("cancelTaskPayment");
-      var statusEl = document.getElementById("cancelTaskStatus");
-
-      if (titleEl != null) titleEl.innerHTML = selectedTask.title || "";
-      if (locationEl != null) locationEl.innerHTML = selectedTask.location || "";
-      if (paymentEl != null) paymentEl.innerHTML = "$" + (selectedTask.payment || 0);
-      if (statusEl != null) statusEl.innerHTML = selectedTask.state || "";
-
-      if (overlay != null) overlay.style.display = "block";
-      var modal = document.getElementById("cancelTaskModal");
-      if (modal != null) modal.style.display = "block";
-    };
-  }
-
-  if (keepButton != null) {
-    keepButton.onclick = function () {
-      if (overlay != null) overlay.style.display = "none";
-      var modal = document.getElementById("cancelTaskModal");
-      if (modal != null) modal.style.display = "none";
-    };
-  }
-
-  if (confirmButton != null) {
-    confirmButton.onclick = function () {
-      cancelLocalTask(selectedTask.id);
-      updateTaskOnServer(Object.assign({}, selectedTask, {
-        state: "cancelled",
-        work_status: "Cancelled",
-        performer_id: null
-      })).catch(function (error) {
-        console.log(error.message);
-      });
-      window.location.href = "requester.html";
+      openCancelModal(selectedTask);
+      var confirmButton = document.getElementById("confirmCancelTaskButton");
+      if (confirmButton != null) {
+        confirmButton.onclick = function () {
+          cancelLocalTask(selectedTask.id);
+          updateTaskOnServer(Object.assign({}, selectedTask, {
+            state: "cancelled",
+            work_status: "Cancelled",
+            performer_id: null,
+          })).catch(function (error) {
+            console.log(error.message);
+          });
+          window.location.href = "requester.html";
+        };
+      }
     };
   }
 }
 
 function connectPerformerCancelButton(selectedTask) {
   var cancelButton = document.getElementById("performerCancelTaskButton");
+
   if (cancelButton == null) {
     return;
   }
+
   cancelButton.onclick = function () {
-    cancelTakenTaskByPerformer(selectedTask.id);
-    window.location.href = "performer.html";
+    openCancelModal(selectedTask);
+    var confirmButton = document.getElementById("confirmCancelTaskButton");
+    if (confirmButton != null) {
+      confirmButton.onclick = function () {
+        cancelTakenTaskByPerformer(selectedTask.id);
+        updateTaskOnServer(Object.assign({}, selectedTask, {
+          state: "open",
+          work_status: "Available",
+          performer_id: null,
+        })).catch(function (error) {
+          console.log(error.message);
+        });
+        window.location.href = "performer.html";
+      };
+    }
   };
 }
 
