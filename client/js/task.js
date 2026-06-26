@@ -265,9 +265,14 @@ function createTaskCompletionNotification(selectedTask) {
 
   addNotification({
     toRole: "Requester",
+    toUserId: selectedTask.requester_id || getCurrentUserId(1),
     type: "task-completion",
     task_id: selectedTask.id,
     task_title: selectedTask.title,
+    requester_id: selectedTask.requester_id || getCurrentUserId(1),
+    performer_id: selectedTask.performer_id,
+    amount: selectedTask.payment,
+    requester_name: selectedTask.requester_name || getCurrentUserName("Requester"),
     performer_name: selectedTask.performer_name || getCurrentUserName("Performer"),
     title: "Task completion",
     message: selectedTask.title + " has been marked as finished.",

@@ -1,7 +1,6 @@
 //yarden shriki, lior zahavi
 var selectedNotificationId = null;
-var selectedRatingNotification = null;
-var selectedRatingValue = 0;
+var notificationTasksApiUrl = "http://localhost:5000/api/tasks";
 
 function ensureNotificationLayout() {
     var appHeader = document.getElementById("appHeader");
@@ -61,28 +60,6 @@ function ensureNotificationLayout() {
             '</section>');
     }
 
-    if (document.getElementById("ratingModal") == null) {
-        document.body.insertAdjacentHTML("beforeend",
-            '<section id="ratingModal" class="ratingModal">' +
-            '<div class="ratingIcon">★</div>' +
-            '<h2>Rate the Performer</h2>' +
-            '<div class="ratingSummary">' +
-            '<div><span>Performer</span><b id="ratingPerformerName">John Designer</b></div>' +
-            '<div><span>Date</span><b id="ratingDate">2026-02-04</b></div>' +
-            '<div class="ratingTaskName"><span>Task Name</span><b id="ratingTaskName">Design a Logo</b></div>' +
-            '</div>' +
-            '<div id="ratingStars" class="ratingStars" aria-label="Rating stars">' +
-            '<button type="button" data-rating="1">★</button>' +
-            '<button type="button" data-rating="2">★</button>' +
-            '<button type="button" data-rating="3">★</button>' +
-            '<button type="button" data-rating="4">★</button>' +
-            '<button type="button" data-rating="5">★</button>' +
-            '</div>' +
-            '<label for="ratingFeedback">Additional Feedback</label>' +
-            '<textarea id="ratingFeedback" placeholder="Describe your experience working with this performer..."></textarea>' +
-            '<button type="button" id="submitRatingButton" class="submitRatingButton">Submit Rating</button>' +
-            '</section>');
-    }
 }
 
 function placeHeaderIcon(appHeader, previousElement, iconButton) {
@@ -121,6 +98,29 @@ function addNotification(notification) {
     openPendingTaskCompletionNotification();
 }
 
+function getCurrentNotificationUserId() {
+    return String(localStorage.getItem("loggedInUserId") || "");
+}
+
+function getNotificationTargetUserId(notification) {
+    return notification.toUserId ||
+        notification.to_user_id ||
+        notification.user_id ||
+        notification.requester_id ||
+        null;
+}
+
+function notificationBelongsToCurrentUser(notification) {
+    var currentUserId = getCurrentNotificationUserId();
+    var targetUserId = getNotificationTargetUserId(notification);
+
+    if (targetUserId != null && targetUserId != "") {
+        return String(targetUserId) == currentUserId;
+    }
+
+    return notification.toRole == userRole;
+}
+
 function getNotificationDateText() {
     var today = new Date();
     var month = today.getMonth() + 1;
@@ -142,7 +142,7 @@ function getCurrentRoleNotifications() {
     var roleNotifications = [];
 
     for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].toRole == userRole && shouldShowNotificationInMailbox(notifications[i])) {
+        if (notificationBelongsToCurrentUser(notifications[i]) && shouldShowNotificationInMailbox(notifications[i])) {
             roleNotifications.push(notifications[i]);
         }
     }
@@ -168,7 +168,7 @@ function openPendingTaskCompletionNotification() {
     var pendingNotification = null;
 
     for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].toRole == userRole && notifications[i].type == "task-completion" && notifications[i].resolved != true) {
+        if (notificationBelongsToCurrentUser(notifications[i]) && notifications[i].type == "task-completion" && notifications[i].resolved != true) {
             notifications[i].is_read = true;
             pendingNotification = notifications[i];
             break;
@@ -288,7 +288,7 @@ function closeTaskCompletionModal() {
     selectedNotificationId = null;
 }
 
-function resolveTaskCompletion(decisionText) {
+async function resolveTaskCompletion(decisionText) {
     var notifications = getNotifications();
     var selectedNotification = null;
 
@@ -302,139 +302,91 @@ function resolveTaskCompletion(decisionText) {
 
     saveNotifications(notifications);
 
-    if (decisionText == "approved" && selectedNotification != null) {
-        addPaymentSuccessNotification(selectedNotification);
-    }
-
     closeTaskCompletionModal();
 
-    if (decisionText == "approved" && selectedNotification != null) {
-        openRatingModal(selectedNotification);
+    if (selectedNotification != null) {
+        if (decisionText == "approved") {
+            await approveTaskCompletion(selectedNotification);
+        } else {
+            await rejectTaskCompletion(selectedNotification);
+        }
     }
 
     refreshMailbox();
 }
 
-function addPaymentSuccessNotification(taskCompletionNotification) {
-    addNotification({
-        toRole: "Requester",
-        type: "payment-success",
-        task_id: taskCompletionNotification.task_id,
-        task_title: taskCompletionNotification.task_title,
-        title: "Payment successful",
-        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred. A confirmation has been sent to your email."
-    });
+async function approveTaskCompletion(selectedNotification) {
+    var paymentWasCreated = false;
 
-    addNotification({
-        toRole: "Performer",
-        type: "payment-success",
-        task_id: taskCompletionNotification.task_id,
-        task_title: taskCompletionNotification.task_title,
-        title: "Payment received",
-        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred to you. A confirmation has been sent to your email."
-    });
-}
-
-function getSavedRatings() {
-    var savedRatings = localStorage.getItem("performerRatings");
-
-    if (savedRatings == null || savedRatings == "") {
-        return [];
+    if (typeof addPaymentSuccessNotification == "function") {
+        paymentWasCreated = await addPaymentSuccessNotification(selectedNotification);
     }
 
-    return JSON.parse(savedRatings);
-}
-
-function savePerformerRating(rating) {
-    var ratings = getSavedRatings();
-    ratings.push(rating);
-    localStorage.setItem("performerRatings", JSON.stringify(ratings));
-}
-
-function openRatingModal(notification) {
-    selectedRatingNotification = notification;
-    selectedRatingValue = 0;
-
-    document.getElementById("ratingPerformerName").innerHTML = notification.performer_name || "John Designer";
-    document.getElementById("ratingDate").innerHTML = getNotificationDateText();
-    document.getElementById("ratingTaskName").innerHTML = notification.task_title;
-    document.getElementById("ratingFeedback").value = "";
-    markRatingStars();
-
-    document.getElementById("messageModalOverlay").style.display = "block";
-    document.getElementById("ratingModal").style.display = "block";
-}
-
-function closeRatingModal() {
-    document.getElementById("messageModalOverlay").style.display = "none";
-    document.getElementById("ratingModal").style.display = "none";
-    selectedRatingNotification = null;
-    selectedRatingValue = 0;
-}
-
-function markRatingStars() {
-    var starButtons = document.querySelectorAll("#ratingStars button");
-
-    for (var i = 0; i < starButtons.length; i++) {
-        if (parseInt(starButtons[i].getAttribute("data-rating")) <= selectedRatingValue) {
-            starButtons[i].className = "activeRatingStar";
-        } else {
-            starButtons[i].className = "";
-        }
+    if (paymentWasCreated == true && typeof openRatingModal == "function") {
+        openRatingModal(selectedNotification);
     }
 }
 
-function chooseRating(ratingValue) {
-    selectedRatingValue = ratingValue;
-    markRatingStars();
+async function rejectTaskCompletion(selectedNotification) {
+    await reopenTaskAfterRejectedCompletion(selectedNotification.task_id);
+    goToReportPage(selectedNotification);
 }
 
-function submitRating() {
-    if (selectedRatingNotification == null || selectedRatingValue == 0) {
+async function getTaskForNotification(taskId) {
+    var response = await fetch(notificationTasksApiUrl + "/" + taskId);
+    var task = await response.json();
+
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(task.message || "Failed to load task");
+    }
+
+    return task;
+}
+
+async function updateTaskForNotification(task) {
+    var response = await fetch(notificationTasksApiUrl + "/" + task.id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+    });
+    var result = await response.json();
+
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(result.message || "Failed to update task");
+    }
+
+    return result;
+}
+
+async function reopenTaskAfterRejectedCompletion(taskId) {
+    if (taskId == null || taskId == "") {
         return;
     }
 
-    savePerformerRating({
-        task_id: selectedRatingNotification.task_id,
-        task_title: selectedRatingNotification.task_title,
-        performer_name: selectedRatingNotification.performer_name || "John Designer",
-        rating: selectedRatingValue,
-        feedback: document.getElementById("ratingFeedback").value,
-        created_at: getNotificationDateText()
-    });
-
-    closeRatingModal();
+    try {
+        var task = await getTaskForNotification(taskId);
+        task.state = "in-progress";
+        task.work_status = "Finalizing the task";
+        await updateTaskForNotification(task);
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
-function downloadReceipt(notificationId, event) {
-    if (event != null) {
-        event.stopPropagation();
+function goToReportPage(notification) {
+    var reportUrl = "report.html?task_id=" + encodeURIComponent(notification.task_id || "");
+
+    if (notification.task_title != null) {
+        reportUrl += "&task_title=" + encodeURIComponent(notification.task_title);
     }
 
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == notificationId) {
-            selectedNotification = notifications[i];
-        }
+    if (notification.performer_id != null) {
+        reportUrl += "&reported_user_id=" + encodeURIComponent(notification.performer_id);
     }
 
-    if (selectedNotification == null) {
-        return;
-    }
-
-    var receiptText = "OTES Payment Receipt\n" +
-        "Task: " + selectedNotification.task_title + "\n" +
-        "Status: Payment transferred\n" +
-        "Date: " + selectedNotification.created_at + "\n";
-    var receiptFile = new Blob([receiptText], { type: "text/plain" });
-    var receiptLink = document.createElement("a");
-
-    receiptLink.href = URL.createObjectURL(receiptFile);
-    receiptLink.download = "receipt-" + selectedNotification.task_id + ".txt";
-    receiptLink.click();
-    URL.revokeObjectURL(receiptLink.href);
+    window.location.href = reportUrl;
 }
 
 function connectMailboxActions() {
@@ -443,8 +395,6 @@ function connectMailboxActions() {
     var mailOverlay = document.getElementById("mailOverlay");
     var approveButton = document.getElementById("approveCompletionButton");
     var rejectButton = document.getElementById("rejectCompletionButton");
-    var submitRatingButton = document.getElementById("submitRatingButton");
-    var starButtons = document.querySelectorAll("#ratingStars button");
 
     if (mailButton != null) {
         mailButton.onclick = openMailbox;
@@ -470,15 +420,6 @@ function connectMailboxActions() {
         };
     }
 
-    for (var i = 0; i < starButtons.length; i++) {
-        starButtons[i].onclick = function () {
-            chooseRating(parseInt(this.getAttribute("data-rating")));
-        };
-    }
-
-    if (submitRatingButton != null) {
-        submitRatingButton.onclick = submitRating;
-    }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
