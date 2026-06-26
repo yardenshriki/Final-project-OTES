@@ -139,11 +139,34 @@ function getChatLastActivityValue(chat) {
     return new Date(task.updated_at).getTime();
   }
 
+  if (task != null && task.completed_at != null) {
+    return new Date(task.completed_at).getTime();
+  }
+
+  if (task != null && task.started_at != null) {
+    return new Date(task.started_at).getTime();
+  }
+
+  if (task != null && task.created_at != null) {
+    return new Date(task.created_at).getTime();
+  }
+
   return Number(chat.taskId) || 0;
 }
 
 function sortChatsByRecentActivity(chats) {
   return chats.sort(function (firstChat, secondChat) {
+    var firstEnded = isChatEnded(firstChat);
+    var secondEnded = isChatEnded(secondChat);
+
+    if (firstEnded == true && secondEnded == false) {
+      return 1;
+    }
+
+    if (firstEnded == false && secondEnded == true) {
+      return -1;
+    }
+
     return getChatLastActivityValue(secondChat) - getChatLastActivityValue(firstChat);
   });
 }
@@ -755,7 +778,7 @@ function renderChatList() {
     return;
   }
 
-  for (var i = chats.length - 1; i >= 0; i--) {
+  for (var i = 0; i < chats.length; i++) {
     var messages = chatMessagesByTask[chats[i].taskId] || chats[i].messages;
     var lastMessage = messages[messages.length - 1] || { text: "No messages yet" };
     var unreadCount = getChatUnreadCount(chats[i]);
@@ -992,11 +1015,11 @@ function connectChatActions() {
 }
 
 function onChatTasksLoaded() {
-  refreshChatUnreadState().then(checkPendingChatOpen);
+  refreshChatUnreadState().then(clearPendingChatOpen);
   startChatAutoRefresh();
 }
 
-function checkPendingChatOpen() {
+function clearPendingChatOpen() {
   var pendingTaskId = localStorage.getItem("pendingChatTaskId");
 
   if (pendingTaskId == null || pendingTaskId == "") {
@@ -1004,7 +1027,6 @@ function checkPendingChatOpen() {
   }
 
   localStorage.removeItem("pendingChatTaskId");
-  openChatDrawer();
 }
 
 var chatPreviousWindowOnload = window.onload;

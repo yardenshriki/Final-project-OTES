@@ -2,6 +2,8 @@
 var performerTasks = [];
 var tasksApiUrl = "http://localhost:5000/api/tasks";
 var sortNewestFirst = true;
+var performerRefreshTimer = null;
+var performerRefreshIntervalMs = 6000;
 var performerFilters = {
     difficulty: "",
     location: "",
@@ -40,6 +42,16 @@ function loadPerformerTasks() {
             renderPerformerAvailableTasks();
             connectPerformerActions();
         });
+}
+
+function startPerformerAutoRefresh() {
+    if (performerRefreshTimer != null) {
+        return;
+    }
+
+    performerRefreshTimer = setInterval(function () {
+        loadPerformerTasks();
+    }, performerRefreshIntervalMs);
 }
 
 function getCurrentPerformerId() {
@@ -371,6 +383,7 @@ window.onload = function () {
     }
 
     loadPerformerTasks();
+    startPerformerAutoRefresh();
 };
 
 function checkPayment() {
