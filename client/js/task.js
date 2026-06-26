@@ -469,6 +469,7 @@ function connectTakeTaskButton(selectedTask) {
           createTaskChat(selectedTask);
         }
 
+        localStorage.setItem("pendingChatTaskId", String(selectedTask.id));
         localStorage.setItem("userRole", "Performer");
         window.location.href = "performer.html";
       })

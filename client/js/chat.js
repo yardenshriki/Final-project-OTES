@@ -1,20 +1,29 @@
 //yarden shriki, lior zahavi
 var activeChatTaskId = null;
 var chatApiUrl = "http://localhost:5000/api/chat";
+var chatTasksApiUrl = "http://localhost:5000/api/tasks";
 var chatMessagesByTask = {};
+var taskChatsCache = {};
+var chatUnreadBadgeRetryCount = 0;
+var chatRefreshTimer = null;
+var chatRefreshInProgress = false;
+var chatRefreshIntervalMs = 3000;
+var chatTaskSourceRefreshIntervalMs = 9000;
+var chatLastTaskSourceRefresh = 0;
 
 function taskHasChatParticipants(task) {
   return (
-    task.requester_name != null &&
-    task.requester_name != "" &&
-    task.performer_name != null &&
-    task.performer_name != ""
+    getTaskRequesterId(task) != null &&
+    getTaskRequesterId(task) != "" &&
+    getTaskPerformerId(task) != null &&
+    getTaskPerformerId(task) != ""
   );
 }
 
 function ensureChatLayout() {
   if (document.getElementById("chatDrawer") != null) {
     connectChatActions();
+    updateChatUnreadBadge();
     return;
   }
 
@@ -26,6 +35,7 @@ function ensureChatLayout() {
       document.body.insertAdjacentHTML("beforeend", html);
       connectChatActions();
       renderChatList();
+      updateChatUnreadBadge();
     });
 }
 
@@ -76,10 +86,11 @@ function isChatMessageUnread(message, roleName) {
 }
 
 function getChatUnreadCount(chat) {
+  var messages = chatMessagesByTask[chat.taskId] || chat.messages;
   var unreadCount = 0;
 
-  for (var i = 0; i < chat.messages.length; i++) {
-    if (isChatMessageUnread(chat.messages[i], getCurrentChatRole())) {
+  for (var i = 0; i < messages.length; i++) {
+    if (isChatMessageUnread(messages[i], getCurrentChatRole())) {
       unreadCount++;
     }
   }
@@ -101,10 +112,17 @@ function getTotalChatUnreadCount() {
 function ensureChatUnreadBadge() {
   var chatButton = document.getElementById("chatButton");
 
-  if (
-    chatButton == null ||
-    document.getElementById("chatUnreadBadge") != null
-  ) {
+  if (chatButton == null) {
+    if (chatUnreadBadgeRetryCount < 10) {
+      chatUnreadBadgeRetryCount++;
+      setTimeout(updateChatUnreadBadge, 150);
+    }
+    return;
+  }
+
+  chatUnreadBadgeRetryCount = 0;
+
+  if (document.getElementById("chatUnreadBadge") != null) {
     return;
   }
 
@@ -179,10 +197,10 @@ function getCurrentChatUserName() {
   }
 
   if (getCurrentChatRole() == "Performer") {
-    return "John Designer";
+    return "Performer";
   }
 
-  return "Sarah Johnson";
+  return "Requester";
 }
 
 function getCurrentChatRole() {
@@ -297,6 +315,22 @@ function getMessageRole(message, task) {
   return getCurrentChatRole();
 }
 
+function getMessageSenderName(message, task) {
+  if (message.sender_name != null && message.sender_name != "") {
+    return message.sender_name;
+  }
+
+  if (message.sender_id == getTaskPerformerId(task)) {
+    return getTaskPerformerName(task);
+  }
+
+  if (message.sender_id == getTaskRequesterId(task)) {
+    return getTaskRequesterName(task);
+  }
+
+  return getCurrentChatUserName();
+}
+
 function getMessageTimeText(createdAt) {
   if (createdAt == null || createdAt == "") {
     return getChatTimeText();
@@ -323,7 +357,7 @@ function mapServerMessageToChatMessage(message, task) {
     sender_id: message.sender_id,
     receiver_id: message.receiver_id,
     senderRole: getMessageRole(message, task),
-    senderName: message.sender_name || getCurrentChatUserName(),
+    senderName: getMessageSenderName(message, task),
     text: message.message,
     time: getMessageTimeText(message.created_at),
     isSystem: false,
@@ -341,6 +375,17 @@ function parseServerJson(response) {
 
 function loadTaskMessages(taskId) {
   var task = getTaskByChatId(taskId);
+
+  if (task == null && taskChatsCache[taskId] != null) {
+    var cachedChat = taskChatsCache[taskId];
+    task = {
+      id: taskId,
+      requester_id: cachedChat.requesterId,
+      performer_id: cachedChat.performerId,
+      requester_name: cachedChat.requesterName,
+      performer_name: cachedChat.performerName,
+    };
+  }
 
   if (task == null || taskHasChatParticipants(task) == false) {
     chatMessagesByTask[taskId] = [];
@@ -374,6 +419,123 @@ function loadVisibleChatMessages() {
   }
 
   return Promise.all(requests);
+}
+
+function shouldRefreshChatTaskSources() {
+  var now = Date.now();
+
+  if (now - chatLastTaskSourceRefresh < chatTaskSourceRefreshIntervalMs) {
+    return false;
+  }
+
+  chatLastTaskSourceRefresh = now;
+  return true;
+}
+
+function getCurrentUserChatTasks(tasks) {
+  var currentUserId = getCurrentChatUserId();
+  var currentTasks = [];
+
+  for (var i = 0; i < tasks.length; i++) {
+    if (
+      taskHasChatParticipants(tasks[i]) &&
+      (getTaskRequesterId(tasks[i]) == currentUserId ||
+        getTaskPerformerId(tasks[i]) == currentUserId)
+    ) {
+      currentTasks.push(tasks[i]);
+    }
+  }
+
+  return currentTasks;
+}
+
+function mergeChatTasks(existingTasks, serverTasks) {
+  var mergedTasks = [];
+  var taskMap = {};
+
+  for (var i = 0; i < existingTasks.length; i++) {
+    if (existingTasks[i] != null && existingTasks[i].id != null) {
+      taskMap[existingTasks[i].id] = existingTasks[i];
+    }
+  }
+
+  for (var j = 0; j < serverTasks.length; j++) {
+    if (serverTasks[j] != null && serverTasks[j].id != null) {
+      taskMap[serverTasks[j].id] = Object.assign(
+        {},
+        taskMap[serverTasks[j].id] || {},
+        serverTasks[j],
+      );
+    }
+  }
+
+  for (var taskId in taskMap) {
+    mergedTasks.push(taskMap[taskId]);
+  }
+
+  return mergedTasks;
+}
+
+function refreshChatTaskSources() {
+  if (shouldRefreshChatTaskSources() == false) {
+    return Promise.resolve();
+  }
+
+  return fetch(chatTasksApiUrl)
+    .then(parseServerJson)
+    .then(function (tasks) {
+      if (Array.isArray(tasks) == false && Array.isArray(tasks.value) == true) {
+        tasks = tasks.value;
+      }
+
+      if (Array.isArray(tasks) == false) {
+        return;
+      }
+
+      var chatTasks = getCurrentUserChatTasks(tasks);
+
+      if (typeof requesterTasks != "undefined" && getCurrentChatRole() == "Requester") {
+        requesterTasks = mergeChatTasks(requesterTasks, chatTasks);
+      }
+
+      if (typeof performerTasks != "undefined" && getCurrentChatRole() == "Performer") {
+        performerTasks = mergeChatTasks(performerTasks, chatTasks);
+      }
+    })
+    .catch(function () {
+      return;
+    });
+}
+
+function refreshChatUnreadState() {
+  if (chatRefreshInProgress == true) {
+    return Promise.resolve();
+  }
+
+  chatRefreshInProgress = true;
+
+  return refreshChatTaskSources().then(function () {
+    return loadVisibleChatMessages().then(function () {
+      renderChatList();
+      updateChatUnreadBadge();
+
+      if (activeChatTaskId != null) {
+        renderChatConversation(activeChatTaskId);
+      }
+    });
+  }).finally(function () {
+    chatRefreshInProgress = false;
+  });
+}
+
+function startChatAutoRefresh() {
+  if (chatRefreshTimer != null) {
+    return;
+  }
+
+  chatRefreshTimer = setInterval(function () {
+    refreshChatUnreadState();
+  }, chatRefreshIntervalMs);
 }
 
 function saveChatMessageToServer(chat, message) {
@@ -424,16 +586,11 @@ function getOtherChatUserName(chat) {
   return chat.performerName;
 }
 
-function taskHasChatParticipants(task) {
-  return (
-    getTaskRequesterId(task) != null &&
-    getTaskRequesterId(task) != "" &&
-    getTaskPerformerId(task) != null &&
-    getTaskPerformerId(task) != ""
-  );
-}
-
 function findTaskChat(taskId) {
+  if (taskChatsCache[taskId] != null) {
+    return taskChatsCache[taskId];
+  }
+
   var chats = getTaskChats();
 
   for (var i = 0; i < chats.length; i++) {
@@ -464,6 +621,7 @@ function createChatFromTask(task) {
     messages: chatMessagesByTask[task.id] || [],
   };
 
+  taskChatsCache[task.id] = chat;
   return chat;
 }
 
@@ -513,6 +671,8 @@ function addTaskChatMessage(taskId, message) {
     if (activeChatTaskId == taskId) {
       renderChatConversation(taskId);
     }
+
+    refreshChatUnreadState();
   });
 }
 
@@ -544,9 +704,8 @@ function renderChatList() {
   }
 
   for (var i = chats.length - 1; i >= 0; i--) {
-    var lastMessage = chats[i].messages[chats[i].messages.length - 1] || {
-      text: "No messages yet",
-    };
+    var messages = chatMessagesByTask[chats[i].taskId] || chats[i].messages;
+    var lastMessage = messages[messages.length - 1] || { text: "No messages yet" };
     var unreadCount = getChatUnreadCount(chats[i]);
     var unreadBadge = "";
 
@@ -582,7 +741,7 @@ function openChatDrawer() {
     return;
   }
 
-  loadVisibleChatMessages().then(renderChatList);
+  refreshChatUnreadState();
   document.getElementById("chatOverlay").style.display = "block";
   document.getElementById("chatDrawer").style.display = "block";
 }
@@ -608,11 +767,22 @@ function showChatListView() {
 
 function openTaskChat(taskId) {
   activeChatTaskId = taskId;
-  document.getElementById("chatListView").style.display = "none";
-  document.getElementById("chatConversationView").style.display = "block";
+
+  var listView = document.getElementById("chatListView");
+  var conversationView = document.getElementById("chatConversationView");
+
+  if (listView != null) {
+    listView.style.display = "none";
+  }
+
+  if (conversationView != null) {
+    conversationView.style.display = "block";
+  }
+
   openChatDrawer();
 
   loadTaskMessages(taskId).then(function () {
+    markTaskChatAsRead(taskId);
     renderChatConversation(taskId);
     renderChatList();
     updateChatUnreadBadge();
@@ -627,17 +797,19 @@ function renderChatConversation(taskId) {
     return;
   }
 
+  var messages = chatMessagesByTask[taskId] || chat.messages;
+
   document.getElementById("chatDrawerSubtitle").innerHTML = escapeChatText(
     chat.taskTitle,
   );
   chatMessages.innerHTML = "";
 
-  for (var i = 0; i < chat.messages.length; i++) {
+  for (var i = 0; i < messages.length; i++) {
     var messageClass = "chatMessage";
 
-    if (chat.messages[i].isSystem == true) {
+    if (messages[i].isSystem == true) {
       messageClass += " chatMessageSystem";
-    } else if (chat.messages[i].senderRole == getCurrentChatRole()) {
+    } else if (messages[i].senderRole == getCurrentChatRole()) {
       messageClass += " chatMessageMine";
     }
 
@@ -646,13 +818,13 @@ function renderChatConversation(taskId) {
       messageClass +
       '">' +
       "<b>" +
-      escapeChatText(chat.messages[i].senderName) +
+      escapeChatText(messages[i].senderName) +
       "</b>" +
       "<p>" +
-      escapeChatText(chat.messages[i].text) +
+      escapeChatText(messages[i].text) +
       "</p>" +
       "<small>" +
-      escapeChatText(chat.messages[i].time) +
+      escapeChatText(messages[i].time) +
       "</small>" +
       "</div>";
   }
@@ -716,6 +888,22 @@ function connectChatActions() {
   }
 }
 
+function onChatTasksLoaded() {
+  refreshChatUnreadState().then(checkPendingChatOpen);
+  startChatAutoRefresh();
+}
+
+function checkPendingChatOpen() {
+  var pendingTaskId = localStorage.getItem("pendingChatTaskId");
+
+  if (pendingTaskId == null || pendingTaskId == "") {
+    return;
+  }
+
+  localStorage.removeItem("pendingChatTaskId");
+  openChatDrawer();
+}
+
 var chatPreviousWindowOnload = window.onload;
 
 window.onload = function () {
@@ -723,10 +911,9 @@ window.onload = function () {
     chatPreviousWindowOnload();
   }
 
-  setTimeout(ensureChatLayout, 350);
-  setTimeout(function () {
-    loadVisibleChatMessages().then(updateChatUnreadBadge);
-  }, 650);
+  ensureChatLayout();
+  setTimeout(refreshChatUnreadState, 250);
+  startChatAutoRefresh();
 };
 
 document.addEventListener("click", function (event) {

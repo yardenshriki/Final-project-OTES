@@ -32,6 +32,9 @@ function loadRequesterTasks() {
       updateProfileStats(requesterTasks);
       updateRequesterStats(requesterTasks);
       connectRequesterFilters();
+      if (typeof onChatTasksLoaded == "function") {
+        onChatTasksLoaded();
+      }
     })
     .catch(function (error) {
       console.log(error.message);

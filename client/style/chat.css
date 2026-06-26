@@ -2,19 +2,21 @@
 .chatUnreadBadge {
   display: none;
   position: absolute;
-  top: -2px;
-  right: -3px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 10px;
+  top: -9px;
+  right: -9px;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 7px;
+  border: 2px solid #f4d6a8;
+  border-radius: 999px;
   background-color: #df4a5a;
   color: white;
-  font-size: 11px;
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 21px;
   font-weight: bold;
   text-align: center;
   box-sizing: border-box;
+  z-index: 2;
 }
 
 .chatOverlay {

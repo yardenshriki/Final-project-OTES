@@ -28,6 +28,9 @@ function loadPerformerTasks() {
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
+            if (typeof onChatTasksLoaded == "function") {
+                onChatTasksLoaded();
+            }
         })
         .catch(function (error) {
             console.log(error.message);
