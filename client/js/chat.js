@@ -98,6 +98,56 @@ function getChatUnreadCount(chat) {
   return unreadCount;
 }
 
+function isTaskChatEnded(task) {
+  if (task == null) {
+    return false;
+  }
+
+  return (
+    task.work_status == "Task completed" ||
+    task.workStatus == "Task completed" ||
+    task.state == "completed" ||
+    task.completed_at != null
+  );
+}
+
+function isChatEnded(chat) {
+  return isTaskChatEnded(getTaskByChatId(chat.taskId));
+}
+
+function getChatLastActivityValue(chat) {
+  var messages = chatMessagesByTask[chat.taskId] || chat.messages || [];
+  var lastMessage = messages[messages.length - 1];
+
+  if (lastMessage != null) {
+    if (lastMessage.created_at != null && lastMessage.created_at != "") {
+      return new Date(lastMessage.created_at).getTime();
+    }
+
+    if (lastMessage.createdAt != null && lastMessage.createdAt != "") {
+      return new Date(lastMessage.createdAt).getTime();
+    }
+
+    if (lastMessage.id != null) {
+      return Number(lastMessage.id);
+    }
+  }
+
+  var task = getTaskByChatId(chat.taskId);
+
+  if (task != null && task.updated_at != null) {
+    return new Date(task.updated_at).getTime();
+  }
+
+  return Number(chat.taskId) || 0;
+}
+
+function sortChatsByRecentActivity(chats) {
+  return chats.sort(function (firstChat, secondChat) {
+    return getChatLastActivityValue(secondChat) - getChatLastActivityValue(firstChat);
+  });
+}
+
 function getTotalChatUnreadCount() {
   var chats = getVisibleChats();
   var unreadCount = 0;
@@ -360,6 +410,7 @@ function mapServerMessageToChatMessage(message, task) {
     senderName: getMessageSenderName(message, task),
     text: message.message,
     time: getMessageTimeText(message.created_at),
+    created_at: message.created_at,
     isSystem: false,
     is_read: message.is_read,
   };
@@ -563,6 +614,7 @@ function saveChatMessageToServer(chat, message) {
         senderName: message.senderName,
         text: message.text,
         time: getChatTimeText(),
+        created_at: result.created_at || new Date().toISOString(),
         isSystem: message.isSystem == true,
         is_read: 0,
       };
@@ -684,7 +736,7 @@ function getVisibleChats() {
     visibleChats.push(chats[i]);
   }
 
-  return visibleChats;
+  return sortChatsByRecentActivity(visibleChats);
 }
 
 function renderChatList() {
@@ -708,10 +760,15 @@ function renderChatList() {
     var lastMessage = messages[messages.length - 1] || { text: "No messages yet" };
     var unreadCount = getChatUnreadCount(chats[i]);
     var unreadBadge = "";
+    var endedLabel = "";
 
     if (unreadCount > 0) {
       unreadBadge =
         '<span class="chatListUnreadBadge">' + unreadCount + "</span>";
+    }
+
+    if (isChatEnded(chats[i]) == true) {
+      endedLabel = '<span class="chatEndedLabel">Task ended</span>';
     }
 
     chatList.innerHTML +=
@@ -721,6 +778,7 @@ function renderChatList() {
       unreadBadge +
       "<h4>" +
       escapeChatText(chats[i].taskTitle) +
+      endedLabel +
       "</h4>" +
       "<p>To: " +
       escapeChatText(getOtherChatUserName(chats[i])) +
@@ -798,6 +856,7 @@ function renderChatConversation(taskId) {
   }
 
   var messages = chatMessagesByTask[taskId] || chat.messages;
+  updateChatMessageFormState(chat);
 
   document.getElementById("chatDrawerSubtitle").innerHTML = escapeChatText(
     chat.taskTitle,
@@ -832,12 +891,56 @@ function renderChatConversation(taskId) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+function updateChatMessageFormState(chat) {
+  var chatForm = document.getElementById("chatMessageForm");
+  var chatHint = document.getElementsByClassName("chatHint")[0];
+  var endedNotice = document.getElementById("chatEndedNotice");
+
+  if (endedNotice == null && chatForm != null) {
+    endedNotice = document.createElement("div");
+    endedNotice.id = "chatEndedNotice";
+    endedNotice.className = "chatEndedNotice";
+    endedNotice.innerHTML = "Task ended. This chat is now read-only.";
+    chatForm.parentNode.insertBefore(endedNotice, chatForm);
+  }
+
+  if (isChatEnded(chat) == true) {
+    if (chatForm != null) {
+      chatForm.style.display = "none";
+    }
+
+    if (chatHint != null) {
+      chatHint.style.display = "none";
+    }
+
+    if (endedNotice != null) {
+      endedNotice.style.display = "block";
+    }
+  } else {
+    if (chatForm != null) {
+      chatForm.style.display = "grid";
+    }
+
+    if (chatHint != null) {
+      chatHint.style.display = "block";
+    }
+
+    if (endedNotice != null) {
+      endedNotice.style.display = "none";
+    }
+  }
+}
+
 function sendCurrentChatMessage(event) {
   event.preventDefault();
 
   var chatInput = document.getElementById("chatMessageInput");
 
   if (activeChatTaskId == null || chatInput.value.trim() == "") {
+    return false;
+  }
+
+  if (isChatEnded(findTaskChat(activeChatTaskId)) == true) {
     return false;
   }
 

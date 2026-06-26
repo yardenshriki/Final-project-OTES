@@ -204,6 +204,10 @@ function connectNextStepButton(selectedTask) {
             selectedTask,
             "Performer finished the step of: " + selectedTask.work_status,
           );
+
+          if (selectedTask.work_status == "Task completed") {
+            addTaskChatSystemMessage(selectedTask, "Task ended");
+          }
         }
 
         if (selectedTask.work_status == "Task completed") {
