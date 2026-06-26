@@ -1,15 +1,7 @@
-﻿//yarden shriki, lior zahavi
+//yarden shriki, lior zahavi
 var requesterTasks = [];
 var selectedTaskState = "all";
 var tasksApiUrl = "http://localhost:5000/api/tasks";
-var taskProgressSteps = [
-  "Task accepted",
-  "On my way",
-  "Task in progress",
-  "Finalizing the task",
-  "Task completed",
-];
-var performerCancelWindowMinutes = 5;
 
 function scrollToAllTasks() {
   closeMenu();
@@ -22,24 +14,26 @@ function scrollToAllTasks() {
 
 function loadRequesterTasks() {
   fetch(tasksApiUrl)
-    .then((response) => {
+    .then(function (response) {
       if (response.status === 200) {
         return response.json();
       }
       throw new Error("Failed to load requester tasks");
     })
-    .then((tasksData) => {
+    .then(function (tasksData) {
       requesterTasks = getCurrentRequesterTasks(tasksData);
       renderCategoryOptions(requesterTasks);
       renderRequesterTasks(requesterTasks);
-      renderTaskPage();
+      if (typeof renderTaskPage == "function") {
+        renderTaskPage();
+      }
       renderMyTasks(requesterTasks);
       renderProfileTaskHistory(requesterTasks);
       updateProfileStats(requesterTasks);
       updateRequesterStats(requesterTasks);
       connectRequesterFilters();
     })
-    .catch((error) => {
+    .catch(function (error) {
       console.log(error.message);
     });
 }
@@ -239,339 +233,6 @@ function createTaskCard(task) {
   );
 }
 
-function renderTaskPage() {
-  if (document.getElementById("taskDetailsTitle") == null) {
-    return;
-  }
-
-  var urlParams = new URLSearchParams(window.location.search);
-  var taskId = urlParams.get("id");
-  var selectedTask = findTaskById(taskId);
-
-  if (selectedTask == null) {
-    renderTaskNotFound();
-    return;
-  }
-
-  renderTaskDetails(selectedTask);
-  connectTaskPageActions(selectedTask);
-}
-
-function renderTaskNotFound() {
-  document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
-  document.getElementById("taskDetailsDescription").innerHTML =
-    "The selected task could not be found.";
-}
-
-function renderTaskDetails(selectedTask) {
-  var taskFields = {
-    taskDetailsTitle: selectedTask.title,
-    taskDetailsStatus: selectedTask.state,
-    taskDetailsPosted: "Posted on " + selectedTask.created_at,
-    taskDetailsDescription:
-      selectedTask.description + "<br><br>" + selectedTask.additional_details,
-    taskDetailsPayment: "$" + selectedTask.payment,
-    taskDetailsDeadline: selectedTask.deadline || "Not set",
-    taskDetailsCategory: selectedTask.category,
-    taskDetailsDifficulty: selectedTask.difficulty,
-    taskDetailsPostedDate: selectedTask.created_at,
-  };
-
-  for (var fieldId in taskFields) {
-    document.getElementById(fieldId).innerHTML = taskFields[fieldId];
-  }
-
-  document.getElementById("taskDetailsStatus").className = getStatusClass(
-    selectedTask.state,
-  );
-}
-
-function connectTaskPageActions(selectedTask) {
-  connectTakeTaskButton(selectedTask);
-  connectNextStepButton(selectedTask);
-  renderPerformerProgress(selectedTask);
-  updateTaskPageByRole(selectedTask);
-}
-
-function getTaskProgressIndex(work_status) {
-  for (var i = 0; i < taskProgressSteps.length; i++) {
-    if (taskProgressSteps[i] == work_status) {
-      return i;
-    }
-  }
-
-  return 0;
-}
-
-function renderPerformerProgress(selectedTask) {
-  var progressTrack = document.getElementById("performerProgressTrack");
-  var nextStepButton = document.getElementById("performerNextStepButton");
-
-  if (progressTrack == null || nextStepButton == null) {
-    return;
-  }
-
-  var currentStepIndex = getTaskProgressIndex(selectedTask.work_status);
-  progressTrack.innerHTML = "";
-
-  for (var i = 0; i < taskProgressSteps.length; i++) {
-    var stepClass = "progressStep";
-    var stepMark = "";
-
-    if (i <= currentStepIndex) {
-      stepClass += " completedStep";
-      stepMark = "ג“";
-    }
-
-    progressTrack.innerHTML +=
-      '<div class="' +
-      stepClass +
-      '">' +
-      "<span>" +
-      stepMark +
-      "</span>" +
-      "<b>" +
-      taskProgressSteps[i] +
-      "</b>" +
-      "</div>";
-  }
-
-  if (currentStepIndex >= taskProgressSteps.length - 1) {
-    nextStepButton.innerHTML = "Task completed";
-    nextStepButton.disabled = true;
-  } else {
-    nextStepButton.innerHTML = taskProgressSteps[currentStepIndex + 1];
-    nextStepButton.disabled = false;
-  }
-}
-
-function connectNextStepButton(selectedTask) {
-  var nextStepButton = document.getElementById("performerNextStepButton");
-
-  if (nextStepButton == null) {
-    return;
-  }
-
-  nextStepButton.onclick = function () {
-    var currentStepIndex = getTaskProgressIndex(selectedTask.work_status);
-
-    if (currentStepIndex >= taskProgressSteps.length - 1) {
-      return;
-    }
-
-    selectedTask.work_status = taskProgressSteps[currentStepIndex + 1];
-    updateTaskStateByWorkStatus(selectedTask);
-    ensureTaskChatParticipants(selectedTask);
-
-    updateTaskOnServer(selectedTask)
-      .then(() => {
-        if (typeof addTaskChatSystemMessage == "function") {
-          addTaskChatSystemMessage(
-            selectedTask,
-            "Performer finished the step of: " + selectedTask.work_status,
-          );
-        }
-
-        if (selectedTask.work_status == "Task completed") {
-          createTaskCompletionNotification(selectedTask);
-        }
-
-        document.getElementById("taskDetailsStatus").innerHTML =
-          selectedTask.state;
-        document.getElementById("taskDetailsStatus").className = getStatusClass(
-          selectedTask.state,
-        );
-        renderPerformerProgress(selectedTask);
-        updateTaskPageByRole(selectedTask);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
-}
-
-function createTaskCompletionNotification(selectedTask) {
-  if (typeof addNotification != "function") {
-    return;
-  }
-
-  addNotification({
-    toRole: "Requester",
-    type: "task-completion",
-    task_id: selectedTask.id,
-    task_title: selectedTask.title,
-    performer_name: selectedTask.performer_name || getCurrentUserName("Performer"),
-    title: "Task completion",
-    message: selectedTask.title + " has been marked as finished.",
-  });
-}
-
-function updateTaskPageByRole(selectedTask) {
-  var performerItems = document.getElementsByClassName("performerOnly");
-  var activeItems = document.getElementsByClassName("performerActiveOnly");
-  var availableItems = document.getElementsByClassName(
-    "performerAvailableOnly",
-  );
-  var requesterItems = document.getElementsByClassName("requesterOnly");
-  var isPerformerTaskPage = userRole == "Performer";
-  var isTakenTask =
-    selectedTask.performer_id != null && selectedTask.performer_id != "";
-  var hasChatParticipants = taskHasChatParticipants(selectedTask);
-
-  for (var i = 0; i < performerItems.length; i++) {
-    if (isPerformerTaskPage) {
-      performerItems[i].style.display = getTaskElementDisplay(
-        performerItems[i],
-      );
-    } else {
-      performerItems[i].style.display = "none";
-    }
-  }
-
-  for (var j = 0; j < activeItems.length; j++) {
-    activeItems[j].style.display =
-      isPerformerTaskPage && isTakenTask
-        ? getTaskElementDisplay(activeItems[j])
-        : "none";
-  }
-
-  for (var k = 0; k < availableItems.length; k++) {
-    availableItems[k].style.display =
-      isPerformerTaskPage && isTakenTask == false
-        ? getTaskElementDisplay(availableItems[k])
-        : "none";
-  }
-
-  for (var m = 0; m < requesterItems.length; m++) {
-    if (requesterItems[m].className.indexOf("communicationPanel") != -1) {
-      requesterItems[m].style.display = hasChatParticipants
-        ? getTaskElementDisplay(requesterItems[m])
-        : "none";
-    } else {
-      requesterItems[m].style.display =
-        isPerformerTaskPage && isTakenTask == false ? "none" : "flex";
-    }
-  }
-}
-
-function taskHasChatParticipants(task) {
-  return (
-    task.requester_name != null &&
-    task.requester_name != "" &&
-    task.performer_name != null &&
-    task.performer_name != ""
-  );
-}
-
-function ensureTaskChatParticipants(task) {
-  if (task.performer_id == null || task.performer_id == "") {
-    return;
-  }
-
-  if (task.requester_name == null || task.requester_name == "") {
-    task.requester_name = getCurrentUserName("Requester");
-  }
-
-  if (task.performer_name == null || task.performer_name == "") {
-    task.performer_name = getCurrentUserName("Performer");
-  }
-}
-
-function getTaskElementDisplay(element) {
-  if (element.className.indexOf("performerProgressPanel") != -1) {
-    return "grid";
-  }
-
-  if (element.className.indexOf("communicationPanel") != -1) {
-    return "flex";
-  }
-
-  return "block";
-}
-
-function connectTakeTaskButton(selectedTask) {
-  var takeTaskButton = document.getElementById("performerTakeTaskButton");
-  var taskChatButton = document.getElementById("taskChatButton");
-
-  if (taskChatButton != null) {
-    taskChatButton.onclick = function () {
-      if (
-        taskHasChatParticipants(selectedTask) &&
-        typeof openCurrentTaskChat == "function"
-      ) {
-        openCurrentTaskChat(selectedTask);
-      }
-    };
-  }
-
-  if (takeTaskButton == null) {
-    return;
-  }
-
-  takeTaskButton.onclick = function () {
-    selectedTask.performer_id =
-      selectedTask.performer_id || getCurrentUserId(2);
-    selectedTask.requester_name =
-      selectedTask.requester_name || getCurrentUserName("Requester");
-    selectedTask.performer_name =
-      selectedTask.performer_name || getCurrentUserName("Performer");
-    selectedTask.work_status = "Task accepted";
-    updateTaskStateByWorkStatus(selectedTask);
-
-    updateTaskOnServer(selectedTask)
-      .then(function () {
-        if (typeof createTaskChat == "function") {
-          createTaskChat(selectedTask);
-        }
-
-        localStorage.setItem("userRole", "Performer");
-        window.location.href = "performer.html";
-      })
-      .catch(function (error) {
-        console.log(error.message);
-      });
-  };
-}
-
-function createTaskAcceptedNotifications(selectedTask) {
-    if (typeof addNotification != "function") {
-        return;
-    }
-
-    var performerName = selectedTask.performerName || "John Designer";
-
-    addNotification({
-        toRole: "Requester",
-        type: "task-accepted",
-        taskId: selectedTask.id,
-        taskTitle: selectedTask.taskTitle,
-        performerName: performerName,
-        title: "Task accepted",
-        message: performerName + " accepted your task " + selectedTask.taskTitle + " and confirmed responsibility for it."
-    });
-
-    addNotification({
-        toRole: "Performer",
-        type: "performer-task-responsibility",
-        taskId: selectedTask.id,
-        taskTitle: selectedTask.taskTitle,
-        title: "Task responsibility",
-        message: "You accepted " + selectedTask.taskTitle + ". Contact the requester in the chat for any additional task details."
-    });
-}
-
-function openPerformerAcceptedTaskModal(selectedTask) {
-    if (document.getElementById("performerAcceptedTaskMessage") == null) {
-        window.location.href = "performer.html";
-        return;
-    }
-
-    document.getElementById("performerAcceptedTaskMessage").innerHTML =
-        "<b>" + selectedTask.taskTitle + "</b> is now your responsibility. Please contact the Requester through the chat for additional task details.";
-    document.getElementById("performerAcceptedTaskOverlay").style.display = "block";
-    document.getElementById("performerAcceptedTaskModal").style.display = "block";
-}
-
 function renderMyTasks(tasks) {
   var myTasksList = document.getElementById("myTasksList");
 
@@ -598,7 +259,9 @@ function renderMyTasks(tasks) {
       '">Status: ' +
       tasks[i].state +
       "</span>" +
-      '<input type="button" value="Open">' +
+      '<input type="button" value="Open" onclick="window.location.href=\'task.html?id=' +
+      tasks[i].id +
+      "'\">" +
       "</div>";
   }
 }
@@ -853,6 +516,5 @@ function checkTask() {
 }
 
 function checkPayment() {
-  /* showScreen("profileScreen"); */
   return false;
 }

@@ -135,7 +135,6 @@
 .taskDescriptionPanel h3,
 .taskSideCard h3,
 .communicationPanel h3 {
-  margin-top: 0;
   color: #3f3327;
 }
 
@@ -191,7 +190,6 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 26px;
 }
 
 .requesterAvatar {

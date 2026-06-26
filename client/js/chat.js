@@ -3,6 +3,15 @@ var activeChatTaskId = null;
 var chatApiUrl = "http://localhost:5000/api/chat";
 var chatMessagesByTask = {};
 
+function taskHasChatParticipants(task) {
+  return (
+    task.requester_name != null &&
+    task.requester_name != "" &&
+    task.performer_name != null &&
+    task.performer_name != ""
+  );
+}
+
 function ensureChatLayout() {
   if (document.getElementById("chatDrawer") != null) {
     connectChatActions();
