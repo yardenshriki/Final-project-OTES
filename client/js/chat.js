@@ -685,6 +685,23 @@ function createTaskChat(task) {
   return createChatFromTask(task);
 }
 
+function removeTaskChat(taskId) {
+  delete chatMessagesByTask[taskId];
+  delete taskChatsCache[taskId];
+  localStorage.setItem("removedTaskChat_" + taskId, new Date().toISOString());
+
+  if (activeChatTaskId == taskId) {
+    activeChatTaskId = null;
+
+    if (document.getElementById("chatDrawer") != null) {
+      showChatListView();
+    }
+  }
+
+  renderChatList();
+  updateChatUnreadBadge();
+}
+
 function createChatFromTask(task) {
   var chat = {
     taskId: task.id,

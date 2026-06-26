@@ -95,6 +95,14 @@ function isWithinCancelWindow(taskId) {
   return (nowTime - acceptedTime) < performerCancelWindowMinutes * 60 * 1000;
 }
 
+function canPerformerCancelTask(selectedTask) {
+  return (
+    selectedTask != null &&
+    selectedTask.work_status == "Task accepted" &&
+    isWithinCancelWindow(selectedTask.id)
+  );
+}
+
 function goBack() {
   if (userRole == "Performer") {
     window.location.href = "performer.html";
@@ -307,7 +315,7 @@ function updateTaskPageByRole(selectedTask) {
   var performerCancelPanel = document.getElementById("performerCancelTaskPanel");
   if (performerCancelPanel != null) {
     performerCancelPanel.style.display =
-      isPerformerTaskPage && isTakenTask && isWithinCancelWindow(selectedTask.id)
+      isPerformerTaskPage && isTakenTask && canPerformerCancelTask(selectedTask)
         ? "block"
         : "none";
   }
@@ -409,11 +417,18 @@ function connectPerformerCancelButton(selectedTask) {
   }
 
   cancelButton.onclick = function () {
+    if (canPerformerCancelTask(selectedTask) == false) {
+      return;
+    }
+
     openCancelModal(selectedTask);
     var confirmButton = document.getElementById("confirmCancelTaskButton");
     if (confirmButton != null) {
       confirmButton.onclick = function () {
         cancelTakenTaskByPerformer(selectedTask.id);
+        if (typeof removeTaskChat == "function") {
+          removeTaskChat(selectedTask.id);
+        }
         updateTaskOnServer(Object.assign({}, selectedTask, {
           state: "open",
           work_status: "Available",
@@ -496,6 +511,13 @@ function connectTakeTaskButton(selectedTask) {
       .then(function () {
         if (typeof createTaskChat == "function") {
           createTaskChat(selectedTask);
+        }
+
+        if (typeof addTaskChatSystemMessage == "function") {
+          addTaskChatSystemMessage(
+            selectedTask,
+            "Task accepted by " + selectedTask.performer_name,
+          );
         }
 
         localStorage.setItem("pendingChatTaskId", String(selectedTask.id));
