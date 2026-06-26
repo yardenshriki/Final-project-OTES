@@ -1,6 +1,177 @@
 //yarden shriki, lior zahavi
-var selectedNotificationId = null;
+var notificationsApiUrl = "http://localhost:5000/api/notification";
 var notificationTasksApiUrl = "http://localhost:5000/api/tasks";
+var notificationUsersApiUrl = "http://localhost:5000/api/users";
+var notificationsCache = [];
+var selectedNotificationId = null;
+var selectedNotificationData = null;
+
+function getCurrentNotificationUserId() {
+    return String(localStorage.getItem("loggedInUserId") || "");
+}
+
+function getNotifications() {
+    return notificationsCache;
+}
+
+async function fetchUserNotifications() {
+    var userId = getCurrentNotificationUserId();
+    if (userId == "" || userId == "null") return [];
+
+    try {
+        var response = await fetch(notificationsApiUrl + "/user/" + userId);
+        if (!response.ok) return [];
+        notificationsCache = await response.json();
+        return notificationsCache;
+    } catch (e) {
+        return [];
+    }
+}
+
+async function addNotification(notification) {
+    var userId = notification.toUserId ||
+        notification.user_id ||
+        notification.userId ||
+        null;
+
+    if (userId == null || userId == "") return;
+
+    try {
+        await fetch(notificationsApiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: userId,
+                task_id: notification.task_id || null,
+                type: notification.type || "general",
+                title: notification.title,
+                message: notification.message,
+            })
+        });
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
+    } catch (e) {
+        console.log(e.message);
+    }
+}
+
+function getNotificationDateText() {
+    var today = new Date();
+    var month = today.getMonth() + 1;
+    var day = today.getDate();
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+    return today.getFullYear() + "-" + month + "-" + day;
+}
+
+function shouldShowNotificationInMailbox(notification) {
+    return notification.type == "payment-success" ||
+        notification.type == "task-cancelled" ||
+        notification.type == "task-accepted" ||
+        notification.type == "performer-task-responsibility" ||
+        notification.type == "performer-task-cancelled" ||
+        notification.type == "report-sent";
+}
+
+function getCurrentRoleNotifications() {
+    var result = [];
+    for (var i = 0; i < notificationsCache.length; i++) {
+        if (shouldShowNotificationInMailbox(notificationsCache[i])) {
+            result.push(notificationsCache[i]);
+        }
+    }
+    return result;
+}
+
+async function refreshMailbox() {
+    await fetchUserNotifications();
+    updateMailBadge();
+    renderMailList();
+}
+
+async function openPendingTaskCompletionNotification() {
+    var pending = null;
+    for (var i = 0; i < notificationsCache.length; i++) {
+        if (notificationsCache[i].type == "task-completion" && !notificationsCache[i].is_read) {
+            pending = notificationsCache[i];
+            break;
+        }
+    }
+
+    if (pending == null) return;
+
+    if (pending.task_id) {
+        try {
+            var task = await fetch(notificationTasksApiUrl + "/" + pending.task_id).then(function (r) { return r.json(); });
+            pending.performer_id = task.performer_id;
+            pending.requester_id = task.requester_id || pending.user_id;
+            pending.amount = task.payment;
+
+            if (task.performer_id) {
+                var performer = await fetch(notificationUsersApiUrl + "/" + task.performer_id).then(function (r) { return r.json(); });
+                pending.performer_name = performer.full_name || "";
+            }
+        } catch (e) {}
+    }
+
+    try {
+        await fetch(notificationsApiUrl + "/" + pending.id + "/read", { method: "PATCH" });
+        for (var j = 0; j < notificationsCache.length; j++) {
+            if (notificationsCache[j].id == pending.id) {
+                notificationsCache[j].is_read = 1;
+            }
+        }
+    } catch (e) {}
+
+    openTaskCompletionModal(pending);
+}
+
+function updateMailBadge() {
+    var badge = document.getElementById("mailUnreadBadge");
+    if (badge == null) return;
+
+    var notifications = getCurrentRoleNotifications();
+    var unreadCount = 0;
+    for (var i = 0; i < notifications.length; i++) {
+        if (!notifications[i].is_read) unreadCount++;
+    }
+
+    badge.innerHTML = unreadCount;
+    badge.style.display = unreadCount > 0 ? "block" : "none";
+}
+
+function renderMailList() {
+    var mailList = document.getElementById("mailList");
+    if (mailList == null) return;
+
+    var notifications = getCurrentRoleNotifications();
+    mailList.innerHTML = "";
+
+    if (notifications.length == 0) {
+        mailList.innerHTML = '<div class="emptyMailbox">No messages yet</div>';
+        return;
+    }
+
+    for (var i = notifications.length - 1; i >= 0; i--) {
+        var className = "mailItem";
+        if (!notifications[i].is_read) className += " mailItemUnread";
+        mailList.innerHTML += createNotificationItem(notifications[i], className);
+    }
+}
+
+function createNotificationItem(notification, className) {
+    var receiptButton = "";
+    if (notification.type == "payment-success") {
+        receiptButton = '<button type="button" class="receiptDownloadButton" onclick="downloadReceipt(' + notification.id + ', event)">Download Receipt</button>';
+    }
+
+    return '<div class="' + className + '" onclick="openNotification(' + notification.id + ')">' +
+        '<h4>' + (notification.title || "") + '</h4>' +
+        '<p>' + (notification.message || "") + '</p>' +
+        receiptButton +
+        '<small>' + (notification.created_at || "") + '</small>' +
+        '</div>';
+}
 
 function ensureNotificationLayout() {
     var appHeader = document.getElementById("appHeader");
@@ -59,7 +230,6 @@ function ensureNotificationLayout() {
             '<p class="completionNote">* Clicking "YES" will transfer the payment to the performer immediately.</p>' +
             '</section>');
     }
-
 }
 
 function placeHeaderIcon(appHeader, previousElement, iconButton) {
@@ -67,182 +237,9 @@ function placeHeaderIcon(appHeader, previousElement, iconButton) {
         appHeader.insertBefore(iconButton, previousElement.nextSibling);
         return;
     }
-
     if (previousElement == null && iconButton.parentNode == null) {
         appHeader.appendChild(iconButton);
     }
-}
-
-function getNotifications() {
-    var savedNotifications = localStorage.getItem("notifications");
-
-    if (savedNotifications == null || savedNotifications == "") {
-        return [];
-    }
-
-    return JSON.parse(savedNotifications);
-}
-
-function saveNotifications(notifications) {
-    localStorage.setItem("notifications", JSON.stringify(notifications));
-}
-
-function addNotification(notification) {
-    var notifications = getNotifications();
-    notification.id = Date.now();
-    notification.is_read = false;
-    notification.created_at = getNotificationDateText();
-    notifications.push(notification);
-    saveNotifications(notifications);
-    refreshMailbox();
-    openPendingTaskCompletionNotification();
-}
-
-function getCurrentNotificationUserId() {
-    return String(localStorage.getItem("loggedInUserId") || "");
-}
-
-function getNotificationTargetUserId(notification) {
-    return notification.toUserId ||
-        notification.to_user_id ||
-        notification.user_id ||
-        notification.requester_id ||
-        null;
-}
-
-function notificationBelongsToCurrentUser(notification) {
-    var currentUserId = getCurrentNotificationUserId();
-    var targetUserId = getNotificationTargetUserId(notification);
-
-    if (targetUserId != null && targetUserId != "") {
-        return String(targetUserId) == currentUserId;
-    }
-
-    return notification.toRole == userRole;
-}
-
-function getNotificationDateText() {
-    var today = new Date();
-    var month = today.getMonth() + 1;
-    var day = today.getDate();
-
-    if (month < 10) {
-        month = "0" + month;
-    }
-
-    if (day < 10) {
-        day = "0" + day;
-    }
-
-    return today.getFullYear() + "-" + month + "-" + day;
-}
-
-function getCurrentRoleNotifications() {
-    var notifications = getNotifications();
-    var roleNotifications = [];
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notificationBelongsToCurrentUser(notifications[i]) && shouldShowNotificationInMailbox(notifications[i])) {
-            roleNotifications.push(notifications[i]);
-        }
-    }
-
-    return roleNotifications;
-}
-
-function shouldShowNotificationInMailbox(notification) {
-    return notification.type == "payment-success" ||
-        notification.type == "task-cancelled" ||
-        notification.type == "task-accepted" ||
-        notification.type == "performer-task-responsibility" ||
-        notification.type == "performer-task-cancelled";
-}
-
-function refreshMailbox() {
-    updateMailBadge();
-    renderMailList();
-}
-
-function openPendingTaskCompletionNotification() {
-    var notifications = getNotifications();
-    var pendingNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notificationBelongsToCurrentUser(notifications[i]) && notifications[i].type == "task-completion" && notifications[i].resolved != true) {
-            notifications[i].is_read = true;
-            pendingNotification = notifications[i];
-            break;
-        }
-    }
-
-    if (pendingNotification == null) {
-        return;
-    }
-
-    saveNotifications(notifications);
-    refreshMailbox();
-    openTaskCompletionModal(pendingNotification);
-}
-
-function updateMailBadge() {
-    var badge = document.getElementById("mailUnreadBadge");
-
-    if (badge == null) {
-        return;
-    }
-
-    var notifications = getCurrentRoleNotifications();
-    var unreadCount = 0;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].is_read == false) {
-            unreadCount++;
-        }
-    }
-
-    badge.innerHTML = unreadCount;
-    badge.style.display = unreadCount > 0 ? "block" : "none";
-}
-
-function renderMailList() {
-    var mailList = document.getElementById("mailList");
-
-    if (mailList == null) {
-        return;
-    }
-
-    var notifications = getCurrentRoleNotifications();
-    mailList.innerHTML = "";
-
-    if (notifications.length == 0) {
-        mailList.innerHTML = '<div class="emptyMailbox">No messages yet</div>';
-        return;
-    }
-
-    for (var i = notifications.length - 1; i >= 0; i--) {
-        var className = "mailItem";
-
-        if (notifications[i].is_read == false) {
-            className += " mailItemUnread";
-        }
-
-        mailList.innerHTML += createNotificationItem(notifications[i], className);
-    }
-}
-
-function createNotificationItem(notification, className) {
-    var receiptButton = "";
-
-    if (notification.type == "payment-success") {
-        receiptButton = '<button type="button" class="receiptDownloadButton" onclick="downloadReceipt(' + notification.id + ', event)">Download Receipt</button>';
-    }
-
-    return '<div class="' + className + '" onclick="openNotification(' + notification.id + ')">' +
-        '<h4>' + notification.title + '</h4>' +
-        '<p>' + notification.message + '</p>' +
-        receiptButton +
-        '<small>' + notification.created_at + '</small>' +
-        '</div>';
 }
 
 function openMailbox() {
@@ -256,28 +253,25 @@ function closeMailbox() {
     document.getElementById("mailDrawer").style.display = "none";
 }
 
-function openNotification(notificationId) {
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == notificationId) {
-            notifications[i].is_read = true;
-            selectedNotification = notifications[i];
+async function openNotification(notificationId) {
+    try {
+        await fetch(notificationsApiUrl + "/" + notificationId + "/read", { method: "PATCH" });
+        for (var i = 0; i < notificationsCache.length; i++) {
+            if (notificationsCache[i].id == notificationId) {
+                notificationsCache[i].is_read = 1;
+            }
         }
-    }
+    } catch (e) {}
 
-    saveNotifications(notifications);
-    refreshMailbox();
-
-    if (selectedNotification != null && selectedNotification.type == "task-completion" && selectedNotification.resolved != true) {
-        openTaskCompletionModal(selectedNotification);
-    }
+    updateMailBadge();
+    renderMailList();
 }
 
 function openTaskCompletionModal(notification) {
     selectedNotificationId = notification.id;
-    document.getElementById("taskCompletionMessage").innerHTML = '<b>' + notification.task_title + '</b> has been marked as finished.';
+    selectedNotificationData = notification;
+    document.getElementById("taskCompletionMessage").innerHTML =
+        '<b>' + (notification.task_title || "") + '</b> has been marked as finished.';
     document.getElementById("messageModalOverlay").style.display = "block";
     document.getElementById("taskCompletionModal").style.display = "block";
 }
@@ -286,90 +280,55 @@ function closeTaskCompletionModal() {
     document.getElementById("messageModalOverlay").style.display = "none";
     document.getElementById("taskCompletionModal").style.display = "none";
     selectedNotificationId = null;
+    selectedNotificationData = null;
 }
 
 async function resolveTaskCompletion(decisionText) {
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == selectedNotificationId) {
-            selectedNotification = notifications[i];
-            notifications[i].resolved = true;
-            notifications[i].decision = decisionText;
-        }
-    }
-
-    saveNotifications(notifications);
+    var notification = selectedNotificationData;
 
     closeTaskCompletionModal();
 
-    if (selectedNotification != null) {
+    if (notification != null) {
         if (decisionText == "approved") {
-            await approveTaskCompletion(selectedNotification);
+            await approveTaskCompletion(notification);
         } else {
-            await rejectTaskCompletion(selectedNotification);
+            await rejectTaskCompletion(notification);
         }
     }
 
-    refreshMailbox();
+    await refreshMailbox();
 }
 
-async function approveTaskCompletion(selectedNotification) {
+async function approveTaskCompletion(notification) {
     var paymentWasCreated = false;
 
     if (typeof addPaymentSuccessNotification == "function") {
-        paymentWasCreated = await addPaymentSuccessNotification(selectedNotification);
+        paymentWasCreated = await addPaymentSuccessNotification(notification);
     }
 
     if (paymentWasCreated == true && typeof openRatingModal == "function") {
-        openRatingModal(selectedNotification);
+        openRatingModal(notification);
     }
 }
 
-async function rejectTaskCompletion(selectedNotification) {
-    await reopenTaskAfterRejectedCompletion(selectedNotification.task_id);
-    goToReportPage(selectedNotification);
-}
-
-async function getTaskForNotification(taskId) {
-    var response = await fetch(notificationTasksApiUrl + "/" + taskId);
-    var task = await response.json();
-
-    if (response.status < 200 || response.status >= 300) {
-        throw new Error(task.message || "Failed to load task");
-    }
-
-    return task;
-}
-
-async function updateTaskForNotification(task) {
-    var response = await fetch(notificationTasksApiUrl + "/" + task.id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(task),
-    });
-    var result = await response.json();
-
-    if (response.status < 200 || response.status >= 300) {
-        throw new Error(result.message || "Failed to update task");
-    }
-
-    return result;
+async function rejectTaskCompletion(notification) {
+    await reopenTaskAfterRejectedCompletion(notification.task_id);
+    goToReportPage(notification);
 }
 
 async function reopenTaskAfterRejectedCompletion(taskId) {
-    if (taskId == null || taskId == "") {
-        return;
-    }
+    if (taskId == null || taskId == "") return;
 
     try {
-        var task = await getTaskForNotification(taskId);
+        var response = await fetch(notificationTasksApiUrl + "/" + taskId);
+        var task = await response.json();
         task.state = "in-progress";
         task.work_status = "Finalizing the task";
-        await updateTaskForNotification(task);
+        await fetch(notificationTasksApiUrl + "/" + task.id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(task),
+        });
     } catch (error) {
         console.log(error.message);
     }
@@ -377,15 +336,12 @@ async function reopenTaskAfterRejectedCompletion(taskId) {
 
 function goToReportPage(notification) {
     var reportUrl = "report.html?task_id=" + encodeURIComponent(notification.task_id || "");
-
     if (notification.task_title != null) {
         reportUrl += "&task_title=" + encodeURIComponent(notification.task_title);
     }
-
     if (notification.performer_id != null) {
         reportUrl += "&reported_user_id=" + encodeURIComponent(notification.performer_id);
     }
-
     window.location.href = reportUrl;
 }
 
@@ -396,37 +352,23 @@ function connectMailboxActions() {
     var approveButton = document.getElementById("approveCompletionButton");
     var rejectButton = document.getElementById("rejectCompletionButton");
 
-    if (mailButton != null) {
-        mailButton.onclick = openMailbox;
-    }
-
-    if (closeMailButton != null) {
-        closeMailButton.onclick = closeMailbox;
-    }
-
-    if (mailOverlay != null) {
-        mailOverlay.onclick = closeMailbox;
-    }
+    if (mailButton != null) mailButton.onclick = openMailbox;
+    if (closeMailButton != null) closeMailButton.onclick = closeMailbox;
+    if (mailOverlay != null) mailOverlay.onclick = closeMailbox;
 
     if (approveButton != null) {
-        approveButton.onclick = function () {
-            resolveTaskCompletion("approved");
-        };
+        approveButton.onclick = function () { resolveTaskCompletion("approved"); };
     }
-
     if (rejectButton != null) {
-        rejectButton.onclick = function () {
-            resolveTaskCompletion("not-approved");
-        };
+        rejectButton.onclick = function () { resolveTaskCompletion("not-approved"); };
     }
-
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(function () {
+    setTimeout(async function () {
         ensureNotificationLayout();
         connectMailboxActions();
-        refreshMailbox();
-        openPendingTaskCompletionNotification();
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
     }, 200);
 });

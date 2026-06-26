@@ -152,13 +152,21 @@ async function downloadReceipt(notificationId, event) {
         }
     }
 
-    if (selectedNotification == null || selectedNotification.payment_id == null) {
-        console.log("Missing payment id for receipt");
+    if (selectedNotification == null || selectedNotification.task_id == null) {
+        console.log("Missing task_id for receipt");
         return;
     }
 
     try {
-        var receipt = await getPaymentReceiptFromServer(selectedNotification.payment_id);
+        var paymentsResponse = await fetch(paymentsApiUrl + "/task/" + selectedNotification.task_id);
+        var payments = await paymentsResponse.json();
+
+        if (!payments || payments.length == 0) {
+            console.log("No payment found for task");
+            return;
+        }
+
+        var receipt = await getPaymentReceiptFromServer(payments[0].id);
         saveReceiptFile(receipt);
     } catch (error) {
         console.log(error.message);
