@@ -1,5 +1,6 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var SIGNUP_API_URL = "http://localhost:5000/api/users";
+var signupProfilePictureData = "";
 
 function setSignupError(inputName, errorName, text) {
     document.getElementById(inputName).style.borderColor = "red";
@@ -254,86 +255,57 @@ function checkSignup() {
         return false;
     }
 
-    showScreen("paymentScreen");
+    readProfilePictureFile("profilePicture", function (imageData) {
+        signupProfilePictureData = imageData;
+        showScreen("paymentScreen");
+    }, function (message) {
+        setSignupError("profilePicture", "profilePictureError", message);
+        showMessage("signupMessage", message);
+    });
+
     return false;
 }
 
 function checkPayment() {
-    var cardHolder = document.getElementById("cardHolder").value;
-    var cardNumber = document.getElementById("cardNumber").value;
-    var expiryMonth = document.getElementById("expiryMonth").value;
-    var expiryYear = document.getElementById("expiryYear").value;
-    var cvv = document.getElementById("cvv").value;
     var receipts = document.getElementById("receipts").checked;
     var notifications = document.getElementById("notifications").checked;
     var policy = document.getElementById("policy").checked;
-    var hasError = false;
+    var isCardValid = false;
 
     clearMessage("paymentMessage");
     clearPaymentErrors();
 
-    if (cardHolder == "") {
-        setSignupError("cardHolder", "cardHolderError", "Card holder name is required");
-        hasError = true;
-    }
-
-    if (cardNumber == "") {
-        setSignupError("cardNumber", "cardNumberError", "Card number is required");
-        hasError = true;
-    } else {
-        if (cardNumber.length != 16) {
-            setSignupError("cardNumber", "cardNumberError", "Card number must contain 16 digits");
-            hasError = true;
-        } else {
-            if (!isDigits(cardNumber)) {
-                setSignupError("cardNumber", "cardNumberError", "Card number must contain digits only");
-                hasError = true;
-            }
+    isCardValid = saveCardDetails({
+        validateOnly: true,
+        messageId: "paymentMessage",
+        fieldIds: {
+            cardHolder: "cardHolder",
+            cardNumber: "cardNumber",
+            expiryMonth: "expiryMonth",
+            expiryYear: "expiryYear",
+            cvv: "cvv"
+        },
+        errorIds: {
+            cardHolder: "cardHolderError",
+            cardNumber: "cardNumberError",
+            expiryMonth: "expiryMonthError",
+            expiryYear: "expiryYearError",
+            cvv: "cvvError"
         }
-    }
-
-    if (expiryMonth == "") {
-        setSignupError("expiryMonth", "expiryMonthError", "Expiry month is required");
-        hasError = true;
-    }
-
-    if (expiryYear == "") {
-        setSignupError("expiryYear", "expiryYearError", "Expiry year is required");
-        hasError = true;
-    }
-
-    if (cvv == "") {
-        setSignupError("cvv", "cvvError", "CVV is required");
-        hasError = true;
-    } else {
-        if (cvv.length != 3 && cvv.length != 4) {
-            setSignupError("cvv", "cvvError", "CVV must contain 3 or 4 digits");
-            hasError = true;
-        } else {
-            if (!isDigits(cvv)) {
-                setSignupError("cvv", "cvvError", "CVV must contain digits only");
-                hasError = true;
-            }
-        }
-    }
+    });
 
     if (receipts == false || notifications == false || policy == false) {
         showMessage("paymentMessage", "Please approve all permissions and terms");
-        hasError = true;
+        return false;
     }
 
-    if (hasError == true) {
-        if (document.getElementById("paymentMessage").innerHTML == "") {
-            showMessage("paymentMessage", "Please fix the fields marked in red");
-        }
-
+    if (isCardValid == false) {
         return false;
     }
 
     createSignupUser();
     return false;
 }
-
 function createSignupUser() {
     clearMessage("paymentMessage");
 
@@ -364,13 +336,6 @@ function createSignupUser() {
 
 function buildSignupRequest() {
     var email = document.getElementById("email").value.trim();
-    var profilePictureInput = document.getElementById("profilePicture");
-    var profilePicture = "";
-
-    if (profilePictureInput.files != null && profilePictureInput.files.length > 0) {
-        profilePicture = profilePictureInput.files[0].name;
-    }
-
     return {
         full_name: document.getElementById("fullName").value.trim(),
         username: buildSignupUsername(email),
@@ -379,7 +344,7 @@ function buildSignupRequest() {
         birth_date: document.getElementById("birthDate").value,
         phone_number: null,
         gender: document.getElementById("gender").value,
-        profile_picture: profilePicture,
+        profile_picture: signupProfilePictureData,
         role: "Requester"
     };
 }
@@ -400,14 +365,36 @@ function saveSignupUser(data) {
         full_name: fullName,
         username: username,
         email: email,
-        role: role
+        role: role,
+        profile_picture: signupProfilePictureData
     }));
     localStorage.setItem("loggedInUserId", data.userId || "");
     localStorage.setItem("loggedInUsername", username);
     localStorage.setItem("loggedInFullName", fullName);
     localStorage.setItem("loggedInEmail", email);
+    localStorage.setItem("loggedInProfilePicture", signupProfilePictureData);
     localStorage.setItem("userRole", role);
     localStorage.setItem("showWelcomePopup", "yes");
+
+    saveCardDetails({
+        username: username,
+        messageId: "paymentMessage",
+        showSuccess: false,
+        fieldIds: {
+            cardHolder: "cardHolder",
+            cardNumber: "cardNumber",
+            expiryMonth: "expiryMonth",
+            expiryYear: "expiryYear",
+            cvv: "cvv"
+        },
+        errorIds: {
+            cardHolder: "cardHolderError",
+            cardNumber: "cardNumberError",
+            expiryMonth: "expiryMonthError",
+            expiryYear: "expiryYearError",
+            cvv: "cvvError"
+        }
+    });
 }
 
 function getSignupErrorMessage(error) {
@@ -433,3 +420,7 @@ window.onload = function () {
 
     initSignupPage();
 };
+
+
+
+

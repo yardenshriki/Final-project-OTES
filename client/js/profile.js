@@ -1,4 +1,4 @@
-var PROFILE_API_BASE_URL = "http://localhost:5000/api";
+﻿var PROFILE_API_BASE_URL = "http://localhost:5000/api";
 var profileRole = localStorage.getItem("userRole") || "Requester";
 var profileData = {};
 var currentProfile = null;
@@ -304,13 +304,7 @@ function buildProfileUpdateRequest(password) {
 }
 
 function getServerProfilePictureValue() {
-    var image = currentProfile.image || "";
-
-    if (image.length <= 255) {
-        return image;
-    }
-
-    return "";
+    return currentProfile.image || "";
 }
 
 function updateCurrentProfileOnServer(password) {
@@ -333,7 +327,21 @@ function saveProfileLoginState() {
     localStorage.setItem("loggedInUsername", currentProfile.username);
     localStorage.setItem("loggedInFullName", currentProfile.name);
     localStorage.setItem("loggedInEmail", currentProfile.email);
+    localStorage.setItem("loggedInProfilePicture", currentProfile.image || currentProfile.profile_picture || "");
     localStorage.setItem("userRole", currentProfile.role || profileRole);
+
+    var currentUser = typeof getStoredHeaderUser == "function" ? getStoredHeaderUser() : {};
+    currentUser.id = currentProfile.id || currentUser.id;
+    currentUser.full_name = currentProfile.name;
+    currentUser.username = currentProfile.username;
+    currentUser.email = currentProfile.email;
+    currentUser.role = currentProfile.role || profileRole;
+    currentUser.profile_picture = currentProfile.image || currentProfile.profile_picture || "";
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    if (typeof refreshHeaderProfilePicture == "function") {
+        refreshHeaderProfilePicture();
+    }
 
     if (currentProfile.id != null && currentProfile.id != "") {
         localStorage.setItem("loggedInUserId", currentProfile.id);
@@ -606,79 +614,17 @@ function closeProfileUpdatedPopup() {
     }
 }
 
-function fillCardForm() {
-    var savedCard = localStorage.getItem("otesCard_" + getProfileStorageUsername());
-
-    if (savedCard == null || savedCard == "") {
-        return;
-    }
-
-    try {
-        var card = JSON.parse(savedCard);
-        setInputValue("cardNumber", card.maskedNumber || "");
-        setInputValue("cardHolder", card.cardHolder || "");
-        setInputValue("cardExpiry", card.expiry || "");
-    } catch (error) {
-    }
-}
-
-function saveCardDetails() {
-    var cardNumber = getInputValue("cardNumber").replace(/\s/g, "");
-    var cardHolder = getInputValue("cardHolder");
-    var cardExpiry = getInputValue("cardExpiry");
-    var cardCvv = getInputValue("cardCvv");
-
-    if (cardNumber.length != 16 || isNaN(cardNumber)) {
-        setProfileMessage("cardMessage", "Card number must contain 16 digits", false);
-        return false;
-    }
-
-    if (cardHolder == "" || cardExpiry == "" || cardCvv == "") {
-        setProfileMessage("cardMessage", "Please fill all card details", false);
-        return false;
-    }
-
-    if (cardCvv.length < 3 || cardCvv.length > 4 || isNaN(cardCvv)) {
-        setProfileMessage("cardMessage", "CVV must contain 3 or 4 digits", false);
-        return false;
-    }
-
-    localStorage.setItem("otesCard_" + getProfileStorageUsername(), JSON.stringify({
-        maskedNumber: "**** **** **** " + cardNumber.substring(12),
-        cardHolder: cardHolder,
-        expiry: cardExpiry,
-        savedAt: new Date().toISOString().substring(0, 10)
-    }));
-
-    setProfileMessage("cardMessage", "Card details saved successfully", true);
-    document.getElementById("cardCvv").value = "";
-    return false;
-}
-
-function getProfileStorageUsername() {
-    if (currentProfile != null && currentProfile.username != null) {
-        return currentProfile.username;
-    }
-
-    return localStorage.getItem("loggedInUsername") || "john_doe";
-}
-
 function previewProfileImage(file) {
-    if (file == null) {
-        return;
-    }
-
-    var reader = new FileReader();
-
-    reader.onload = function (event) {
-        uploadedProfileImage = event.target.result;
+    readProfilePictureFile("editProfilePicture", function (imageData) {
+        uploadedProfileImage = imageData;
         var previewProfile = {};
         copyProfileFields(previewProfile, currentProfile);
         previewProfile.image = uploadedProfileImage;
         renderProfileImage("editProfileImage", "editProfileInitials", previewProfile);
-    };
-
-    reader.readAsDataURL(file);
+        setProfileMessage("profileEditMessage", "", false);
+    }, function (message) {
+        setProfileMessage("profileEditMessage", message, false);
+    });
 }
 
 function setInputValue(id, value) {
@@ -859,6 +805,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+
+
+
 
 
 
