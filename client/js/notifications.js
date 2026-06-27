@@ -446,7 +446,7 @@ async function submitRating() {
     closeRatingModal();
 }
 
-function downloadReceipt(notificationId, event) {
+async function downloadReceipt(notificationId, event) {
     if (event != null) {
         event.stopPropagation();
     }
@@ -460,27 +460,20 @@ function downloadReceipt(notificationId, event) {
         }
     }
 
-    await refreshMailbox();
-}
-
-async function approveTaskCompletion(notification) {
-    var paymentWasCreated = false;
-
-    if (typeof addPaymentSuccessNotification == "function") {
-        paymentWasCreated = await addPaymentSuccessNotification(notification);
+    if (selectedNotification != null) {
+        var receiptText = "OTES Payment Receipt\n" +
+            "Task: " + (selectedNotification.task_title || "") + "\n" +
+            "Status: Payment transferred\n" +
+            "Date: " + (selectedNotification.created_at || "") + "\n";
+        var receiptFile = new Blob([receiptText], { type: "text/plain" });
+        var receiptLink = document.createElement("a");
+        receiptLink.href = URL.createObjectURL(receiptFile);
+        receiptLink.download = "receipt-" + (selectedNotification.task_id || notificationId) + ".txt";
+        receiptLink.click();
+        URL.revokeObjectURL(receiptLink.href);
     }
 
-    var receiptText = "OTES Payment Receipt\n" +
-        "Task: " + (selectedNotification.task_title || "") + "\n" +
-        "Status: Payment transferred\n" +
-        "Date: " + (selectedNotification.created_at || "") + "\n";
-    var receiptFile = new Blob([receiptText], { type: "text/plain" });
-    var receiptLink = document.createElement("a");
-
-    receiptLink.href = URL.createObjectURL(receiptFile);
-    receiptLink.download = "receipt-" + (selectedNotification.task_id || notificationId) + ".txt";
-    receiptLink.click();
-    URL.revokeObjectURL(receiptLink.href);
+    await refreshMailbox();
 }
 
 function connectMailboxActions() {
@@ -500,6 +493,9 @@ function connectMailboxActions() {
     if (rejectButton != null) {
         rejectButton.onclick = function () { resolveTaskCompletion("not-approved"); };
     }
+
+    var starButtons = document.querySelectorAll("#ratingStars button");
+    var submitRatingButton = document.getElementById("submitRatingButton");
 
     for (var i = 0; i < starButtons.length; i++) {
         starButtons[i].onclick = function () {
