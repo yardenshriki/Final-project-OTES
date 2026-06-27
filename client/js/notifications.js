@@ -226,8 +226,11 @@ function ensureNotificationLayout() {
     }
 
     if (document.getElementById("taskCompletionModal") == null) {
+        if (document.getElementById("messageModalOverlay") == null) {
+            document.body.insertAdjacentHTML("beforeend",
+                '<div id="messageModalOverlay" class="messageModalOverlay"></div>');
+        }
         document.body.insertAdjacentHTML("beforeend",
-            '<div id="messageModalOverlay" class="messageModalOverlay"></div>' +
             '<section id="taskCompletionModal" class="taskCompletionModal">' +
             '<div class="completionIcon">!</div>' +
             '<h2>TASK COMPLETION</h2>' +
@@ -263,6 +266,7 @@ function ensureNotificationLayout() {
             '<button type="button" id="submitRatingButton" class="submitRatingButton">Submit Rating</button>' +
             '</section>');
     }
+
 }
 
 function placeHeaderIcon(appHeader, previousElement, iconButton) {
@@ -456,8 +460,14 @@ function downloadReceipt(notificationId, event) {
         }
     }
 
-    if (selectedNotification == null) {
-        return;
+    await refreshMailbox();
+}
+
+async function approveTaskCompletion(notification) {
+    var paymentWasCreated = false;
+
+    if (typeof addPaymentSuccessNotification == "function") {
+        paymentWasCreated = await addPaymentSuccessNotification(notification);
     }
 
     var receiptText = "OTES Payment Receipt\n" +
@@ -479,8 +489,6 @@ function connectMailboxActions() {
     var mailOverlay = document.getElementById("mailOverlay");
     var approveButton = document.getElementById("approveCompletionButton");
     var rejectButton = document.getElementById("rejectCompletionButton");
-    var submitRatingButton = document.getElementById("submitRatingButton");
-    var starButtons = document.querySelectorAll("#ratingStars button");
 
     if (mailButton != null) mailButton.onclick = openMailbox;
     if (closeMailButton != null) closeMailButton.onclick = closeMailbox;
