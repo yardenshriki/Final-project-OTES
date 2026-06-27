@@ -5,6 +5,7 @@ var notificationUsersApiUrl = "http://localhost:5000/api/users";
 var notificationsCache = [];
 var selectedNotificationId = null;
 var selectedNotificationData = null;
+var taskCompletionModalOpen = false;
 
 function getCurrentNotificationUserId() {
     return String(localStorage.getItem("loggedInUserId") || "");
@@ -103,6 +104,7 @@ async function openPendingTaskCompletionNotification() {
     if (pending.task_id) {
         try {
             var task = await fetch(notificationTasksApiUrl + "/" + pending.task_id).then(function (r) { return r.json(); });
+            pending.task_title = task.title || "";
             pending.performer_id = task.performer_id;
             pending.requester_id = task.requester_id || pending.user_id;
             pending.amount = task.payment;
@@ -216,8 +218,11 @@ function ensureNotificationLayout() {
     }
 
     if (document.getElementById("taskCompletionModal") == null) {
+        if (document.getElementById("messageModalOverlay") == null) {
+            document.body.insertAdjacentHTML("beforeend",
+                '<div id="messageModalOverlay" class="messageModalOverlay"></div>');
+        }
         document.body.insertAdjacentHTML("beforeend",
-            '<div id="messageModalOverlay" class="messageModalOverlay"></div>' +
             '<section id="taskCompletionModal" class="taskCompletionModal">' +
             '<div class="completionIcon">!</div>' +
             '<h2>TASK COMPLETION</h2>' +
@@ -268,6 +273,8 @@ async function openNotification(notificationId) {
 }
 
 function openTaskCompletionModal(notification) {
+    if (taskCompletionModalOpen) return;
+    taskCompletionModalOpen = true;
     selectedNotificationId = notification.id;
     selectedNotificationData = notification;
     document.getElementById("taskCompletionMessage").innerHTML =
@@ -277,6 +284,7 @@ function openTaskCompletionModal(notification) {
 }
 
 function closeTaskCompletionModal() {
+    taskCompletionModalOpen = false;
     document.getElementById("messageModalOverlay").style.display = "none";
     document.getElementById("taskCompletionModal").style.display = "none";
     selectedNotificationId = null;
@@ -371,4 +379,9 @@ document.addEventListener("DOMContentLoaded", function () {
         await refreshMailbox();
         await openPendingTaskCompletionNotification();
     }, 200);
+
+    setInterval(async function () {
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
+    }, 5000);
 });
