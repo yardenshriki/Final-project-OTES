@@ -206,6 +206,33 @@ function fetchAdminEndpoint(path) {
         });
 }
 
+function sendAdminEndpoint(path, method, body) {
+    return fetch(ADMIN_API_BASE_URL + path, {
+        method: method,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    })
+        .then(function (response) {
+            return response.json().then(function (data) {
+                if (!response.ok) {
+                    throw data;
+                }
+
+                return data;
+            });
+        });
+}
+
+function postAdminEndpoint(path, body) {
+    return sendAdminEndpoint(path, "POST", body);
+}
+
+function patchAdminEndpoint(path, body) {
+    return sendAdminEndpoint(path, "PATCH", body);
+}
+
 function adminArray(data) {
     return Array.isArray(data) ? data : [];
 }
@@ -292,11 +319,61 @@ function normalizeServerReportStatus(status) {
         return "Closed";
     }
 
-    if (value == "in-review") {
-        return "Review";
+    if (value == "in-review" || value == "in_review" || value == "review") {
+        return "In Review";
     }
 
     return "New";
+}
+
+function getReportStatusRank(status) {
+    var value = normalizeAdminValue(status);
+
+    if (value == "new" || value == "open") {
+        return 0;
+    }
+
+    if (value == "in review" || value == "in-review" || value == "review") {
+        return 1;
+    }
+
+    if (value == "closed") {
+        return 2;
+    }
+
+    return 3;
+}
+
+function getReportStatusClass(status) {
+    var value = normalizeAdminValue(status);
+
+    if (value == "new" || value == "open") {
+        return "statusOpen";
+    }
+
+    if (value == "closed") {
+        return "statusDone";
+    }
+
+    return "statusProgress";
+}
+
+function getAdminUserStatusFromRole(role) {
+    var value = normalizeAdminValue(role);
+
+    if (value == "blocked") {
+        return "Blocked";
+    }
+
+    if (value == "immediate block") {
+        return "Immediate Block";
+    }
+
+    if (value == "suspended") {
+        return "Blocked";
+    }
+
+    return "Active";
 }
 
 function normalizeAdminReportsFromServer(reports) {
@@ -307,6 +384,8 @@ function normalizeAdminReportsFromServer(reports) {
             id: reports[i].id,
             date: formatAdminDateValue(reports[i].created_at),
             username: reports[i].reported_user_name || reports[i].reporter_name || "User " + reports[i].reporter_id,
+            reporterName: reports[i].reporter_name || "User " + reports[i].reporter_id,
+            reportedUserName: reports[i].reported_user_name || "User " + reports[i].reported_user_id,
             type: reports[i].reason || "Report",
             description: reports[i].description || reports[i].task_title || "",
             status: normalizeServerReportStatus(reports[i].status),
@@ -383,7 +462,9 @@ function normalizeAdminAnomaliesFromServer(reports, users, tasks, payments) {
     }
 
     for (var key in grouped) {
-        result.push(grouped[key]);
+        if (Number(grouped[key].reports) > 3) {
+            result.push(grouped[key]);
+        }
     }
 
     return result;
@@ -507,7 +588,8 @@ function normalizeAdminUsersFromServer(users, tasks, reports, payments) {
             earnings: earnings,
             joinDate: formatAdminDateValue(user.created_at),
             lastTask: lastTask,
-            status: "Active",
+            role: user.role || "",
+            status: getAdminUserStatusFromRole(user.role),
             tasks: userTasks,
             ratings: [],
             payments: userPayments,
@@ -636,18 +718,32 @@ function renderReports() {
     var body = document.getElementById("reportsTableBody");
     var search = document.getElementById("reportSearch").value.toLowerCase();
     var reports = adminData.reports.slice().sort(function (a, b) {
+        var statusDiff = getReportStatusRank(a.status) - getReportStatusRank(b.status);
+
+        if (statusDiff != 0) {
+            return statusDiff;
+        }
+
         return new Date(b.date) - new Date(a.date);
     });
 
     body.innerHTML = "";
 
     for (var i = 0; i < reports.length; i++) {
-        if ((reports[i].username + reports[i].description + reports[i].type).toLowerCase().indexOf(search) == -1) {
+        if ((reports[i].username + reports[i].reporterName + reports[i].reportedUserName + reports[i].description + reports[i].type).toLowerCase().indexOf(search) == -1) {
             continue;
         }
 
-        body.innerHTML += "<tr><td>" + cleanAdminText(reports[i].date) + "</td><td>" + cleanAdminText(reports[i].username) + "</td><td>" + cleanAdminText(reports[i].type) + "</td><td>" + cleanAdminText(reports[i].description) + "</td><td><span class='statusProgress'>" + cleanAdminText(reports[i].status) + "</span></td></tr>";
+        body.innerHTML += "<tr><td>" + cleanAdminText(reports[i].date) + "</td><td>" + getReportUserLink(reports[i].reporterId, reports[i].reporterName) + "</td><td>" + getReportUserLink(reports[i].reportedUserId, reports[i].reportedUserName) + "</td><td>" + cleanAdminText(reports[i].type) + "</td><td>" + cleanAdminText(reports[i].description) + "</td><td><span class='" + getReportStatusClass(reports[i].status) + "'>" + cleanAdminText(reports[i].status) + "</span></td></tr>";
     }
+}
+
+function getReportUserLink(userId, userName) {
+    if (userId == null || userId == "") {
+        return cleanAdminText(userName || "Unknown user");
+    }
+
+    return "<button type='button' class='tableLink' onclick='openAdminUserByDbId(\"" + cleanAdminText(userId) + "\", \"adminReportsSection\")'>" + cleanAdminText(userName || ("User " + userId)) + "</button>";
 }
 
 function renderAnomalies() {
@@ -739,6 +835,15 @@ function openAdminUserByUsername(username, backSection) {
     }
 }
 
+function openAdminUserByDbId(userId, backSection) {
+    for (var i = 0; i < adminData.users.length; i++) {
+        if (String(adminData.users[i].dbId) == String(userId) || String(adminData.users[i].idNumber) == String(userId)) {
+            openAdminUser(i, backSection || "adminReportsSection");
+            return;
+        }
+    }
+}
+
 function openAdminUser(index, backSection) {
     selectedAdminUser = adminData.users[index];
     adminProfileBackSection = backSection || "adminUsersSection";
@@ -804,6 +909,77 @@ function getTodayString() {
     return today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
 }
 
+function getSelectedUserReportReasonText() {
+    var history = selectedAdminUser && selectedAdminUser.reportHistory ? selectedAdminUser.reportHistory : [];
+
+    if (history.length == 0) {
+        return "Multiple reports were filed against your account.";
+    }
+
+    return history.join("\n");
+}
+
+function getWarningEmailText() {
+    return "Hello " + selectedAdminUser.name + ",\n\n" +
+        "A warning was issued for your account.\n" +
+        "Reason and details:\n" + getSelectedUserReportReasonText() + "\n\n" +
+        "Please resolve the reported issues. Continued exceptions may lead to account restriction or blocking.\n\n" +
+        "OTES Admin Team";
+}
+
+function getRestrictionRoleValue(type) {
+    return type == "Immediate Block" ? "Immediate Block" : "Blocked";
+}
+
+function getRestrictionMailboxText(type, duration, reason) {
+    var durationText = type == "Immediate Block" ? "Immediate" : (duration ? duration + " days" : "Not specified");
+
+    return "Hello " + selectedAdminUser.name + ",\n\n" +
+        "An admin decision was made regarding your account.\n" +
+        "Decision: " + getRestrictionRoleValue(type) + "\n" +
+        "Restriction type: " + type + "\n" +
+        "Duration: " + durationText + "\n" +
+        "Reason: " + (reason || "No reason entered") + "\n\n" +
+        "This decision affects your access to the OTES system.\n\n" +
+        "OTES Admin Team";
+}
+
+function markSelectedUserReportsInReview() {
+    if (!selectedAdminUser || selectedAdminUser.dbId == null || selectedAdminUser.dbId == "") {
+        return Promise.resolve();
+    }
+
+    var targetReportIndexes = [];
+    var updateRequests = [];
+
+    for (var i = 0; i < adminData.reports.length; i++) {
+        var report = adminData.reports[i];
+        var isReportedUser = String(report.reportedUserId) == String(selectedAdminUser.dbId);
+        var isNewReport = getReportStatusRank(report.status) == 0;
+
+        if (!isReportedUser || !isNewReport) {
+            continue;
+        }
+
+        targetReportIndexes.push(i);
+
+        if (report.id != null && report.id != "") {
+            updateRequests.push(patchAdminEndpoint("/report/" + report.id + "/status", {
+                status: "in-review"
+            }));
+        }
+    }
+
+    return Promise.all(updateRequests).then(function () {
+        for (var j = 0; j < targetReportIndexes.length; j++) {
+            adminData.reports[targetReportIndexes[j]].status = "In Review";
+        }
+
+        saveAdminData();
+        renderReports();
+    });
+}
+
 function openWarningEmailPage() {
     if (!selectedAdminUser) {
         return;
@@ -812,7 +988,7 @@ function openWarningEmailPage() {
     var previousWarning = selectedAdminUser.warningSent ? "A warning email was already sent on " + cleanAdminText(selectedAdminUser.warningDate) + "." : "No previous warning email was sent.";
     document.getElementById("warningExistingInfo").innerHTML = previousWarning;
     document.getElementById("warningUsername").value = selectedAdminUser.username;
-    document.getElementById("warningEmailText").value = "Hello " + selectedAdminUser.name + ",\n\nYour account has more than 3 reports filed. Please resolve the reported issues. Continued exceptions may lead to account restriction or blocking.\n\nOTES Admin Team";
+    document.getElementById("warningEmailText").value = getWarningEmailText();
     showAdminSection("adminWarningEmailSection");
 }
 
@@ -821,11 +997,40 @@ function sendWarningEmail() {
         return;
     }
 
-    selectedAdminUser.warningSent = true;
-    selectedAdminUser.warningDate = getTodayString();
-    saveAdminData();
-    document.getElementById("warningExistingInfo").innerHTML = "Warning email sent on " + selectedAdminUser.warningDate + ".";
-    renderUsers();
+    var warningTextElement = document.getElementById("warningEmailText");
+    var warningText = warningTextElement ? warningTextElement.value.trim() : "";
+
+    if (warningText == "") {
+        warningText = getWarningEmailText();
+    }
+
+    if (selectedAdminUser.dbId == null || selectedAdminUser.dbId == "") {
+        document.getElementById("warningExistingInfo").innerHTML = "Warning email could not be sent because this user has no database ID.";
+        return;
+    }
+
+    document.getElementById("warningExistingInfo").innerHTML = "Sending warning email...";
+
+    postAdminEndpoint("/notification", {
+        user_id: selectedAdminUser.dbId,
+        type: "report",
+        title: "Warning Email",
+        message: warningText
+    })
+        .then(function () {
+            return markSelectedUserReportsInReview();
+        })
+        .then(function () {
+            selectedAdminUser.warningSent = true;
+            selectedAdminUser.warningDate = getTodayString();
+            saveAdminData();
+            document.getElementById("warningExistingInfo").innerHTML = "Warning email sent on " + selectedAdminUser.warningDate + ". It was added to this user's mailbox.";
+            renderUsers();
+        })
+        .catch(function (error) {
+            var message = error && error.message ? error.message : "Failed to send warning email.";
+            document.getElementById("warningExistingInfo").innerHTML = message;
+        });
 }
 
 function openRestrictionEdit() {
@@ -879,15 +1084,56 @@ function approveRestriction() {
         return;
     }
 
-    selectedAdminUser.restrictionType = document.getElementById("restrictionTypeEdit").value;
-    selectedAdminUser.restrictionDuration = document.getElementById("restrictionDuration").value;
-    selectedAdminUser.restrictionReason = document.getElementById("restrictionReasonEdit").value;
-    selectedAdminUser.restrictionEmailSent = true;
-    selectedAdminUser.restrictionEmailDate = getTodayString();
-    selectedAdminUser.status = selectedAdminUser.restrictionType == "Immediate Block" ? "Immediate Block" : selectedAdminUser.restrictionType;
-    saveAdminData();
-    renderUsers();
-    document.getElementById("restrictionEmailNotice").innerHTML = "Email Sent: a restriction email was sent to " + cleanAdminText(selectedAdminUser.email) + " on " + selectedAdminUser.restrictionEmailDate + ".";
+    var type = document.getElementById("restrictionTypeEdit").value;
+    var duration = document.getElementById("restrictionDuration").value;
+    var reason = document.getElementById("restrictionReasonEdit").value;
+    var roleValue = getRestrictionRoleValue(type);
+    var roleUpdated = false;
+
+    if (selectedAdminUser.dbId == null || selectedAdminUser.dbId == "") {
+        document.getElementById("restrictionEmailNotice").innerHTML = "Restriction could not be saved because this user has no database ID.";
+        return;
+    }
+
+    document.getElementById("restrictionEmailNotice").innerHTML = "Saving restriction...";
+
+    patchAdminEndpoint("/users/" + selectedAdminUser.dbId + "/role", {
+        role: roleValue
+    })
+        .then(function () {
+            roleUpdated = true;
+            selectedAdminUser.role = roleValue;
+            selectedAdminUser.restrictionType = type;
+            selectedAdminUser.restrictionDuration = duration;
+            selectedAdminUser.restrictionReason = reason;
+            selectedAdminUser.restrictionEmailSent = true;
+            selectedAdminUser.restrictionEmailDate = getTodayString();
+            selectedAdminUser.status = roleValue;
+            saveAdminData();
+            renderUsers();
+
+            return postAdminEndpoint("/notification", {
+                user_id: selectedAdminUser.dbId,
+                type: "report",
+                title: "Account Restriction Decision",
+                message: getRestrictionMailboxText(type, duration, reason)
+            });
+        })
+        .then(function () {
+            return markSelectedUserReportsInReview();
+        })
+        .then(function () {
+            document.getElementById("restrictionEmailNotice").innerHTML = "Email Sent: a restriction email was sent to " + cleanAdminText(selectedAdminUser.email) + " on " + selectedAdminUser.restrictionEmailDate + ".";
+        })
+        .catch(function (error) {
+            var message = error && error.message ? error.message : "Restriction action failed.";
+
+            if (roleUpdated) {
+                document.getElementById("restrictionEmailNotice").innerHTML = "Restriction was saved, but the mailbox notification failed: " + cleanAdminText(message);
+            } else {
+                document.getElementById("restrictionEmailNotice").innerHTML = cleanAdminText(message);
+            }
+        });
 }
 function getPaymentUserLink(name, backSection) {
     var userIndex = findAdminUserByNameOrId(name, "");
@@ -1676,5 +1922,8 @@ function renderAnalyticsCharts() {
     renderUserReportsSummary();
     renderUserReportsAreaChart();
 }
+
+
+
 
 

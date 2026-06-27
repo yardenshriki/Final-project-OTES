@@ -1807,3 +1807,13 @@ hr {
 .profileIcon.profileIconWithImage::after {
   display: none;
 }
+
+.profileIcon.profileIconEmpty {
+  background-color: transparent;
+  border: 1px solid rgba(106, 89, 70, 0.25);
+}
+
+.profileIcon.profileIconEmpty::before,
+.profileIcon.profileIconEmpty::after {
+  display: none;
+}
