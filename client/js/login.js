@@ -121,24 +121,27 @@ function getUserRole(user) {
 
 function isUserBlockedFromLogin(user) {
     var status = String(user.status || "").toLowerCase();
+    var role = String(user.role || "").toLowerCase();
     var restrictionType = String(user.restrictionType || user.restriction_type || "").toLowerCase();
 
     return status == "blocked" || status == "suspended" || status == "immediate block" ||
+        role == "blocked" || role == "suspended" || role == "immediate block" ||
         restrictionType == "blocked" || restrictionType == "suspended" || restrictionType == "immediate block";
 }
 
 function getBlockedLoginMessage(user) {
-    var status = String(user.status || user.restrictionType || user.restriction_type || "Blocked");
+    var status = String(user.status || user.role || user.restrictionType || user.restriction_type || "Blocked");
+    var restrictionType = String(user.restrictionType || user.restriction_type || user.role || "");
 
-    if (status == "Immediate Block" || String(user.restrictionType || user.restriction_type || "") == "Immediate Block") {
+    if (status == "Immediate Block" || restrictionType == "Immediate Block") {
         return "Access denied: this user is blocked immediately.";
     }
 
-    if (status == "Suspended" || String(user.restrictionType || user.restriction_type || "") == "Suspended") {
+    if (status == "Suspended" || restrictionType == "Suspended") {
         return "Access denied: this user is temporarily blocked.";
     }
 
-    return "Access denied: this user is blocked.";
+    return "Access denied: this user is blocked from the system.";
 }
 
 function getLoginErrorMessage(error) {
@@ -148,5 +151,6 @@ function getLoginErrorMessage(error) {
 
     return "Login failed. Please check that the server and database are running.";
 }
+
 
 

@@ -18,6 +18,23 @@ function getNotifications() {
     return notificationsCache;
 }
 
+function getNotificationTimeValue(notification) {
+    var rawDate = notification.created_at || notification.createdAt || notification.date || "";
+    var parsedDate = new Date(rawDate);
+    if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.getTime();
+    }
+    return Number(notification.id || 0);
+}
+
+function sortNotificationsNewestFirst(notifications) {
+    return notifications.sort(function (a, b) {
+        var timeDifference = getNotificationTimeValue(b) - getNotificationTimeValue(a);
+        if (timeDifference != 0) return timeDifference;
+        return Number(b.id || 0) - Number(a.id || 0);
+    });
+}
+
 async function fetchUserNotifications() {
     var userId = getCurrentNotificationUserId();
     if (userId == "" || userId == "null") return [];
@@ -25,7 +42,7 @@ async function fetchUserNotifications() {
     try {
         var response = await fetch(notificationsApiUrl + "/user/" + userId);
         if (!response.ok) return [];
-        notificationsCache = await response.json();
+        notificationsCache = sortNotificationsNewestFirst(await response.json());
         return notificationsCache;
     } catch (e) {
         return [];
@@ -89,7 +106,7 @@ function getCurrentRoleNotifications() {
             result.push(notificationsCache[i]);
         }
     }
-    return result;
+    return sortNotificationsNewestFirst(result);
 }
 
 async function refreshMailbox() {

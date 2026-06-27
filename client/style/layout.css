@@ -346,6 +346,16 @@
   transform: translateX(-50%);
 }
 
+.profileIcon.profileIconEmpty {
+  background-color: transparent;
+  border: 1px solid rgba(106, 89, 70, 0.25);
+}
+
+.profileIcon.profileIconEmpty::before,
+.profileIcon.profileIconEmpty::after {
+  display: none;
+}
+
 @media screen and (max-width: 900px) {
   #appHeader {
     padding-left: 10px;
