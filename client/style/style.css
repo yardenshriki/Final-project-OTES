@@ -63,6 +63,54 @@
   margin-top: 18px;
 }
 
+.authBody #forgotPasswordScreen {
+  display: block;
+  margin-top: 0;
+}
+
+.authBody #forgotPasswordScreen h2 {
+  font-size: 30px;
+}
+
+.authBody #forgotPasswordScreen .subTitle {
+  max-width: 620px;
+  margin: 6px auto 12px auto;
+  line-height: 24px;
+}
+
+.authBody #forgotPasswordScreen .card {
+  width: 430px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.authBody #forgotPasswordScreen label {
+  margin-top: 6px;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+
+.authBody #forgotPasswordScreen input {
+  height: 34px;
+  font-size: 14px;
+}
+
+.authBody #forgotPasswordScreen .fieldError {
+  min-height: 5px;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.authBody #forgotPasswordScreen .button {
+  height: 40px;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.forgotHidden {
+  display: none;
+}
+
 .authBody #signupScreen,
 .authBody #paymentScreen {
   margin-top: 0;
@@ -364,6 +412,26 @@ input[type="file"] {
   font-weight: bold;
 }
 
+.linkButton {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #a98555;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.linkButton:hover,
+.linkButton:focus {
+  color: #6a5946;
+  text-decoration: underline;
+}
+
 .line {
   margin-top: 24px;
   margin-bottom: 8px;
@@ -388,6 +456,10 @@ input[type="file"] {
   font-size: 15px;
   font-weight: bold;
   text-align: center;
+}
+
+.message.successMessage {
+  color: #2f9b57;
 }
 
 .expiryRow {

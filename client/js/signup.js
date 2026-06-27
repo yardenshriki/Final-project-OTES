@@ -18,6 +18,7 @@ function clearSignupErrors() {
     clearSignupError("idNumber", "idNumberError");
     clearSignupError("gender", "genderError");
     clearSignupError("email", "emailError");
+    clearSignupError("phoneNumber", "phoneNumberError");
     clearSignupError("signupPassword", "signupPasswordError");
     clearSignupError("confirmPassword", "confirmPasswordError");
     clearSignupError("profilePicture", "profilePictureError");
@@ -143,12 +144,17 @@ function isStrongPassword(password) {
     return password.length >= 6 && hasLetter(password) && hasDigit(password);
 }
 
+function isValidMobilePhone(phoneNumber) {
+    return phoneNumber.length == 10 && phoneNumber.indexOf("05") == 0 && isDigits(phoneNumber);
+}
+
 function checkSignup() {
     var fullName = document.getElementById("fullName").value;
     var birthDate = document.getElementById("birthDate").value;
     var idNumber = document.getElementById("idNumber").value;
     var gender = document.getElementById("gender").value;
     var email = document.getElementById("email").value;
+    var phoneNumber = document.getElementById("phoneNumber").value.trim();
     var signupPassword = document.getElementById("signupPassword").value;
     var confirmPassword = document.getElementById("confirmPassword").value;
     var profilePicture = document.getElementById("profilePicture").value;
@@ -211,6 +217,17 @@ function checkSignup() {
                 setSignupError("email", "emailError", "Email must include .");
                 hasError = true;
             }
+        }
+    }
+
+    if (phoneNumber == "") {
+        setSignupError("phoneNumber", "phoneNumberError", "Mobile phone is required");
+        hasError = true;
+        hasEmptyField = true;
+    } else {
+        if (!isValidMobilePhone(phoneNumber)) {
+            setSignupError("phoneNumber", "phoneNumberError", "Mobile phone must contain 10 digits and start with 05");
+            hasError = true;
         }
     }
 
@@ -337,12 +354,14 @@ function createSignupUser() {
 function buildSignupRequest() {
     var email = document.getElementById("email").value.trim();
     return {
+        id: document.getElementById("idNumber").value.trim(),
+        id_number: document.getElementById("idNumber").value.trim(),
         full_name: document.getElementById("fullName").value.trim(),
         username: buildSignupUsername(email),
         email: email,
         password: document.getElementById("signupPassword").value,
         birth_date: document.getElementById("birthDate").value,
-        phone_number: null,
+        phone_number: document.getElementById("phoneNumber").value.trim(),
         gender: document.getElementById("gender").value,
         profile_picture: signupProfilePictureData,
         role: "Requester"
@@ -357,6 +376,7 @@ function saveSignupUser(data) {
     var email = document.getElementById("email").value.trim();
     var username = buildSignupUsername(email);
     var fullName = document.getElementById("fullName").value.trim();
+    var phoneNumber = document.getElementById("phoneNumber").value.trim();
     var role = data.role || "Requester";
 
     userRole = role;
@@ -365,6 +385,7 @@ function saveSignupUser(data) {
         full_name: fullName,
         username: username,
         email: email,
+        phone_number: phoneNumber,
         role: role,
         profile_picture: signupProfilePictureData
     }));
@@ -372,6 +393,7 @@ function saveSignupUser(data) {
     localStorage.setItem("loggedInUsername", username);
     localStorage.setItem("loggedInFullName", fullName);
     localStorage.setItem("loggedInEmail", email);
+    localStorage.setItem("loggedInPhoneNumber", phoneNumber);
     localStorage.setItem("loggedInProfilePicture", signupProfilePictureData);
     localStorage.setItem("userRole", role);
     localStorage.setItem("showWelcomePopup", "yes");
