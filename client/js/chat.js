@@ -592,6 +592,7 @@ function refreshChatUnreadState() {
     return loadVisibleChatMessages().then(function () {
       renderChatList();
       updateChatUnreadBadge();
+      checkRequesterTaskCompletion();
 
       if (activeChatTaskId != null) {
         renderChatConversation(activeChatTaskId);
@@ -1044,6 +1045,34 @@ function clearPendingChatOpen() {
   }
 
   localStorage.removeItem("pendingChatTaskId");
+}
+
+var chatCompletionCheckedTasks = {};
+
+function checkRequesterTaskCompletion() {
+    if (getCurrentChatRole() != "Requester") return;
+
+    var tasks = getChatSourceTasks();
+    for (var i = 0; i < tasks.length; i++) {
+        var task = tasks[i];
+        var taskId = task.id;
+
+        if (chatCompletionCheckedTasks[taskId]) continue;
+        if (getTaskRequesterId(task) != getCurrentChatUserId()) continue;
+
+        var messages = chatMessagesByTask[taskId] || [];
+        for (var j = 0; j < messages.length; j++) {
+            if (messages[j].text == "Task ended") {
+                chatCompletionCheckedTasks[taskId] = true;
+                if (typeof refreshMailbox == "function" && typeof openPendingTaskCompletionNotification == "function") {
+                    refreshMailbox().then(function () {
+                        openPendingTaskCompletionNotification();
+                    });
+                }
+                break;
+            }
+        }
+    }
 }
 
 var chatPreviousWindowOnload = window.onload;

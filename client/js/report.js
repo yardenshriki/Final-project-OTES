@@ -128,6 +128,16 @@ async function submitReportForm() {
             description: reportData.reportDescription
         });
 
+        if (typeof addNotification == "function") {
+            await addNotification({
+                toUserId: getCurrentReportUserId(),
+                task_id: reportTarget.task_id || null,
+                type: "report-sent",
+                title: "Report Received",
+                message: "Your report has been received. Our team will review it and keep you updated.",
+            });
+        }
+
         resetReportForm();
         clearReportMessage();
         showReportSuccessPopup();

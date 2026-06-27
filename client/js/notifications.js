@@ -1,7 +1,182 @@
 //yarden shriki, lior zahavi
+var notificationsApiUrl = "http://localhost:5000/api/notification";
+var notificationTasksApiUrl = "http://localhost:5000/api/tasks";
+var notificationUsersApiUrl = "http://localhost:5000/api/users";
+var notificationsCache = [];
 var selectedNotificationId = null;
-var selectedRatingNotification = null;
-var selectedRatingValue = 0;
+var selectedNotificationData = null;
+var taskCompletionModalOpen = false;
+
+function getCurrentNotificationUserId() {
+    return String(localStorage.getItem("loggedInUserId") || "");
+}
+
+function getNotifications() {
+    return notificationsCache;
+}
+
+async function fetchUserNotifications() {
+    var userId = getCurrentNotificationUserId();
+    if (userId == "" || userId == "null") return [];
+
+    try {
+        var response = await fetch(notificationsApiUrl + "/user/" + userId);
+        if (!response.ok) return [];
+        notificationsCache = await response.json();
+        return notificationsCache;
+    } catch (e) {
+        return [];
+    }
+}
+
+async function addNotification(notification) {
+    var userId = notification.toUserId ||
+        notification.user_id ||
+        notification.userId ||
+        null;
+
+    if (userId == null || userId == "") return;
+
+    try {
+        await fetch(notificationsApiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: userId,
+                task_id: notification.task_id || null,
+                type: notification.type || "general",
+                title: notification.title,
+                message: notification.message,
+            })
+        });
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
+    } catch (e) {
+        console.log(e.message);
+    }
+}
+
+function getNotificationDateText() {
+    var today = new Date();
+    var month = today.getMonth() + 1;
+    var day = today.getDate();
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+    return today.getFullYear() + "-" + month + "-" + day;
+}
+
+function shouldShowNotificationInMailbox(notification) {
+    return notification.type == "payment-success" ||
+        notification.type == "task-cancelled" ||
+        notification.type == "task-accepted" ||
+        notification.type == "performer-task-responsibility" ||
+        notification.type == "performer-task-cancelled" ||
+        notification.type == "report-sent" ||
+        notification.type == "report-in-review" ||
+        notification.type == "report-closed" ||
+        notification.type == "report-decision";
+}
+
+function getCurrentRoleNotifications() {
+    var result = [];
+    for (var i = 0; i < notificationsCache.length; i++) {
+        if (shouldShowNotificationInMailbox(notificationsCache[i])) {
+            result.push(notificationsCache[i]);
+        }
+    }
+    return result;
+}
+
+async function refreshMailbox() {
+    await fetchUserNotifications();
+    updateMailBadge();
+    renderMailList();
+}
+
+async function openPendingTaskCompletionNotification() {
+    var pending = null;
+    for (var i = 0; i < notificationsCache.length; i++) {
+        if (notificationsCache[i].type == "task-completion" && !notificationsCache[i].is_read) {
+            pending = notificationsCache[i];
+            break;
+        }
+    }
+
+    if (pending == null) return;
+
+    if (pending.task_id) {
+        try {
+            var task = await fetch(notificationTasksApiUrl + "/" + pending.task_id).then(function (r) { return r.json(); });
+            pending.task_title = task.title || "";
+            pending.performer_id = task.performer_id;
+            pending.requester_id = task.requester_id || pending.user_id;
+            pending.amount = task.payment;
+
+            if (task.performer_id) {
+                var performer = await fetch(notificationUsersApiUrl + "/" + task.performer_id).then(function (r) { return r.json(); });
+                pending.performer_name = performer.full_name || "";
+            }
+        } catch (e) {}
+    }
+
+    try {
+        await fetch(notificationsApiUrl + "/" + pending.id + "/read", { method: "PATCH" });
+        for (var j = 0; j < notificationsCache.length; j++) {
+            if (notificationsCache[j].id == pending.id) {
+                notificationsCache[j].is_read = 1;
+            }
+        }
+    } catch (e) {}
+
+    openTaskCompletionModal(pending);
+}
+
+function updateMailBadge() {
+    var badge = document.getElementById("mailUnreadBadge");
+    if (badge == null) return;
+
+    var notifications = getCurrentRoleNotifications();
+    var unreadCount = 0;
+    for (var i = 0; i < notifications.length; i++) {
+        if (!notifications[i].is_read) unreadCount++;
+    }
+
+    badge.innerHTML = unreadCount;
+    badge.style.display = unreadCount > 0 ? "block" : "none";
+}
+
+function renderMailList() {
+    var mailList = document.getElementById("mailList");
+    if (mailList == null) return;
+
+    var notifications = getCurrentRoleNotifications();
+    mailList.innerHTML = "";
+
+    if (notifications.length == 0) {
+        mailList.innerHTML = '<div class="emptyMailbox">No messages yet</div>';
+        return;
+    }
+
+    for (var i = notifications.length - 1; i >= 0; i--) {
+        var className = "mailItem";
+        if (!notifications[i].is_read) className += " mailItemUnread";
+        mailList.innerHTML += createNotificationItem(notifications[i], className);
+    }
+}
+
+function createNotificationItem(notification, className) {
+    var receiptButton = "";
+    if (notification.type == "payment-success") {
+        receiptButton = '<button type="button" class="receiptDownloadButton" onclick="downloadReceipt(' + notification.id + ', event)">Download Receipt</button>';
+    }
+
+    return '<div class="' + className + '" onclick="openNotification(' + notification.id + ')">' +
+        '<h4>' + (notification.title || "") + '</h4>' +
+        '<p>' + (notification.message || "") + '</p>' +
+        receiptButton +
+        '<small>' + (notification.created_at || "") + '</small>' +
+        '</div>';
+}
 
 function ensureNotificationLayout() {
     var appHeader = document.getElementById("appHeader");
@@ -46,8 +221,11 @@ function ensureNotificationLayout() {
     }
 
     if (document.getElementById("taskCompletionModal") == null) {
+        if (document.getElementById("messageModalOverlay") == null) {
+            document.body.insertAdjacentHTML("beforeend",
+                '<div id="messageModalOverlay" class="messageModalOverlay"></div>');
+        }
         document.body.insertAdjacentHTML("beforeend",
-            '<div id="messageModalOverlay" class="messageModalOverlay"></div>' +
             '<section id="taskCompletionModal" class="taskCompletionModal">' +
             '<div class="completionIcon">!</div>' +
             '<h2>TASK COMPLETION</h2>' +
@@ -60,29 +238,6 @@ function ensureNotificationLayout() {
             '<p class="completionNote">* Clicking "YES" will transfer the payment to the performer immediately.</p>' +
             '</section>');
     }
-
-    if (document.getElementById("ratingModal") == null) {
-        document.body.insertAdjacentHTML("beforeend",
-            '<section id="ratingModal" class="ratingModal">' +
-            '<div class="ratingIcon">★</div>' +
-            '<h2>Rate the Performer</h2>' +
-            '<div class="ratingSummary">' +
-            '<div><span>Performer</span><b id="ratingPerformerName">John Designer</b></div>' +
-            '<div><span>Date</span><b id="ratingDate">2026-02-04</b></div>' +
-            '<div class="ratingTaskName"><span>Task Name</span><b id="ratingTaskName">Design a Logo</b></div>' +
-            '</div>' +
-            '<div id="ratingStars" class="ratingStars" aria-label="Rating stars">' +
-            '<button type="button" data-rating="1">★</button>' +
-            '<button type="button" data-rating="2">★</button>' +
-            '<button type="button" data-rating="3">★</button>' +
-            '<button type="button" data-rating="4">★</button>' +
-            '<button type="button" data-rating="5">★</button>' +
-            '</div>' +
-            '<label for="ratingFeedback">Additional Feedback</label>' +
-            '<textarea id="ratingFeedback" placeholder="Describe your experience working with this performer..."></textarea>' +
-            '<button type="button" id="submitRatingButton" class="submitRatingButton">Submit Rating</button>' +
-            '</section>');
-    }
 }
 
 function placeHeaderIcon(appHeader, previousElement, iconButton) {
@@ -90,159 +245,9 @@ function placeHeaderIcon(appHeader, previousElement, iconButton) {
         appHeader.insertBefore(iconButton, previousElement.nextSibling);
         return;
     }
-
     if (previousElement == null && iconButton.parentNode == null) {
         appHeader.appendChild(iconButton);
     }
-}
-
-function getNotifications() {
-    var savedNotifications = localStorage.getItem("notifications");
-
-    if (savedNotifications == null || savedNotifications == "") {
-        return [];
-    }
-
-    return JSON.parse(savedNotifications);
-}
-
-function saveNotifications(notifications) {
-    localStorage.setItem("notifications", JSON.stringify(notifications));
-}
-
-function addNotification(notification) {
-    var notifications = getNotifications();
-    notification.id = Date.now();
-    notification.is_read = false;
-    notification.created_at = getNotificationDateText();
-    notifications.push(notification);
-    saveNotifications(notifications);
-    refreshMailbox();
-    openPendingTaskCompletionNotification();
-}
-
-function getNotificationDateText() {
-    var today = new Date();
-    var month = today.getMonth() + 1;
-    var day = today.getDate();
-
-    if (month < 10) {
-        month = "0" + month;
-    }
-
-    if (day < 10) {
-        day = "0" + day;
-    }
-
-    return today.getFullYear() + "-" + month + "-" + day;
-}
-
-function getCurrentRoleNotifications() {
-    var notifications = getNotifications();
-    var roleNotifications = [];
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].toRole == userRole && shouldShowNotificationInMailbox(notifications[i])) {
-            roleNotifications.push(notifications[i]);
-        }
-    }
-
-    return roleNotifications;
-}
-
-function shouldShowNotificationInMailbox(notification) {
-    return notification.type == "payment-success" ||
-        notification.type == "task-cancelled" ||
-        notification.type == "task-accepted" ||
-        notification.type == "performer-task-responsibility" ||
-        notification.type == "performer-task-cancelled";
-}
-
-function refreshMailbox() {
-    updateMailBadge();
-    renderMailList();
-}
-
-function openPendingTaskCompletionNotification() {
-    var notifications = getNotifications();
-    var pendingNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].toRole == userRole && notifications[i].type == "task-completion" && notifications[i].resolved != true) {
-            notifications[i].is_read = true;
-            pendingNotification = notifications[i];
-            break;
-        }
-    }
-
-    if (pendingNotification == null) {
-        return;
-    }
-
-    saveNotifications(notifications);
-    refreshMailbox();
-    openTaskCompletionModal(pendingNotification);
-}
-
-function updateMailBadge() {
-    var badge = document.getElementById("mailUnreadBadge");
-
-    if (badge == null) {
-        return;
-    }
-
-    var notifications = getCurrentRoleNotifications();
-    var unreadCount = 0;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].is_read == false) {
-            unreadCount++;
-        }
-    }
-
-    badge.innerHTML = unreadCount;
-    badge.style.display = unreadCount > 0 ? "block" : "none";
-}
-
-function renderMailList() {
-    var mailList = document.getElementById("mailList");
-
-    if (mailList == null) {
-        return;
-    }
-
-    var notifications = getCurrentRoleNotifications();
-    mailList.innerHTML = "";
-
-    if (notifications.length == 0) {
-        mailList.innerHTML = '<div class="emptyMailbox">No messages yet</div>';
-        return;
-    }
-
-    for (var i = notifications.length - 1; i >= 0; i--) {
-        var className = "mailItem";
-
-        if (notifications[i].is_read == false) {
-            className += " mailItemUnread";
-        }
-
-        mailList.innerHTML += createNotificationItem(notifications[i], className);
-    }
-}
-
-function createNotificationItem(notification, className) {
-    var receiptButton = "";
-
-    if (notification.type == "payment-success") {
-        receiptButton = '<button type="button" class="receiptDownloadButton" onclick="downloadReceipt(' + notification.id + ', event)">Download Receipt</button>';
-    }
-
-    return '<div class="' + className + '" onclick="openNotification(' + notification.id + ')">' +
-        '<h4>' + notification.title + '</h4>' +
-        '<p>' + notification.message + '</p>' +
-        receiptButton +
-        '<small>' + notification.created_at + '</small>' +
-        '</div>';
 }
 
 function openMailbox() {
@@ -256,185 +261,99 @@ function closeMailbox() {
     document.getElementById("mailDrawer").style.display = "none";
 }
 
-function openNotification(notificationId) {
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == notificationId) {
-            notifications[i].is_read = true;
-            selectedNotification = notifications[i];
+async function openNotification(notificationId) {
+    try {
+        await fetch(notificationsApiUrl + "/" + notificationId + "/read", { method: "PATCH" });
+        for (var i = 0; i < notificationsCache.length; i++) {
+            if (notificationsCache[i].id == notificationId) {
+                notificationsCache[i].is_read = 1;
+            }
         }
-    }
+    } catch (e) {}
 
-    saveNotifications(notifications);
-    refreshMailbox();
-
-    if (selectedNotification != null && selectedNotification.type == "task-completion" && selectedNotification.resolved != true) {
-        openTaskCompletionModal(selectedNotification);
-    }
+    updateMailBadge();
+    renderMailList();
 }
 
 function openTaskCompletionModal(notification) {
+    if (taskCompletionModalOpen) return;
+    taskCompletionModalOpen = true;
     selectedNotificationId = notification.id;
-    document.getElementById("taskCompletionMessage").innerHTML = '<b>' + notification.task_title + '</b> has been marked as finished.';
+    selectedNotificationData = notification;
+    document.getElementById("taskCompletionMessage").innerHTML =
+        '<b>' + (notification.task_title || "") + '</b> has been marked as finished.';
     document.getElementById("messageModalOverlay").style.display = "block";
     document.getElementById("taskCompletionModal").style.display = "block";
 }
 
 function closeTaskCompletionModal() {
+    taskCompletionModalOpen = false;
     document.getElementById("messageModalOverlay").style.display = "none";
     document.getElementById("taskCompletionModal").style.display = "none";
     selectedNotificationId = null;
+    selectedNotificationData = null;
 }
 
-function resolveTaskCompletion(decisionText) {
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == selectedNotificationId) {
-            selectedNotification = notifications[i];
-            notifications[i].resolved = true;
-            notifications[i].decision = decisionText;
-        }
-    }
-
-    saveNotifications(notifications);
-
-    if (decisionText == "approved" && selectedNotification != null) {
-        addPaymentSuccessNotification(selectedNotification);
-    }
+async function resolveTaskCompletion(decisionText) {
+    var notification = selectedNotificationData;
 
     closeTaskCompletionModal();
 
-    if (decisionText == "approved" && selectedNotification != null) {
-        openRatingModal(selectedNotification);
-    }
-
-    refreshMailbox();
-}
-
-function addPaymentSuccessNotification(taskCompletionNotification) {
-    addNotification({
-        toRole: "Requester",
-        type: "payment-success",
-        task_id: taskCompletionNotification.task_id,
-        task_title: taskCompletionNotification.task_title,
-        title: "Payment successful",
-        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred. A confirmation has been sent to your email."
-    });
-
-    addNotification({
-        toRole: "Performer",
-        type: "payment-success",
-        task_id: taskCompletionNotification.task_id,
-        task_title: taskCompletionNotification.task_title,
-        title: "Payment received",
-        message: "The payment for " + taskCompletionNotification.task_title + " has been successfully transferred to you. A confirmation has been sent to your email."
-    });
-}
-
-function getSavedRatings() {
-    var savedRatings = localStorage.getItem("performerRatings");
-
-    if (savedRatings == null || savedRatings == "") {
-        return [];
-    }
-
-    return JSON.parse(savedRatings);
-}
-
-function savePerformerRating(rating) {
-    var ratings = getSavedRatings();
-    ratings.push(rating);
-    localStorage.setItem("performerRatings", JSON.stringify(ratings));
-}
-
-function openRatingModal(notification) {
-    selectedRatingNotification = notification;
-    selectedRatingValue = 0;
-
-    document.getElementById("ratingPerformerName").innerHTML = notification.performer_name || "John Designer";
-    document.getElementById("ratingDate").innerHTML = getNotificationDateText();
-    document.getElementById("ratingTaskName").innerHTML = notification.task_title;
-    document.getElementById("ratingFeedback").value = "";
-    markRatingStars();
-
-    document.getElementById("messageModalOverlay").style.display = "block";
-    document.getElementById("ratingModal").style.display = "block";
-}
-
-function closeRatingModal() {
-    document.getElementById("messageModalOverlay").style.display = "none";
-    document.getElementById("ratingModal").style.display = "none";
-    selectedRatingNotification = null;
-    selectedRatingValue = 0;
-}
-
-function markRatingStars() {
-    var starButtons = document.querySelectorAll("#ratingStars button");
-
-    for (var i = 0; i < starButtons.length; i++) {
-        if (parseInt(starButtons[i].getAttribute("data-rating")) <= selectedRatingValue) {
-            starButtons[i].className = "activeRatingStar";
+    if (notification != null) {
+        if (decisionText == "approved") {
+            await approveTaskCompletion(notification);
         } else {
-            starButtons[i].className = "";
-        }
-    }
-}
-
-function chooseRating(ratingValue) {
-    selectedRatingValue = ratingValue;
-    markRatingStars();
-}
-
-function submitRating() {
-    if (selectedRatingNotification == null || selectedRatingValue == 0) {
-        return;
-    }
-
-    savePerformerRating({
-        task_id: selectedRatingNotification.task_id,
-        task_title: selectedRatingNotification.task_title,
-        performer_name: selectedRatingNotification.performer_name || "John Designer",
-        rating: selectedRatingValue,
-        feedback: document.getElementById("ratingFeedback").value,
-        created_at: getNotificationDateText()
-    });
-
-    closeRatingModal();
-}
-
-function downloadReceipt(notificationId, event) {
-    if (event != null) {
-        event.stopPropagation();
-    }
-
-    var notifications = getNotifications();
-    var selectedNotification = null;
-
-    for (var i = 0; i < notifications.length; i++) {
-        if (notifications[i].id == notificationId) {
-            selectedNotification = notifications[i];
+            await rejectTaskCompletion(notification);
         }
     }
 
-    if (selectedNotification == null) {
-        return;
+    await refreshMailbox();
+}
+
+async function approveTaskCompletion(notification) {
+    var paymentWasCreated = false;
+
+    if (typeof addPaymentSuccessNotification == "function") {
+        paymentWasCreated = await addPaymentSuccessNotification(notification);
     }
 
-    var receiptText = "OTES Payment Receipt\n" +
-        "Task: " + selectedNotification.task_title + "\n" +
-        "Status: Payment transferred\n" +
-        "Date: " + selectedNotification.created_at + "\n";
-    var receiptFile = new Blob([receiptText], { type: "text/plain" });
-    var receiptLink = document.createElement("a");
+    if (paymentWasCreated == true && typeof openRatingModal == "function") {
+        openRatingModal(notification);
+    }
+}
 
-    receiptLink.href = URL.createObjectURL(receiptFile);
-    receiptLink.download = "receipt-" + selectedNotification.task_id + ".txt";
-    receiptLink.click();
-    URL.revokeObjectURL(receiptLink.href);
+async function rejectTaskCompletion(notification) {
+    await reopenTaskAfterRejectedCompletion(notification.task_id);
+    goToReportPage(notification);
+}
+
+async function reopenTaskAfterRejectedCompletion(taskId) {
+    if (taskId == null || taskId == "") return;
+
+    try {
+        var response = await fetch(notificationTasksApiUrl + "/" + taskId);
+        var task = await response.json();
+        task.state = "in-progress";
+        task.work_status = "Finalizing the task";
+        await fetch(notificationTasksApiUrl + "/" + task.id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(task),
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+function goToReportPage(notification) {
+    var reportUrl = "report.html?task_id=" + encodeURIComponent(notification.task_id || "");
+    if (notification.task_title != null) {
+        reportUrl += "&task_title=" + encodeURIComponent(notification.task_title);
+    }
+    if (notification.performer_id != null) {
+        reportUrl += "&reported_user_id=" + encodeURIComponent(notification.performer_id);
+    }
+    window.location.href = reportUrl;
 }
 
 function connectMailboxActions() {
@@ -443,49 +362,29 @@ function connectMailboxActions() {
     var mailOverlay = document.getElementById("mailOverlay");
     var approveButton = document.getElementById("approveCompletionButton");
     var rejectButton = document.getElementById("rejectCompletionButton");
-    var submitRatingButton = document.getElementById("submitRatingButton");
-    var starButtons = document.querySelectorAll("#ratingStars button");
 
-    if (mailButton != null) {
-        mailButton.onclick = openMailbox;
-    }
-
-    if (closeMailButton != null) {
-        closeMailButton.onclick = closeMailbox;
-    }
-
-    if (mailOverlay != null) {
-        mailOverlay.onclick = closeMailbox;
-    }
+    if (mailButton != null) mailButton.onclick = openMailbox;
+    if (closeMailButton != null) closeMailButton.onclick = closeMailbox;
+    if (mailOverlay != null) mailOverlay.onclick = closeMailbox;
 
     if (approveButton != null) {
-        approveButton.onclick = function () {
-            resolveTaskCompletion("approved");
-        };
+        approveButton.onclick = function () { resolveTaskCompletion("approved"); };
     }
-
     if (rejectButton != null) {
-        rejectButton.onclick = function () {
-            resolveTaskCompletion("not-approved");
-        };
-    }
-
-    for (var i = 0; i < starButtons.length; i++) {
-        starButtons[i].onclick = function () {
-            chooseRating(parseInt(this.getAttribute("data-rating")));
-        };
-    }
-
-    if (submitRatingButton != null) {
-        submitRatingButton.onclick = submitRating;
+        rejectButton.onclick = function () { resolveTaskCompletion("not-approved"); };
     }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(function () {
+    setTimeout(async function () {
         ensureNotificationLayout();
         connectMailboxActions();
-        refreshMailbox();
-        openPendingTaskCompletionNotification();
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
     }, 200);
+
+    setInterval(async function () {
+        await refreshMailbox();
+        await openPendingTaskCompletionNotification();
+    }, 5000);
 });
