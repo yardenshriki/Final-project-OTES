@@ -140,6 +140,54 @@
   font-size: 13px;
 }
 
+.profileAboutHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profileSmallButton {
+  width: auto;
+  min-width: 82px;
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #e3be84;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profileSmallButton:hover,
+.profileSmallButton:focus {
+  background-color: #c99f63;
+}
+
+.profileAboutEditForm {
+  margin-top: 4px;
+}
+
+.profileAboutEditForm label {
+  display: block;
+  margin: 14px 0 6px;
+  color: #2f2a24;
+  font-weight: 700;
+}
+
+.profileAboutEditForm textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 11px 12px;
+  border: 1px solid #dbb476;
+  border-radius: 4px;
+  background-color: #fffaf3;
+  color: #2f2a24;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
 .profileRating span:first-child {
   color: #d6ad6c;
 }
@@ -310,6 +358,52 @@
 .profileFormCard textarea {
   min-height: 90px;
   resize: vertical;
+}
+
+.profileFieldHint {
+  margin: -8px 0 10px;
+  color: #7c6a55;
+  font-size: 13px;
+}
+
+.profileSkillsOptions {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-height: 250px;
+  overflow-y: auto;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border: 1px solid #dbb476;
+  border-radius: 6px;
+  background-color: #fffaf3;
+}
+
+.profileSkillOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #fff2dc;
+  color: #2f2a24;
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.profileSkillOption input {
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.profileSkillOption:has(input:checked) {
+  background-color: #e5bd80;
+  color: #2f2a24;
+  font-weight: 700;
 }
 
 .passwordSection {

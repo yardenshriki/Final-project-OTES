@@ -78,10 +78,31 @@
                         </nav>
 
                         <article id="aboutTab" class="profileTabPanel">
-                            <h2>Bio</h2>
-                            <p id="profileBio"></p>
-                            <h2>Skills</h2>
-                            <p id="profileSkills"></p>
+                            <div id="aboutViewPanel">
+                                <div class="profileAboutHeader">
+                                    <h2>Bio</h2>
+                                    <button type="button" id="editAboutButton" class="profileSmallButton">Edit</button>
+                                </div>
+                                <p id="profileBio"></p>
+                                <h2>Skills</h2>
+                                <p id="profileSkills"></p>
+                            </div>
+
+                            <form id="aboutEditForm" class="hiddenProfilePanel profileAboutEditForm">
+                                <label for="editBio">Bio</label>
+                                <textarea id="editBio" maxlength="150" placeholder="Write a short bio up to 150 characters"></textarea>
+                                <p id="editBioCounter" class="profileFieldHint">0 / 150</p>
+
+                                <label>Skills</label>
+                                <p class="profileFieldHint">Choose up to 4 skills</p>
+                                <div id="editSkillsOptions" class="profileSkillsOptions"></div>
+
+                                <p id="aboutEditMessage" class="message profileFormMessage"></p>
+                                <div class="profileFormActions">
+                                    <button type="submit" class="profilePrimaryButton">Save</button>
+                                    <button type="button" id="cancelAboutEditButton" class="profileSecondaryButton">Cancel</button>
+                                </div>
+                            </form>
                         </article>
 
                         <article id="tasksTab" class="profileTabPanel hiddenProfilePanel">
@@ -121,12 +142,6 @@
 
                             <label for="editEmail">Email</label>
                             <input type="email" id="editEmail" required>
-
-                            <label for="editBio">Bio</label>
-                            <textarea id="editBio"></textarea>
-
-                            <label for="editSkills">Skills</label>
-                            <input type="text" id="editSkills" placeholder="Logo Design, Branding, UI/UX">
                         </section>
                     </div>
 
