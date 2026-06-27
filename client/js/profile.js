@@ -4,6 +4,27 @@ var profileData = {};
 var currentProfile = null;
 var profileOriginalUsername = "";
 var uploadedProfileImage = "";
+var profileAvailableSkills = [
+    "Payroll Accounting & Calculations",
+    "Taxation & Benefits Compliance",
+    "Budgeting & Financial Reporting",
+    "Operational Excellence",
+    "Project Lifecycle Management",
+    "Product Requirement Characterization",
+    "Operations & Monitoring",
+    "Risk Management & Security Clearance",
+    "Analytical Thinking & Problem Solving",
+    "Working Under Pressure & Adaptability",
+    "Teamwork & Cross-functional Collaboration",
+    "High Attention to Detail",
+    "Self-Driven Learning",
+    "Software Engineering Principles",
+    "Low-Level & High-Level Programming",
+    "System Architecture",
+    "Networking & IT Diagnostics",
+    "Digital Design & Visual Storytelling",
+    "Logo & Concept Branding"
+];
 
 function getProfileHomePath() {
     if (profileRole == "Performer") {
@@ -121,6 +142,8 @@ function normalizeProfileUserFromServer(user) {
         phone_number: user.phone_number || "",
         gender: user.gender || "",
         role: user.role || profileRole,
+        bio: user.bio || "",
+        skills: user.skills || "",
         image: user.profile_picture || user.profileImage || "",
         profile_picture: user.profile_picture || user.profileImage || "",
         tasks: [],
@@ -243,8 +266,8 @@ function buildCurrentProfile(data) {
     profile.username = profile.username || username;
     profile.name = profile.name || "John Doe";
     profile.email = profile.email || "john.doe@gmail.com";
-    profile.bio = profile.bio || "Experienced designer with a passion for creating clean, modern designs. Specialized in logo design and branding.";
-    profile.skills = profile.skills || "Logo Design, Branding, UI/UX, Illustration";
+    profile.bio = profile.bio || "";
+    profile.skills = profile.skills || "";
     profile.rating = profile.rating || getRatingFromText(profile.ratings);
     profile.ratingCount = profile.ratingCount || getCompletedCount(profile);
     profile.completedTasks = profile.completedTasks || getCompletedCount(profile);
@@ -292,6 +315,8 @@ function buildProfileUpdateRequest(password) {
         birth_date: currentProfile.birth_date || null,
         phone_number: currentProfile.phone_number || "",
         gender: currentProfile.gender || "",
+        bio: currentProfile.bio || "",
+        skills: currentProfile.skills || "",
         profile_picture: getServerProfilePictureValue(),
         role: currentProfile.role || profileRole
     };
@@ -335,6 +360,8 @@ function saveProfileLoginState() {
     currentUser.full_name = currentProfile.name;
     currentUser.username = currentProfile.username;
     currentUser.email = currentProfile.email;
+    currentUser.bio = currentProfile.bio || "";
+    currentUser.skills = currentProfile.skills || "";
     currentUser.role = currentProfile.role || profileRole;
     currentUser.profile_picture = currentProfile.image || currentProfile.profile_picture || "";
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
@@ -441,6 +468,10 @@ function showProfileTab(tabName) {
     var tabs = document.querySelectorAll(".profileTabs button");
     var panels = ["aboutTab", "tasksTab", "reviewsTab"];
 
+    if (tabName != "about") {
+        closeAboutEdit();
+    }
+
     for (var i = 0; i < tabs.length; i++) {
         tabs[i].className = tabs[i].getAttribute("data-tab") == tabName ? "activeProfileTab" : "";
     }
@@ -467,19 +498,106 @@ function fillEditForm() {
     setInputValue("editFullName", currentProfile.name);
     setInputValue("editUsername", currentProfile.username);
     setInputValue("editEmail", currentProfile.email);
-    setInputValue("editBio", currentProfile.bio);
-    setInputValue("editSkills", currentProfile.skills);
     setInputValue("editPassword", "");
     setInputValue("editPasswordConfirm", "");
     renderProfileImage("editProfileImage", "editProfileInitials", currentProfile);
+}
+
+function openAboutEdit() {
+    setInputValue("editBio", currentProfile.bio);
+    updateBioCounter();
+    renderProfileSkillOptions(currentProfile.skills);
+    setProfileMessage("aboutEditMessage", "", false);
+    document.getElementById("aboutViewPanel").className = "hiddenProfilePanel";
+    document.getElementById("aboutEditForm").className = "profileAboutEditForm";
+}
+
+function closeAboutEdit() {
+    document.getElementById("aboutViewPanel").className = "";
+    document.getElementById("aboutEditForm").className = "hiddenProfilePanel profileAboutEditForm";
+    setProfileMessage("aboutEditMessage", "", false);
+}
+
+function updateBioCounter() {
+    var bioInput = document.getElementById("editBio");
+    var counter = document.getElementById("editBioCounter");
+
+    if (bioInput == null || counter == null) {
+        return;
+    }
+
+    counter.innerHTML = bioInput.value.length + " / 150";
+}
+
+function getProfileSkillsArray(skillsText) {
+    if (skillsText == null || skillsText == "") {
+        return [];
+    }
+
+    return String(skillsText).split(",").map(function (skill) {
+        return skill.trim();
+    }).filter(function (skill) {
+        return skill != "";
+    });
+}
+
+function renderProfileSkillOptions(selectedSkillsText) {
+    var container = document.getElementById("editSkillsOptions");
+    var selectedSkills = getProfileSkillsArray(selectedSkillsText);
+
+    if (container == null) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    for (var i = 0; i < profileAvailableSkills.length; i++) {
+        var skill = profileAvailableSkills[i];
+        var checked = selectedSkills.indexOf(skill) >= 0 ? " checked" : "";
+        container.innerHTML += "<label class='profileSkillOption'><input type='checkbox' name='editSkillOption' value='" + cleanProfileText(skill) + "'" + checked + "> <span>" + cleanProfileText(skill) + "</span></label>";
+    }
+
+    attachProfileSkillEvents();
+    enforceProfileSkillLimit();
+}
+
+function attachProfileSkillEvents() {
+    var checkboxes = document.querySelectorAll("input[name='editSkillOption']");
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener("change", enforceProfileSkillLimit);
+    }
+}
+
+function getSelectedProfileSkills() {
+    var selected = [];
+    var checkboxes = document.querySelectorAll("input[name='editSkillOption']");
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            selected.push(checkboxes[i].value);
+        }
+    }
+
+    return selected;
+}
+
+function enforceProfileSkillLimit() {
+    var selected = getSelectedProfileSkills();
+    var checkboxes = document.querySelectorAll("input[name='editSkillOption']");
+    var disableUnchecked = selected.length >= 4;
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (!checkboxes[i].checked) {
+            checkboxes[i].disabled = disableUnchecked;
+        }
+    }
 }
 
 function saveEditProfile() {
     var fullName = getInputValue("editFullName");
     var username = getInputValue("editUsername");
     var email = getInputValue("editEmail");
-    var bio = getInputValue("editBio");
-    var skills = getInputValue("editSkills");
     var password = getPasswordInputValue("editPassword");
     var confirmPassword = getPasswordInputValue("editPasswordConfirm");
     var changedDetails = [];
@@ -511,13 +629,11 @@ function saveEditProfile() {
         return false;
     }
 
-    changedDetails = getProfileChangedDetails(fullName, username, email, bio, skills, password);
+    changedDetails = getProfileChangedDetails(fullName, username, email, currentProfile.bio, currentProfile.skills, password);
 
     currentProfile.name = fullName;
     currentProfile.username = username;
     currentProfile.email = email;
-    currentProfile.bio = bio;
-    currentProfile.skills = skills;
     currentProfile.image = uploadedProfileImage;
 
     if (password != "") {
@@ -537,6 +653,52 @@ function saveEditProfile() {
         })
         .catch(function (error) {
             setProfileMessage("profileEditMessage", getProfileUpdateErrorMessage(error), false);
+        });
+
+    return false;
+}
+
+function saveAboutProfile() {
+    var bio = getInputValue("editBio");
+    var selectedSkills = getSelectedProfileSkills();
+    var skills = selectedSkills.join(", ");
+    var changedDetails = [];
+
+    setProfileMessage("aboutEditMessage", "", false);
+
+    if (bio.length > 150) {
+        setProfileMessage("aboutEditMessage", "Bio must be up to 150 characters", false);
+        return false;
+    }
+
+    if (selectedSkills.length > 4) {
+        setProfileMessage("aboutEditMessage", "You can choose up to 4 skills", false);
+        return false;
+    }
+
+    changedDetails = [];
+    addProfileChange(changedDetails, "Bio", currentProfile.bio, bio);
+    addProfileChange(changedDetails, "Skills", currentProfile.skills, skills);
+
+    if (changedDetails.length == 0) {
+        changedDetails.push("No visible details changed");
+    }
+
+    currentProfile.bio = bio;
+    currentProfile.skills = skills;
+
+    setProfileMessage("aboutEditMessage", "Saving about details...", true);
+
+    updateCurrentProfileOnServer("")
+        .then(function () {
+            saveProfileLoginState();
+            saveCurrentProfile();
+            renderProfile();
+            closeAboutEdit();
+            showProfileUpdatedPopup(changedDetails);
+        })
+        .catch(function (error) {
+            setProfileMessage("aboutEditMessage", getProfileUpdateErrorMessage(error), false);
         });
 
     return false;
@@ -777,6 +939,12 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
         saveEditProfile();
     });
+    document.getElementById("editAboutButton").addEventListener("click", openAboutEdit);
+    document.getElementById("cancelAboutEditButton").addEventListener("click", closeAboutEdit);
+    document.getElementById("aboutEditForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        saveAboutProfile();
+    });
     document.getElementById("creditCardForm").addEventListener("submit", function (event) {
         event.preventDefault();
         saveCardDetails();
@@ -791,6 +959,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("editProfilePicture").addEventListener("change", function () {
         previewProfileImage(this.files[0]);
     });
+    document.getElementById("editBio").addEventListener("input", updateBioCounter);
     document.getElementById("requesterButton").addEventListener("click", function () {
         switchProfileRole("Requester");
     });
