@@ -133,8 +133,8 @@ async function submitReportForm() {
                 toUserId: getCurrentReportUserId(),
                 task_id: reportTarget.task_id || null,
                 type: "report-sent",
-                title: "Report received",
-                message: "Your report has been received and is being reviewed by our admin team.",
+                title: "Report Received",
+                message: "Your report has been received. Our team will review it and keep you updated.",
             });
         }
 

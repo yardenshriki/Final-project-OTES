@@ -71,7 +71,10 @@ function shouldShowNotificationInMailbox(notification) {
         notification.type == "task-accepted" ||
         notification.type == "performer-task-responsibility" ||
         notification.type == "performer-task-cancelled" ||
-        notification.type == "report-sent";
+        notification.type == "report-sent" ||
+        notification.type == "report-in-review" ||
+        notification.type == "report-closed" ||
+        notification.type == "report-decision";
 }
 
 function getCurrentRoleNotifications() {
