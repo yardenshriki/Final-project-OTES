@@ -2440,3 +2440,21 @@ body:has(#adminHomeScreen) .appFooter.adminFooter,
     margin: auto 0 0;
 }
 
+
+.adminHeaderProfileIcon {
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0;
+  flex: 0 0 18px;
+}
+
+.adminHeaderProfileIcon::before {
+  top: 4px;
+  width: 7px;
+  height: 7px;
+}
+
+.adminHeaderProfileIcon::after {
+  width: 15px;
+  height: 9px;
+}

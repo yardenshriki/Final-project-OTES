@@ -1,4 +1,4 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var LOGIN_API_URL = "http://localhost:5000/api/users/login";
 
 function checkLogin() {
@@ -77,6 +77,7 @@ function saveLoggedInUser(user, loginName) {
     localStorage.setItem("loggedInUsername", username);
     localStorage.setItem("loggedInFullName", user.full_name || user.fullName || username);
     localStorage.setItem("loggedInEmail", user.email || "");
+    localStorage.setItem("loggedInProfilePicture", user.profile_picture || user.profilePicture || "");
     localStorage.setItem("userRole", role);
 
     if (role == "Admin") {
@@ -147,3 +148,5 @@ function getLoginErrorMessage(error) {
 
     return "Login failed. Please check that the server and database are running.";
 }
+
+

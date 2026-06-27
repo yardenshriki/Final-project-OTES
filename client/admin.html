@@ -21,7 +21,7 @@
                         <button type="button" class="adminNavButton" onclick="showAdminSection('adminPaymentsSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"></path></svg>Payments</button>
                         <button type="button" class="adminNavButton" onclick="showAdminSection('adminTasksSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>System Log</button>
                         <button type="button" class="adminNavButton" onclick="showAdminSection('adminSoftwareSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>Updates</button>
-                        <button type="button" class="adminNavButton" onclick="showAdminSection('adminProfileSection')"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 22a8 8 0 0 1 16 0"></path></svg>Profile</button>
+                        <button type="button" class="adminNavButton" onclick="showAdminSection('adminProfileSection')"><span class="profileIcon adminHeaderProfileIcon"></span>Profile</button>
                     </div>
                     <button type="button" class="adminNavButton adminLogoutButton" onclick="logoutAdmin()"><svg class="adminNavIcon realIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>Logout</button>
                 </nav>
@@ -409,10 +409,12 @@
         </footer>
     </div>
 
+    <script src="js/header-profile.js"></script>
     <script src="js/admin.js"></script>
 </body>
 
 </html>
+
 
 
 
