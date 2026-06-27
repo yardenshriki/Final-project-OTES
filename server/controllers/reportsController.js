@@ -124,9 +124,11 @@ async function createReport(req, res) {
 }
 
 async function updateReportStatus(req, res) {
+  const decision = req.body.decision || null;
+
   try {
     const [reports] = await db.execute(
-      `SELECT status
+      `SELECT status, reporter_id, reported_user_id
       FROM reports
       WHERE id = ?`,
       [req.params.id],
@@ -139,7 +141,7 @@ async function updateReportStatus(req, res) {
       return;
     }
 
-    const currentStatus = reports[0].status;
+    const { status: currentStatus, reporter_id, reported_user_id } = reports[0];
 
     if (currentStatus == "closed") {
       res.json({
@@ -163,6 +165,33 @@ async function updateReportStatus(req, res) {
         message: "Report not found",
       });
       return;
+    }
+
+    if (nextStatus == "in-review") {
+      await db.execute(
+        `INSERT INTO notifications (user_id, type, title, message)
+        VALUES (?, ?, ?, ?)`,
+        [reporter_id, "report", "Report under review", "Your report has been received and is now being reviewed"],
+      );
+    } else if (nextStatus == "closed") {
+      await db.execute(
+        `INSERT INTO notifications (user_id, type, title, message)
+        VALUES (?, ?, ?, ?)`,
+        [reporter_id, "report", "Report closed", "Your report has been reviewed and closed"],
+      );
+
+      if (reported_user_id && decision) {
+        const decisionTitle = decision == "block" ? "Your account has been blocked" : "You received a warning";
+        const decisionMessage = decision == "block"
+          ? "Following a report filed against you, your account has been blocked"
+          : "Following a report filed against you, you have received a warning";
+
+        await db.execute(
+          `INSERT INTO notifications (user_id, type, title, message)
+          VALUES (?, ?, ?, ?)`,
+          [reported_user_id, decision, decisionTitle, decisionMessage],
+        );
+      }
     }
 
     res.json({

@@ -128,6 +128,24 @@ async function submitReportForm() {
             description: reportData.reportDescription
         });
 
+        var notifMessage = "Your report has been received. Our team will review it and keep you updated.";
+        if (reportTarget.task_id && reportTarget.task_title) {
+            notifMessage = "Your report has been received regarding task: " + reportTarget.task_title + ". Our team will review it.";
+        }
+        try {
+            await fetch("http://localhost:5000/api/notification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: getCurrentReportUserId(),
+                    task_id: reportTarget.task_id || null,
+                    type: "report-sent",
+                    title: "Report Received",
+                    message: notifMessage
+                })
+            });
+        } catch (e) {}
+
         resetReportForm();
         clearReportMessage();
         showReportSuccessPopup();
@@ -236,6 +254,7 @@ async function findReportTargetFromServer(reportedTarget) {
     for (var j = 0; j < reportTasks.length; j++) {
         if (isMatchingReportTask(reportTasks[j], normalizedTarget) == true) {
             target.task_id = reportTasks[j].id;
+            target.task_title = reportTasks[j].title || "";
 
             if (reportTasks[j].performer_id != null && reportTasks[j].performer_id != "") {
                 target.reported_user_id = reportTasks[j].performer_id;
