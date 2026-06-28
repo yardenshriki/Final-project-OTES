@@ -179,7 +179,7 @@ function renderMailList() {
         return;
     }
 
-    for (var i = notifications.length - 1; i >= 0; i--) {
+    for (var i = 0; i < notifications.length; i++) {
         var className = "mailItem";
         if (!notifications[i].is_read) className += " mailItemUnread";
         mailList.innerHTML += createNotificationItem(notifications[i], className);
@@ -357,6 +357,14 @@ async function resolveTaskCompletion(decisionText) {
 }
 
 async function approveTaskCompletion(notification) {
+    if (notification.task_id != null) {
+        try {
+            await fetch(notificationTasksApiUrl + "/" + notification.task_id + "/approve", { method: "PATCH" });
+        } catch (e) {
+            console.log(e.message);
+        }
+    }
+
     var paymentWasCreated = false;
 
     if (typeof addPaymentSuccessNotification == "function") {
@@ -377,15 +385,7 @@ async function reopenTaskAfterRejectedCompletion(taskId) {
     if (taskId == null || taskId == "") return;
 
     try {
-        var response = await fetch(notificationTasksApiUrl + "/" + taskId);
-        var task = await response.json();
-        task.state = "in-progress";
-        task.work_status = "Finalizing the task";
-        await fetch(notificationTasksApiUrl + "/" + task.id, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(task),
-        });
+        await fetch(notificationTasksApiUrl + "/" + taskId + "/reject", { method: "PATCH" });
     } catch (error) {
         console.log(error.message);
     }

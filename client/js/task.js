@@ -132,7 +132,6 @@ function renderTaskDetails(selectedTask) {
     taskDetailsDescription:
       selectedTask.description + "<br><br>" + selectedTask.additional_details,
     taskDetailsPayment: "$" + selectedTask.payment,
-    taskDetailsDeadline: formatDisplayDate(selectedTask.deadline) || "Not set",
     taskDetailsCategory: selectedTask.category,
     taskDetailsDifficulty: selectedTask.difficulty,
     taskDetailsPostedDate: formatDisplayDate(selectedTask.created_at),

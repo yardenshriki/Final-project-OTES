@@ -985,8 +985,8 @@ hr {
 
 .appFooter {
   width: 100%;
-  margin: 28px 0 0 0;
-  padding: 10px 28px;
+  margin-top: auto;
+  padding: 28px 28px 10px;
   background-color: #f0cf9d;
   border-top: 2px solid #d3aa70;
   color: #3f3327;
@@ -1020,6 +1020,7 @@ hr {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  vertical-align: middle;
   width: 28px;
   height: 28px;
   margin-right: 8px;
@@ -1051,6 +1052,22 @@ hr {
 
 .footerSocials button:active {
   transform: scale(1.05);
+}
+
+.instagramBtn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  background:
+    radial-gradient(circle at 75% 25%, currentColor 0, currentColor 1.5px, transparent 1.5px),
+    radial-gradient(circle at center, transparent 0, transparent 2px, currentColor 2px, currentColor 4px, transparent 4px);
+  box-sizing: border-box;
 }
 
 .footerSocials button::after {
@@ -1087,7 +1104,9 @@ hr {
   border-bottom: 2px solid #d3aa70;
   box-sizing: border-box;
   z-index: 15;
-  white-space: nowrap;
+  overflow: hidden;
+  align-items: center;
+  gap: 4px;
 }
 
 .menuButton {
@@ -1098,19 +1117,21 @@ hr {
   color: #5c4b39;
   font-size: 20px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .systemTitle {
-  display: inline-block;
   position: relative;
+  flex: 1;
+  min-width: 0;
   margin-left: 14px;
-  max-width: calc(100% - 390px);
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: middle;
+  white-space: nowrap;
   font-size: 20px;
   font-weight: bold;
   color: #3f3327;
+  order: 1;
 }
 
 .systemTitle::after {
@@ -1118,12 +1139,13 @@ hr {
 }
 
 .roleSwitch {
-  float: right;
   margin-right: 12px;
   padding: 3px;
   border: 2px solid #d0a66b;
   border-radius: 24px;
   background-color: #f8e8d0;
+  flex-shrink: 0;
+  order: 3;
 }
 
 .roleSwitch input {
@@ -1144,7 +1166,6 @@ hr {
 }
 
 .profileButton {
-  float: right;
   width: 38px;
   height: 38px;
   padding: 0;
@@ -1153,6 +1174,8 @@ hr {
   background-color: transparent;
   cursor: pointer;
   overflow: hidden;
+  flex-shrink: 0;
+  order: 6;
 }
 
 .profileIcon {
@@ -1603,7 +1626,7 @@ hr {
 @media screen and (max-width: 900px) {
   .topBar,
   .systemBox {
-    width: 86%;
+    width: 92%;
   }
 
   .taskItem,
@@ -1631,7 +1654,6 @@ hr {
   }
 
   .systemTitle {
-    max-width: calc(100% - 310px);
     margin-left: 8px;
     font-size: 16px;
   }
@@ -1700,6 +1722,24 @@ hr {
 }
 
 @media screen and (max-width: 560px) {
+  .topBar,
+  .systemBox {
+    width: 96%;
+    padding: 14px;
+  }
+
+  .filterRow input,
+  .filterRow select {
+    width: 100%;
+    margin-right: 0;
+    margin-top: 8px;
+  }
+
+  .taskDetailsLayout,
+  .performerProgressPanel {
+    width: 96%;
+  }
+
   .authBody #signupScreen,
   .authBody #paymentScreen {
     padding-top: 48px;
@@ -1740,7 +1780,6 @@ hr {
   }
 
   .systemTitle {
-    max-width: calc(100% - 255px);
     font-size: 13px;
     color: transparent;
   }

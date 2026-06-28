@@ -26,6 +26,7 @@
   width: 950px;
   margin: 0 auto;
   text-align: left;
+  align-items: start;
 }
 
 .performerOnly {
@@ -128,7 +129,6 @@
 }
 
 .taskDescriptionPanel {
-  min-height: 300px;
   padding: 28px;
 }
 
@@ -139,7 +139,6 @@
 }
 
 .taskDescriptionPanel p {
-  min-height: 150px;
   line-height: 26px;
   color: #3f3327;
 }
@@ -229,8 +228,13 @@
   font-weight: normal;
 }
 
+.taskMainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
 .communicationPanel {
-  grid-column: 1 / 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -240,7 +244,6 @@
 
 .cancelTaskPanel,
 .performerCancelTaskPanel {
-  grid-column: 1 / 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -299,7 +302,6 @@
 }
 
 .takeTaskButton {
-  grid-column: 1 / 2;
   width: 100%;
   height: 58px;
   border: none;
@@ -456,15 +458,6 @@
   .performerProgressPanel {
     grid-template-columns: 1fr;
     width: 86%;
-  }
-
-  .communicationPanel {
-    grid-column: auto;
-  }
-
-  .cancelTaskPanel,
-  .performerCancelTaskPanel {
-    grid-column: auto;
   }
 
   .nextStepButton {

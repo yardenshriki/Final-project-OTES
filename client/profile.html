@@ -6,14 +6,16 @@
     <title>Profile - Online Tasks Execution System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/layout.css">
     <link rel="stylesheet" href="style/notifications.css">
     <link rel="stylesheet" href="style/profile.css">
 </head>
 
 <body class="profilePageBody">
     <div id="page">
+        <div id="layoutContainer"></div>
         <header id="appHeader">
-            <input type="button" value="&#9776;" class="menuButton" id="profileMenuButton" aria-label="Menu">
+            <input type="button" value="&#9776;" class="menuButton" id="profileMenuButton" aria-label="Menu" onclick="openMenu()">
             <span class="systemTitle">Task Execution System</span>
 
             <button type="button" class="profileHeaderLink" aria-label="Profile">
@@ -225,11 +227,13 @@
             <div class="footerSocials">
                 <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
                 <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
-                <button type="button" aria-label="Instagram" data-tooltip="Instagram">?</button>
+                <button type="button" class="instagramBtn" aria-label="Instagram" data-tooltip="Instagram"></button>
             </div>
         </footer>
     </div>
 
+    <script src="js/script.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/credit-card.js"></script>
     <script src="js/profile-picture.js"></script>
     <script src="js/header-profile.js"></script>

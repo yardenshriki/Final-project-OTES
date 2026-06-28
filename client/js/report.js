@@ -330,7 +330,6 @@ function connectReportForm() {
 function connectReportActions() {
     connectReportForm();
     addReportClick("reportBackButton", goToReportHome);
-    addReportClick("reportHomeButton", goToReportHome);
     addReportClick("reportCancelButton", cancelReportForm);
     addReportClick("reportSuccessButton", confirmReportSuccess);
     addReportClick("requesterButton", function () {
