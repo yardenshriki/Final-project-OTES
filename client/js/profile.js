@@ -86,26 +86,36 @@ function getLoggedInProfileUserId() {
 function loadProfileData(done) {
     var userId = getLoggedInProfileUserId();
     var userRequest = userId != null ? fetchProfileEndpoint("/users/" + userId) : fetchProfileEndpoint("/users");
+    var ratingsRequest = userId != null ? fetchProfileEndpoint("/rating/user/" + userId).catch(function () {
+        return { averageRating: 0, totalRatings: 0, ratings: [] };
+    }) : Promise.resolve({ averageRating: 0, totalRatings: 0, ratings: [] });
 
     Promise.all([
         userRequest,
         fetchProfileEndpoint("/tasks"),
-        fetchProfileEndpoint("/payment")
+        fetchProfileEndpoint("/payment"),
+        ratingsRequest
     ])
         .then(function (responses) {
-            done(buildProfileDataFromServer(responses[0], responses[1], responses[2]));
+            done(buildProfileDataFromServer(responses[0], responses[1], responses[2], responses[3]));
         })
         .catch(function () {
             done(getDefaultProfileData());
         });
 }
 
-function buildProfileDataFromServer(userData, tasksData, paymentsData) {
+function buildProfileDataFromServer(userData, tasksData, paymentsData, ratingsData) {
     var users = Array.isArray(userData) ? userData : [userData];
     var currentUser = findProfileUserFromList(users) || users[0] || {};
     var normalizedUser = normalizeProfileUserFromServer(currentUser);
     var taskLogs = normalizeProfileTasksFromServer(tasksData || [], normalizedUser);
     var payments = normalizeProfilePaymentsFromServer(paymentsData || [], normalizedUser);
+    var ratingDetails = normalizeProfileRatingsFromServer(ratingsData);
+
+    normalizedUser.rating = ratingDetails.averageRating;
+    normalizedUser.ratingCount = ratingDetails.totalRatings;
+    normalizedUser.ratings = ratingDetails.reviews;
+    normalizedUser.reviews = ratingDetails.reviews;
 
     return {
         users: [normalizedUser],
@@ -194,6 +204,30 @@ function normalizeProfilePaymentsFromServer(payments, user) {
     return rows;
 }
 
+function normalizeProfileRatingsFromServer(ratingsData) {
+    var ratings = ratingsData != null && Array.isArray(ratingsData.ratings) ? ratingsData.ratings : [];
+    var average = Number(ratingsData != null ? ratingsData.averageRating || ratingsData.average_rating || 0 : 0);
+    var total = Number(ratingsData != null ? ratingsData.totalRatings || ratingsData.total_ratings || ratings.length : ratings.length);
+    var reviews = [];
+
+    for (var i = 0; i < ratings.length; i++) {
+        reviews.push({
+            clientName: ratings[i].requester_name || "Client",
+            taskTitle: ratings[i].task_title || "Task",
+            rating: Number(ratings[i].rating || 0),
+            feedback: ratings[i].feedback || "",
+            date: formatProfileDate(ratings[i].created_at || ratings[i].updated_at),
+            id: ratings[i].id || ""
+        });
+    }
+
+    return {
+        averageRating: average > 0 ? average.toFixed(1) : "0.0",
+        totalRatings: total,
+        reviews: reviews
+    };
+}
+
 function formatProfileTaskStatus(status) {
     var normalizedStatus = normalizeProfileText(status);
 
@@ -224,10 +258,13 @@ function getDefaultProfileData() {
         users: [
             {
                 username: "john_doe",
-                name: "John Doe",
-                email: "john.doe@gmail.com",
-                tasks: ["Design a Logo", "Data Entry"],
-                ratings: ["4.8 from Anna Smith"]
+                name: "User",
+                email: "",
+                tasks: [],
+                ratings: [],
+                reviews: [],
+                rating: "0.0",
+                ratingCount: 0
             }
         ],
         taskLogs: [],
@@ -264,16 +301,16 @@ function buildCurrentProfile(data) {
 
     profileOriginalUsername = user.username || username;
     profile.username = profile.username || username;
-    profile.name = profile.name || "John Doe";
-    profile.email = profile.email || "john.doe@gmail.com";
+    profile.name = profile.name || "User";
+    profile.email = profile.email || "";
     profile.bio = profile.bio || "";
     profile.skills = profile.skills || "";
-    profile.rating = profile.rating || getRatingFromText(profile.ratings);
-    profile.ratingCount = profile.ratingCount || getCompletedCount(profile);
+    profile.rating = profile.rating != null && profile.rating !== "" ? profile.rating : getRatingFromText(profile.ratings);
+    profile.ratingCount = profile.ratingCount != null && profile.ratingCount !== "" ? profile.ratingCount : getReviewCount(profile);
     profile.completedTasks = profile.completedTasks || getCompletedCount(profile);
     profile.activeTasks = profile.activeTasks || getActiveCount(profile);
     profile.earnings = profile.earnings || getEarnings(profile);
-    profile.reviews = profile.reviews || profile.ratings || ["4.8 from Anna Smith"];
+    profile.reviews = profile.reviews || profile.ratings || [];
     profile.image = profile.image || "";
 
     return profile;
@@ -458,10 +495,39 @@ function renderReviews() {
     var rows = "";
 
     for (var i = 0; i < reviews.length; i++) {
-        rows += "<li>" + cleanProfileText(reviews[i]) + "</li>";
+        rows += buildProfileReviewRow(reviews[i]);
     }
 
-    list.innerHTML = rows || "<li>No reviews yet.</li>";
+    list.innerHTML = rows || "<li class='profileEmptyReview'>No client reviews yet.</li>";
+}
+
+function buildProfileReviewRow(review) {
+    if (typeof review == "string") {
+        return "<li class='profileReviewCard'><p>" + cleanProfileText(review) + "</p></li>";
+    }
+
+    return "<li class='profileReviewCard'>" +
+        "<div class='profileReviewHeader'>" +
+        "<strong>" + cleanProfileText(review.clientName || "Client") + "</strong>" +
+        "<span>" + cleanProfileText(review.date || "") + "</span>" +
+        "</div>" +
+        "<div class='profileReviewMeta'>" +
+        "<span>" + cleanProfileText(review.taskTitle || "Task") + "</span>" +
+        "<span class='profileReviewStars'>" + getProfileRatingStars(review.rating) + "</span>" +
+        "</div>" +
+        "<p>" + cleanProfileText(review.feedback || "No written feedback.") + "</p>" +
+        "</li>";
+}
+
+function getProfileRatingStars(ratingValue) {
+    var rating = Math.round(Number(ratingValue || 0));
+    var stars = "";
+
+    for (var i = 1; i <= 5; i++) {
+        stars += "<span class='" + (i <= rating ? "activeReviewStar" : "emptyReviewStar") + "'>&#9733;</span>";
+    }
+
+    return stars;
 }
 
 function showProfileTab(tabName) {
@@ -896,7 +962,19 @@ function getRatingFromText(ratings) {
         }
     }
 
-    return "4.8";
+    return "0.0";
+}
+
+function getReviewCount(profile) {
+    if (profile.reviews != null) {
+        return profile.reviews.length;
+    }
+
+    if (profile.ratings != null) {
+        return profile.ratings.length;
+    }
+
+    return 0;
 }
 
 function cleanProfileText(value) {

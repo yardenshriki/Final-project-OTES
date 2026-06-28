@@ -48,6 +48,24 @@
   text-align: left;
 }
 
+#cardView {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+#editProfileView {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+#cardView .profileFormCard {
+  margin: 0 auto;
+}
+
+#editProfileView .profileFormCard {
+  margin: 0 auto;
+}
+
 .profileSection h1 {
   margin: 8px 0 24px;
   color: #2f2a24;
@@ -306,6 +324,64 @@
 
 .profileList li {
   margin-bottom: 10px;
+}
+
+.profileReviewList {
+  display: grid;
+  gap: 12px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.profileReviewCard {
+  margin-bottom: 0;
+  padding: 14px;
+  border: 1px solid #e1bd83;
+  border-radius: 6px;
+  background-color: #fff6e8;
+}
+
+.profileReviewHeader,
+.profileReviewMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profileReviewHeader strong {
+  color: #2f2a24;
+  font-size: 15px;
+}
+
+.profileReviewHeader span,
+.profileReviewMeta span {
+  color: #7c6a55;
+  font-size: 13px;
+}
+
+.profileReviewMeta {
+  margin-top: 6px;
+}
+
+.profileReviewStars {
+  white-space: nowrap;
+}
+
+.activeReviewStar {
+  color: #d6ad6c;
+}
+
+.emptyReviewStar {
+  color: #d8c7b1;
+}
+
+.profileReviewCard p,
+.profileEmptyReview {
+  margin: 10px 0 0;
+  color: #4f3d28;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .hiddenProfilePanel {
