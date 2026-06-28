@@ -230,7 +230,7 @@ function resetForgotPassword() {
     }
 
     if (!isStrongForgotPassword(newPassword)) {
-        setForgotPasswordError("forgotNewPassword", "forgotNewPasswordError", "Password must be at least 6 characters and include letters and numbers");
+        setForgotPasswordError("forgotNewPassword", "forgotNewPasswordError", "Invalid password format");
         showMessage("forgotResetMessage", "Please fix the fields marked in red");
         return false;
     }
