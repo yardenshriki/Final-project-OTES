@@ -179,11 +179,38 @@ function renderMailList() {
         return;
     }
 
-    for (var i = notifications.length - 1; i >= 0; i--) {
+    for (var i = 0; i < notifications.length; i++) {
         var className = "mailItem";
         if (!notifications[i].is_read) className += " mailItemUnread";
         mailList.innerHTML += createNotificationItem(notifications[i], className);
     }
+}
+
+function cleanNotificationText(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function formatNotificationMessage(value) {
+    return cleanNotificationText(value).replace(/\n/g, "<br>");
+}
+
+function formatNotificationDate(value) {
+    if (value == null || value == "") {
+        return "";
+    }
+
+    var text = String(value);
+    var date = new Date(text);
+
+    if (isNaN(date.getTime())) {
+        return text.replace("T", " ").replace(".000Z", "");
+    }
+
+    return date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0") + " " +
+        String(date.getHours()).padStart(2, "0") + ":" +
+        String(date.getMinutes()).padStart(2, "0");
 }
 
 function createNotificationItem(notification, className) {
@@ -193,10 +220,10 @@ function createNotificationItem(notification, className) {
     }
 
     return '<div class="' + className + '" onclick="openNotification(' + notification.id + ')">' +
-        '<h4>' + (notification.title || "") + '</h4>' +
-        '<p>' + (notification.message || "") + '</p>' +
+        '<h4>' + cleanNotificationText(notification.title) + '</h4>' +
+        '<p>' + formatNotificationMessage(notification.message) + '</p>' +
         receiptButton +
-        '<small>' + (notification.created_at || "") + '</small>' +
+        '<small>' + cleanNotificationText(formatNotificationDate(notification.created_at)) + '</small>' +
         '</div>';
 }
 
