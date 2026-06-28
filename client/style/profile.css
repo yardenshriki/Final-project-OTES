@@ -3,7 +3,7 @@
 }
 
 .profilePageBody #appHeader {
-  display: block;
+  display: flex;
 }
 
 .profilePageBody .roleSwitch button {
@@ -24,7 +24,6 @@
 }
 
 .profileHeaderLink {
-  float: right;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -33,6 +32,8 @@
   border: none;
   background-color: transparent;
   color: #3f3327;
+  flex-shrink: 0;
+  order: 4;
   font-weight: bold;
   cursor: pointer;
 }

@@ -911,7 +911,6 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProfile();
 
     document.getElementById("profileBackButton").addEventListener("click", goToProfileHome);
-    document.getElementById("profileMenuButton").addEventListener("click", goToProfileHome);
     document.querySelector(".profileHeaderLink").addEventListener("click", function () {
         showProfileView("profileView");
     });
