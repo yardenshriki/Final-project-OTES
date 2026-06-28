@@ -1,6 +1,6 @@
-//yarden shriki, lior zahavi
-var FORGOT_VERIFY_API_URL = "http://localhost:5000/api/users/reset-password/verify";
-var FORGOT_RESET_API_URL = "http://localhost:5000/api/users/reset-password";
+﻿//yarden shriki, lior zahavi
+var FORGOT_VERIFY_API_URL = API_BASE_URL + "/api/users/reset-password/verify";
+var FORGOT_RESET_API_URL = API_BASE_URL + "/api/users/reset-password";
 var verifiedForgotPasswordData = null;
 
 function clearForgotPasswordForm() {

@@ -1,5 +1,5 @@
 ﻿//yarden shriki, lior zahavi
-var LOGIN_API_URL = "http://localhost:5000/api/users/login";
+var LOGIN_API_URL = API_BASE_URL + "/api/users/login";
 
 function checkLogin() {
     var username = document.getElementById("username").value.trim();

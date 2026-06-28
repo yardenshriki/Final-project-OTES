@@ -1,7 +1,7 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var requesterTasks = [];
 var selectedTaskState = "all";
-var tasksApiUrl = "http://localhost:5000/api/tasks";
+var tasksApiUrl = API_BASE_URL + "/api/tasks";
 var requesterRefreshTimer = null;
 var requesterRefreshIntervalMs = 6000;
 

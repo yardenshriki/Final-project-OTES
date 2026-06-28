@@ -1,5 +1,5 @@
-//yarden shriki, lior zahavi
-var paymentsApiUrl = "http://localhost:5000/api/payment";
+﻿//yarden shriki, lior zahavi
+var paymentsApiUrl = API_BASE_URL + "/api/payment";
 
 async function sendPaymentRequest(path, method, body) {
     var requestOptions = {

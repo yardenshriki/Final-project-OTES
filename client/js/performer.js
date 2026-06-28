@@ -1,6 +1,6 @@
 ﻿//yarden shriki, lior zahavi
 var performerTasks = [];
-var tasksApiUrl = "http://localhost:5000/api/tasks";
+var tasksApiUrl = API_BASE_URL + "/api/tasks";
 var sortNewestFirst = true;
 var performerRefreshTimer = null;
 var performerRefreshIntervalMs = 6000;

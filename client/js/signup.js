@@ -1,5 +1,5 @@
 ﻿//yarden shriki, lior zahavi
-var SIGNUP_API_URL = "http://localhost:5000/api/users";
+var SIGNUP_API_URL = API_BASE_URL + "/api/users";
 var signupProfilePictureData = "";
 
 function setSignupError(inputName, errorName, text) {

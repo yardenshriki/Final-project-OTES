@@ -1,5 +1,5 @@
 ﻿//yarden shriki, lior zahavi
-var ADMIN_API_BASE_URL = "http://localhost:5000/api";
+var ADMIN_API_BASE_URL = API_BASE_URL + "/api";
 var ADMIN_RUNTIME_STORAGE_KEY = "otesAdminRuntimeUpdates";
 var adminData = null;
 var selectedAdminUser = null;
