@@ -1,7 +1,7 @@
-//yarden shriki, lior zahavi
+﻿//yarden shriki, lior zahavi
 var activeChatTaskId = null;
-var chatApiUrl = "http://localhost:5000/api/chat";
-var chatTasksApiUrl = "http://localhost:5000/api/tasks";
+var chatApiUrl = API_BASE_URL + "/api/chat";
+var chatTasksApiUrl = API_BASE_URL + "/api/tasks";
 var chatMessagesByTask = {};
 var taskChatsCache = {};
 var chatUnreadBadgeRetryCount = 0;

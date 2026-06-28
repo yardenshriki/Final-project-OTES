@@ -3,7 +3,7 @@
 }
 
 .profilePageBody #appHeader {
-  display: block;
+  display: flex;
 }
 
 .profilePageBody .roleSwitch button {

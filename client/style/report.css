@@ -3,7 +3,7 @@
 }
 
 .reportPageBody #appHeader {
-  display: block;
+  display: flex;
 }
 
 .reportPageBody .roleSwitch button {

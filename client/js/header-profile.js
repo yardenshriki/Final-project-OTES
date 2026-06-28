@@ -1,5 +1,5 @@
 ﻿//yarden shriki, lior zahavi
-var HEADER_PROFILE_API_URL = "http://localhost:5000/api/users";
+var HEADER_PROFILE_API_URL = API_BASE_URL + "/api/users";
 
 function getStoredHeaderUser() {
     var currentUserText = localStorage.getItem("currentUser");

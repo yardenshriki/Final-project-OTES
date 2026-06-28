@@ -1,8 +1,8 @@
-//yarden shriki, lior zahavi
-var notificationsApiUrl = "http://localhost:5000/api/notification";
-var notificationTasksApiUrl = "http://localhost:5000/api/tasks";
-var notificationUsersApiUrl = "http://localhost:5000/api/users";
-var notificationsRatingsApiUrl = "http://localhost:5000/api/rating";
+﻿//yarden shriki, lior zahavi
+var notificationsApiUrl = API_BASE_URL + "/api/notification";
+var notificationTasksApiUrl = API_BASE_URL + "/api/tasks";
+var notificationUsersApiUrl = API_BASE_URL + "/api/users";
+var notificationsRatingsApiUrl = API_BASE_URL + "/api/rating";
 var notificationsCache = [];
 var selectedNotificationId = null;
 var selectedNotificationData = null;

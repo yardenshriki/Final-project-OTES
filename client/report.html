@@ -6,14 +6,16 @@
     <title>Report an Issue - Online Tasks Execution System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/layout.css">
     <link rel="stylesheet" href="style/notifications.css">
     <link rel="stylesheet" href="style/report.css">
 </head>
 
 <body class="reportPageBody">
     <div id="page">
+        <div id="layoutContainer"></div>
         <header id="appHeader">
-            <button type="button" id="reportHomeButton" class="menuButton" aria-label="Back">&#8592;</button>
+            <input type="button" value="&#9776;" class="menuButton" id="reportMenuButton" aria-label="Menu" onclick="openMenu()">
             <span class="systemTitle">Online Task Execution System</span>
 
             <button type="button" class="profileButton" aria-label="Profile">
@@ -93,11 +95,14 @@
             <div class="footerSocials">
                 <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
                 <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
-                <button type="button" aria-label="Instagram" data-tooltip="Instagram">?</button>
+                <button type="button" class="instagramBtn" aria-label="Instagram" data-tooltip="Instagram"></button>
             </div>
         </footer>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/report.js"></script>
 </body>
 

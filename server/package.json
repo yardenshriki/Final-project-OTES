@@ -13,7 +13,7 @@
   "license": "ISC",
   "author": "lior zahavi",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "js/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node js/app.js",

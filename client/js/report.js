@@ -1,7 +1,7 @@
-var reportUserRole = localStorage.getItem("userRole") || "Requester";
-var REPORTS_API_URL = "http://localhost:5000/api/report";
-var REPORT_USERS_API_URL = "http://localhost:5000/api/users";
-var REPORT_TASKS_API_URL = "http://localhost:5000/api/tasks";
+﻿var reportUserRole = localStorage.getItem("userRole") || "Requester";
+var REPORTS_API_URL = API_BASE_URL + "/api/report";
+var REPORT_USERS_API_URL = API_BASE_URL + "/api/users";
+var REPORT_TASKS_API_URL = API_BASE_URL + "/api/tasks";
 var reportUsers = [];
 var reportTasks = [];
 
@@ -133,7 +133,7 @@ async function submitReportForm() {
             notifMessage = "Your report has been received regarding task: " + reportTarget.task_title + ". Our team will review it.";
         }
         try {
-            await fetch("http://localhost:5000/api/notification", {
+            await fetch(API_BASE_URL + "/api/notification", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

@@ -1,245 +1,392 @@
 ﻿<!--yarden shriki, lior zahavi-->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <title>Profile - Online Tasks Execution System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style/style.css">
-    <link rel="stylesheet" href="style/notifications.css">
-    <link rel="stylesheet" href="style/profile.css">
-</head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/notifications.css" />
+    <link rel="stylesheet" href="style/profile.css" />
+  </head>
 
-<body class="profilePageBody">
+  <body class="profilePageBody">
     <div id="page">
-        <header id="appHeader">
-            <input type="button" value="&#9776;" class="menuButton" id="profileMenuButton" aria-label="Menu">
-            <span class="systemTitle">Task Execution System</span>
+      <header id="appHeader">
+        <input
+          type="button"
+          value="&#9776;"
+          class="menuButton"
+          id="profileMenuButton"
+          aria-label="Menu"
+        />
+        <span class="systemTitle">Task Execution System</span>
 
-            <button type="button" class="profileHeaderLink" aria-label="Profile">
-                <span class="profileIcon"></span>
-                <span>Profile</span>
-            </button>
-            <nav class="roleSwitch" aria-label="User role">
-                <button type="button" id="requesterButton">Requester</button>
-                <button type="button" id="performerButton">Performer</button>
-            </nav>
-        </header>
+        <button type="button" class="profileHeaderLink" aria-label="Profile">
+          <span class="profileIcon"></span>
+          <span>Profile</span>
+        </button>
+        <nav class="roleSwitch" aria-label="User role">
+          <button type="button" id="requesterButton">Requester</button>
+          <button type="button" id="performerButton">Performer</button>
+        </nav>
+      </header>
 
-        <main class="profileMain">
-            <section id="profileView" class="profileSection">
-                <button type="button" class="profileBackButton" id="profileBackButton">&#8592; Back</button>
-                <h1>Profile</h1>
+      <main class="profileMain">
+        <section id="profileView" class="profileSection">
+          <button
+            type="button"
+            class="profileBackButton"
+            id="profileBackButton"
+          >
+            &#8592; Back
+          </button>
+          <h1>Profile</h1>
 
-                <div class="profileLayout">
-                    <aside class="profileSideColumn">
-                        <section class="profileCard">
-                            <div class="profileAvatarWrap">
-                                <img id="profileImage" class="profileImage" alt="Profile picture">
-                                <span id="profileInitials" class="profileInitials"></span>
-                            </div>
-                            <h2 id="profileName">John Doe</h2>
-                            <p id="profileEmail">john.doe@gmail.com</p>
-                            <p class="profileRating"><span>&#9733;</span> <span id="profileRating">4.8</span> (<span id="profileRatingCount">24</span> tasks)</p>
-                            <button type="button" id="editProfileButton" class="profilePrimaryButton">Edit Profile</button>
-                        </section>
-
-                        <section class="profileCard compactProfileCard">
-                            <button type="button" id="openCardButton" class="profileCreditButton">
-                                <span>&#9632;</span>
-                                Add Credit Card Details
-                            </button>
-                        </section>
-
-                        <section class="profileCard profileStatsCard">
-                            <h2>Statistics</h2>
-                            <dl>
-                                <div>
-                                    <dt>Completed</dt>
-                                    <dd id="completedTasksCount">0</dd>
-                                </div>
-                                <div>
-                                    <dt>Active</dt>
-                                    <dd id="activeTasksCount">0</dd>
-                                </div>
-                                <div>
-                                    <dt>Earnings</dt>
-                                    <dd id="earningsAmount">$0</dd>
-                                </div>
-                            </dl>
-                        </section>
-                    </aside>
-
-                    <section class="profileContentCard">
-                        <nav class="profileTabs" aria-label="Profile tabs">
-                            <button type="button" class="activeProfileTab" data-tab="about">About</button>
-                            <button type="button" data-tab="tasks">Task History</button>
-                            <button type="button" data-tab="reviews">Reviews</button>
-                        </nav>
-
-                        <article id="aboutTab" class="profileTabPanel">
-                            <div id="aboutViewPanel">
-                                <div class="profileAboutHeader">
-                                    <h2>Bio</h2>
-                                    <button type="button" id="editAboutButton" class="profileSmallButton">Edit</button>
-                                </div>
-                                <p id="profileBio"></p>
-                                <h2>Skills</h2>
-                                <p id="profileSkills"></p>
-                            </div>
-
-                            <form id="aboutEditForm" class="hiddenProfilePanel profileAboutEditForm">
-                                <label for="editBio">Bio</label>
-                                <textarea id="editBio" maxlength="150" placeholder="Write a short bio up to 150 characters"></textarea>
-                                <p id="editBioCounter" class="profileFieldHint">0 / 150</p>
-
-                                <label>Skills</label>
-                                <p class="profileFieldHint">Choose up to 4 skills</p>
-                                <div id="editSkillsOptions" class="profileSkillsOptions"></div>
-
-                                <p id="aboutEditMessage" class="message profileFormMessage"></p>
-                                <div class="profileFormActions">
-                                    <button type="submit" class="profilePrimaryButton">Save</button>
-                                    <button type="button" id="cancelAboutEditButton" class="profileSecondaryButton">Cancel</button>
-                                </div>
-                            </form>
-                        </article>
-
-                        <article id="tasksTab" class="profileTabPanel hiddenProfilePanel">
-                            <h2>Task History</h2>
-                            <ul id="profileTaskList" class="profileList"></ul>
-                        </article>
-
-                        <article id="reviewsTab" class="profileTabPanel hiddenProfilePanel">
-                            <h2>Reviews</h2>
-                            <ul id="profileReviewList" class="profileList"></ul>
-                        </article>
-                    </section>
+          <div class="profileLayout">
+            <aside class="profileSideColumn">
+              <section class="profileCard">
+                <div class="profileAvatarWrap">
+                  <img
+                    id="profileImage"
+                    class="profileImage"
+                    alt="Profile picture"
+                  />
+                  <span id="profileInitials" class="profileInitials"></span>
                 </div>
-            </section>
+                <h2 id="profileName">John Doe</h2>
+                <p id="profileEmail">john.doe@gmail.com</p>
+                <p class="profileRating">
+                  <span>&#9733;</span>
+                  <span id="profileRating">4.8</span> (<span
+                    id="profileRatingCount"
+                    >24</span
+                  >
+                  tasks)
+                </p>
+                <button
+                  type="button"
+                  id="editProfileButton"
+                  class="profilePrimaryButton"
+                >
+                  Edit Profile
+                </button>
+              </section>
 
-            <section id="editProfileView" class="profileSection hiddenProfilePanel">
-                <button type="button" class="profileBackButton" id="editBackButton">&#8592; Back</button>
-                <h1>Edit Profile</h1>
+              <section class="profileCard compactProfileCard">
+                <button
+                  type="button"
+                  id="openCardButton"
+                  class="profileCreditButton"
+                >
+                  <span>&#9632;</span>
+                  Add Credit Card Details
+                </button>
+              </section>
 
-                <form id="editProfileForm" class="profileFormCard">
-                    <div class="profileEditGrid">
-                        <section class="profilePhotoEditor">
-                            <div class="profileAvatarWrap largeAvatar">
-                                <img id="editProfileImage" class="profileImage" alt="Profile preview">
-                                <span id="editProfileInitials" class="profileInitials"></span>
-                            </div>
-                            <label for="editProfilePicture">Profile Picture</label>
-                            <input type="file" id="editProfilePicture" accept="image/*">
-                        </section>
+              <section class="profileCard profileStatsCard">
+                <h2>Statistics</h2>
+                <dl>
+                  <div>
+                    <dt>Completed</dt>
+                    <dd id="completedTasksCount">0</dd>
+                  </div>
+                  <div>
+                    <dt>Active</dt>
+                    <dd id="activeTasksCount">0</dd>
+                  </div>
+                  <div>
+                    <dt>Earnings</dt>
+                    <dd id="earningsAmount">$0</dd>
+                  </div>
+                </dl>
+              </section>
+            </aside>
 
-                        <section>
-                            <label for="editFullName">Full Name</label>
-                            <input type="text" id="editFullName" required>
+            <section class="profileContentCard">
+              <nav class="profileTabs" aria-label="Profile tabs">
+                <button type="button" class="activeProfileTab" data-tab="about">
+                  About
+                </button>
+                <button type="button" data-tab="tasks">Task History</button>
+                <button type="button" data-tab="reviews">Reviews</button>
+              </nav>
 
-                            <label for="editUsername">Username</label>
-                            <input type="text" id="editUsername" required>
+              <article id="aboutTab" class="profileTabPanel">
+                <div id="aboutViewPanel">
+                  <div class="profileAboutHeader">
+                    <h2>Bio</h2>
+                    <button
+                      type="button"
+                      id="editAboutButton"
+                      class="profileSmallButton"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <p id="profileBio"></p>
+                  <h2>Skills</h2>
+                  <p id="profileSkills"></p>
+                </div>
 
-                            <label for="editEmail">Email</label>
-                            <input type="email" id="editEmail" required>
-                        </section>
-                    </div>
+                <form
+                  id="aboutEditForm"
+                  class="hiddenProfilePanel profileAboutEditForm"
+                >
+                  <label for="editBio">Bio</label>
+                  <textarea
+                    id="editBio"
+                    maxlength="150"
+                    placeholder="Write a short bio up to 150 characters"
+                  ></textarea>
+                  <p id="editBioCounter" class="profileFieldHint">0 / 150</p>
 
-                    <section class="passwordSection">
-                        <h2>Password</h2>
-                        <div class="profileTwoColumns">
-                            <div class="passwordField">
-                                <label for="editPassword">New Password</label>
-                                <div class="passwordInputWrap">
-                                    <input type="password" id="editPassword" placeholder="Leave empty to keep current password">
-                                    <button type="button" id="toggleEditPassword" class="passwordEyeButton" aria-label="Show new password">&#128065;</button>
-                                </div>
-                            </div>
-                            <div class="passwordField">
-                                <label for="editPasswordConfirm">Confirm Password</label>
-                                <div class="passwordInputWrap">
-                                    <input type="password" id="editPasswordConfirm">
-                                    <button type="button" id="toggleEditPasswordConfirm" class="passwordEyeButton" aria-label="Show confirm password">&#128065;</button>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                  <label>Skills</label>
+                  <p class="profileFieldHint">Choose up to 4 skills</p>
+                  <div
+                    id="editSkillsOptions"
+                    class="profileSkillsOptions"
+                  ></div>
 
-                    <p id="profileEditMessage" class="message profileFormMessage"></p>
-                    <div class="profileFormActions">
-                        <button type="submit" class="profilePrimaryButton">Save Changes</button>
-                        <button type="button" id="cancelEditButton" class="profileSecondaryButton">Cancel</button>
-                    </div>
+                  <p
+                    id="aboutEditMessage"
+                    class="message profileFormMessage"
+                  ></p>
+                  <div class="profileFormActions">
+                    <button type="submit" class="profilePrimaryButton">
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      id="cancelAboutEditButton"
+                      class="profileSecondaryButton"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </form>
+              </article>
+
+              <article id="tasksTab" class="profileTabPanel hiddenProfilePanel">
+                <h2>Task History</h2>
+                <ul id="profileTaskList" class="profileList"></ul>
+              </article>
+
+              <article
+                id="reviewsTab"
+                class="profileTabPanel hiddenProfilePanel"
+              >
+                <h2>Reviews</h2>
+                <ul id="profileReviewList" class="profileList"></ul>
+              </article>
             </section>
-
-            <section id="cardView" class="profileSection hiddenProfilePanel">
-                <button type="button" class="profileBackButton" id="cardBackButton">&#8592; Back</button>
-                <h1>Add Credit Card Details</h1>
-
-                <form id="creditCardForm" class="profileFormCard creditCardForm">
-                    <div class="securePaymentNote">
-                        <span>&#9633;</span>
-                        All payments are secure and encrypted. Your card information is protected with industry-standard security.
-                    </div>
-
-                    <label for="cardNumber">Card Number</label>
-                    <input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" required>
-
-                    <label for="cardHolder">Cardholder Name</label>
-                    <input type="text" id="cardHolder" placeholder="John Doe" required>
-
-                    <div class="profileTwoColumns">
-                        <label>
-                            Expiry Date
-                            <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY" required>
-                        </label>
-                        <label>
-                            CVV
-                            <input type="password" id="cardCvv" maxlength="4" placeholder="123" required>
-                        </label>
-                    </div>
-
-                    <p id="cardMessage" class="message profileFormMessage"></p>
-                    <div class="profileFormActions">
-                        <button type="submit" class="profilePrimaryButton">Save Card Details</button>
-                        <button type="button" id="cancelCardButton" class="profileSecondaryButton">Cancel</button>
-                    </div>
-                </form>
-            </section>
-        </main>
-
-        <section id="profileUpdatedPopup" class="profileUpdatedPopup" aria-hidden="true">
-            <div class="profileUpdatedBox" role="dialog" aria-modal="true" aria-labelledby="profileUpdatedTitle">
-                <div class="profileUpdatedIcon">&#10003;</div>
-                <h2 id="profileUpdatedTitle">Profile Updated Successfully</h2>
-                <p>The following details were updated:</p>
-                <ul id="profileUpdatedList"></ul>
-                <button type="button" id="profileUpdatedButton" class="profilePrimaryButton">Got it, thank you</button>
-            </div>
+          </div>
         </section>
 
-        <footer class="appFooter">
-            <h2>Contact Us</h2>
-            <p>If you have any questions about our policies, please contact us:</p>
-            <p>Email: <span>support@taskexecution.com</span></p>
-            <p class="lastUpdated">Last updated: February 2, 2026</p>
-            <div class="footerSocials">
-                <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
-                <button type="button" aria-label="Twitter" data-tooltip="Twitter">t</button>
-                <button type="button" aria-label="Instagram" data-tooltip="Instagram">?</button>
+        <section id="editProfileView" class="profileSection hiddenProfilePanel">
+          <button type="button" class="profileBackButton" id="editBackButton">
+            &#8592; Back
+          </button>
+          <h1>Edit Profile</h1>
+
+          <form id="editProfileForm" class="profileFormCard">
+            <div class="profileEditGrid">
+              <section class="profilePhotoEditor">
+                <div class="profileAvatarWrap largeAvatar">
+                  <img
+                    id="editProfileImage"
+                    class="profileImage"
+                    alt="Profile preview"
+                  />
+                  <span id="editProfileInitials" class="profileInitials"></span>
+                </div>
+                <label for="editProfilePicture">Profile Picture</label>
+                <input type="file" id="editProfilePicture" accept="image/*" />
+              </section>
+
+              <section>
+                <label for="editFullName">Full Name</label>
+                <input type="text" id="editFullName" required />
+
+                <label for="editUsername">Username</label>
+                <input type="text" id="editUsername" required />
+
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" required />
+              </section>
             </div>
-        </footer>
+
+            <section class="passwordSection">
+              <h2>Password</h2>
+              <div class="profileTwoColumns">
+                <div class="passwordField">
+                  <label for="editPassword">New Password</label>
+                  <div class="passwordInputWrap">
+                    <input
+                      type="password"
+                      id="editPassword"
+                      placeholder="Leave empty to keep current password"
+                    />
+                    <button
+                      type="button"
+                      id="toggleEditPassword"
+                      class="passwordEyeButton"
+                      aria-label="Show new password"
+                    >
+                      &#128065;
+                    </button>
+                  </div>
+                </div>
+                <div class="passwordField">
+                  <label for="editPasswordConfirm">Confirm Password</label>
+                  <div class="passwordInputWrap">
+                    <input type="password" id="editPasswordConfirm" />
+                    <button
+                      type="button"
+                      id="toggleEditPasswordConfirm"
+                      class="passwordEyeButton"
+                      aria-label="Show confirm password"
+                    >
+                      &#128065;
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <p id="profileEditMessage" class="message profileFormMessage"></p>
+            <div class="profileFormActions">
+              <button type="submit" class="profilePrimaryButton">
+                Save Changes
+              </button>
+              <button
+                type="button"
+                id="cancelEditButton"
+                class="profileSecondaryButton"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section id="cardView" class="profileSection hiddenProfilePanel">
+          <button type="button" class="profileBackButton" id="cardBackButton">
+            &#8592; Back
+          </button>
+          <h1>Add Credit Card Details</h1>
+
+          <form id="creditCardForm" class="profileFormCard creditCardForm">
+            <div class="securePaymentNote">
+              <span>&#9633;</span>
+              All payments are secure and encrypted. Your card information is
+              protected with industry-standard security.
+            </div>
+
+            <label for="cardNumber">Card Number</label>
+            <input
+              type="text"
+              id="cardNumber"
+              inputmode="numeric"
+              maxlength="19"
+              placeholder="1234 5678 9012 3456"
+              required
+            />
+
+            <label for="cardHolder">Cardholder Name</label>
+            <input
+              type="text"
+              id="cardHolder"
+              placeholder="John Doe"
+              required
+            />
+
+            <div class="profileTwoColumns">
+              <label>
+                Expiry Date
+                <input
+                  type="text"
+                  id="cardExpiry"
+                  maxlength="5"
+                  placeholder="MM/YY"
+                  required
+                />
+              </label>
+              <label>
+                CVV
+                <input
+                  type="password"
+                  id="cardCvv"
+                  maxlength="4"
+                  placeholder="123"
+                  required
+                />
+              </label>
+            </div>
+
+            <p id="cardMessage" class="message profileFormMessage"></p>
+            <div class="profileFormActions">
+              <button type="submit" class="profilePrimaryButton">
+                Save Card Details
+              </button>
+              <button
+                type="button"
+                id="cancelCardButton"
+                class="profileSecondaryButton"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </section>
+      </main>
+
+      <section
+        id="profileUpdatedPopup"
+        class="profileUpdatedPopup"
+        aria-hidden="true"
+      >
+        <div
+          class="profileUpdatedBox"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profileUpdatedTitle"
+        >
+          <div class="profileUpdatedIcon">&#10003;</div>
+          <h2 id="profileUpdatedTitle">Profile Updated Successfully</h2>
+          <p>The following details were updated:</p>
+          <ul id="profileUpdatedList"></ul>
+          <button
+            type="button"
+            id="profileUpdatedButton"
+            class="profilePrimaryButton"
+          >
+            Got it, thank you
+          </button>
+        </div>
+      </section>
+
+      <footer class="appFooter">
+        <h2>Contact Us</h2>
+        <p>If you have any questions about our policies, please contact us:</p>
+        <p>Email: <span>support@taskexecution.com</span></p>
+        <p class="lastUpdated">Last updated: February 2, 2026</p>
+        <div class="footerSocials">
+          <button type="button" aria-label="Facebook" data-tooltip="Facebook">
+            f
+          </button>
+          <button type="button" aria-label="Twitter" data-tooltip="Twitter">
+            t
+          </button>
+          <button type="button" aria-label="Instagram" data-tooltip="Instagram">
+            ?
+          </button>
+        </div>
+      </footer>
     </div>
 
     <script src="js/credit-card.js"></script>
     <script src="js/profile-picture.js"></script>
     <script src="js/header-profile.js"></script>
     <script src="js/profile.js"></script>
-</body>
-
+  </body>
 </html>
-
-
-
-

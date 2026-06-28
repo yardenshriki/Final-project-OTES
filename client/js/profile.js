@@ -1,4 +1,4 @@
-﻿var PROFILE_API_BASE_URL = "http://localhost:5000/api";
+﻿var PROFILE_API_BASE_URL = API_BASE_URL + "/api";
 var profileRole = localStorage.getItem("userRole") || "Requester";
 var profileData = {};
 var currentProfile = null;

@@ -1,5 +1,5 @@
 ﻿//yarden shriki, lior zahavi
-var TASKS_STORAGE_API_URL = "http://localhost:5000/api/tasks";
+var TASKS_STORAGE_API_URL = API_BASE_URL + "/api/tasks";
 
 function parseTasksStorageResponse(response) {
   if (response.status >= 200 && response.status < 300) {

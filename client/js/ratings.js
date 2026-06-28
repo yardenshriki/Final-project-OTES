@@ -1,5 +1,5 @@
-//yarden shriki, lior zahavi
-var ratingsApiUrl = "http://localhost:5000/api/rating";
+﻿//yarden shriki, lior zahavi
+var ratingsApiUrl = API_BASE_URL + "/api/rating";
 var selectedRatingNotification = null;
 var selectedRatingValue = 0;
 
