@@ -124,6 +124,22 @@ function validateForgotPasswordVerification(data) {
     return !hasError;
 }
 
+function getForgotPasswordVerificationErrorMessage(error) {
+    if (error != null && error.role != null && error.message != null) {
+        return error.message;
+    }
+
+    return "One of the details is incorrect.";
+}
+
+function getForgotPasswordResetErrorMessage(error) {
+    if (error != null && error.role != null && error.message != null) {
+        return error.message;
+    }
+
+    return "One of the details is incorrect.";
+}
+
 function verifyForgotPasswordUser() {
     var verificationData = buildForgotPasswordVerificationRequest();
 
@@ -163,7 +179,7 @@ function verifyForgotPasswordUser() {
         .catch(function (error) {
             verifiedForgotPasswordData = null;
             setForgotPasswordMessageSuccess("forgotVerifyMessage", false);
-            showMessage("forgotVerifyMessage", getLoginErrorMessage(error));
+            showMessage("forgotVerifyMessage", getForgotPasswordVerificationErrorMessage(error));
         });
 
     return false;
@@ -259,7 +275,7 @@ function resetForgotPassword() {
             redirectLoggedInUser(data.user);
         })
         .catch(function (error) {
-            showMessage("forgotResetMessage", getLoginErrorMessage(error));
+            showMessage("forgotResetMessage", getForgotPasswordResetErrorMessage(error));
         });
 
     return false;
