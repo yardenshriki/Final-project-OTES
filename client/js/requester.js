@@ -129,6 +129,8 @@ function renderCategoryOptions(tasks) {
     return;
   }
 
+  var currentValue = categorySelect.value;
+
   categorySelect.innerHTML = "<option>All Categories</option>";
 
   for (var i = 0; i < tasks.length; i++) {
@@ -136,6 +138,8 @@ function renderCategoryOptions(tasks) {
       categorySelect.innerHTML += "<option>" + tasks[i].category + "</option>";
     }
   }
+
+  categorySelect.value = currentValue;
 }
 
 function categoryExists(categoryName, categorySelect) {
