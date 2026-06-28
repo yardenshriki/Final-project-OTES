@@ -8,7 +8,7 @@
 }
 
 .taskFormCard {
-  width: 740px;
+  width: min(740px, 92vw);
   border: 2px solid #d9b37c;
   background-color: #fff0dc;
 }
@@ -209,7 +209,7 @@
 }
 
 .tipsBox {
-  width: 740px;
+  width: min(740px, 92vw);
   margin: 24px auto 0 auto;
   padding: 22px;
   background-color: #f3d6a6;

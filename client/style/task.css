@@ -23,7 +23,7 @@
   display: grid;
   grid-template-columns: minmax(0, 2fr) 320px;
   gap: 28px;
-  width: 950px;
+  width: min(950px, 92vw);
   margin: 0 auto;
   text-align: left;
   align-items: start;
@@ -43,7 +43,7 @@
   grid-template-columns: minmax(0, 1fr) 170px;
   align-items: center;
   gap: 28px;
-  width: 950px;
+  width: min(950px, 92vw);
   margin: 0 auto 28px auto;
   padding: 34px 54px 26px 54px;
   background-color: #fff2df;

@@ -510,7 +510,7 @@ hr {
 
 .topBar {
   display: none;
-  width: 950px;
+  width: min(950px, 92vw);
   margin: 0 auto 18px auto;
   padding: 10px;
   background-color: #f0cf9d;
@@ -540,7 +540,7 @@ hr {
 }
 
 .systemBox {
-  width: 950px;
+  width: min(950px, 92vw);
   margin: auto;
   padding: 22px;
   background-color: #fff2df;
@@ -1255,7 +1255,7 @@ hr {
 }
 
 .pageTitle {
-  width: 950px;
+  width: min(950px, 92vw);
   margin: 0 auto 18px auto;
   text-align: left;
 }
