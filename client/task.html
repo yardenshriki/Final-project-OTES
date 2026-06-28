@@ -39,23 +39,48 @@
             Next Step
           </button>
         </section><div class="taskDetailsLayout">
-          <section class="taskDescriptionPanel">
-            <h3>Task Description</h3>
-            <p id="taskDetailsDescription"></p>
+          <div class="taskMainColumn">
+            <section class="taskDescriptionPanel">
+              <h3>Task Description</h3>
+              <p id="taskDetailsDescription"></p>
 
-            <div class="taskDetailsBottom">
-              <div>
-                <span class="detailsIcon">$</span>
-                <small>Payment</small>
-                <b id="taskDetailsPayment"></b>
+              <div class="taskDetailsBottom">
+                <div>
+                  <small>Payment</small>
+                  <b id="taskDetailsPayment"></b>
+                </div>
               </div>
+            </section>
+
+            <section class="communicationPanel requesterOnly performerActiveOnly">
               <div>
-                <span class="detailsIcon">□</span>
-                <small>Deadline</small>
-                <b id="taskDetailsDeadline"></b>
+                <h3>Communication</h3>
+                <p>Chat with the task performer</p>
               </div>
-            </div>
-          </section>
+              <button type="button" id="taskChatButton">Chat</button>
+            </section>
+            <section id="requesterCancelTaskPanel" class="requesterOnly cancelTaskPanel">
+              <div>
+                <h3>Cancel Task</h3>
+                <p>This option is available only before a performer accepts the task.</p>
+              </div>
+              <button type="button" id="cancelTaskButton">Cancel Task</button>
+            </section>
+            <section id="performerCancelTaskPanel" class="performerOnly cancelTaskPanel">
+              <div>
+                <h3>Cancel Accepted Task</h3>
+                <p id="performerCancelTaskText">You can cancel this task only within 5 minutes after accepting it.</p>
+              </div>
+              <button type="button" id="performerCancelTaskButton">Cancel Task</button>
+            </section>
+            <button
+              type="button"
+              id="performerTakeTaskButton"
+              class="performerOnly performerAvailableOnly takeTaskButton"
+            >
+              Take Task
+            </button>
+          </div>
 
           <aside class="taskSidePanel">
             <section class="taskSideCard">
@@ -93,35 +118,6 @@
               </div>
             </section>
           </aside>
-
-          <section class="communicationPanel requesterOnly performerActiveOnly">
-            <div>
-              <h3>Communication</h3>
-              <p>Chat with the task performer</p>
-            </div>
-            <button type="button" id="taskChatButton">Chat</button>
-          </section>
-          <section id="requesterCancelTaskPanel" class="requesterOnly cancelTaskPanel">
-            <div>
-              <h3>Cancel Task</h3>
-              <p>This option is available only before a performer accepts the task.</p>
-            </div>
-            <button type="button" id="cancelTaskButton">Cancel Task</button>
-          </section>
-          <section id="performerCancelTaskPanel" class="performerOnly cancelTaskPanel">
-            <div>
-              <h3>Cancel Accepted Task</h3>
-              <p id="performerCancelTaskText">You can cancel this task only within 5 minutes after accepting it.</p>
-            </div>
-            <button type="button" id="performerCancelTaskButton">Cancel Task</button>
-          </section>
-<button
-            type="button"
-            id="performerTakeTaskButton"
-            class="performerOnly performerAvailableOnly takeTaskButton"
-          >
-            Take Task
-          </button>
         </div>
       </main>
     </div>
