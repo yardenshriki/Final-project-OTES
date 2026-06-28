@@ -248,7 +248,9 @@
   border-bottom: 2px solid #d3aa70;
   box-sizing: border-box;
   z-index: 15;
-  white-space: nowrap;
+  overflow: hidden;
+  align-items: center;
+  gap: 4px;
 }
 
 .menuButton {
@@ -262,25 +264,27 @@
 }
 
 .systemTitle {
-  display: inline-block;
   position: relative;
+  flex: 1;
+  min-width: 0;
   margin-left: 14px;
-  max-width: calc(100% - 390px);
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: middle;
+  white-space: nowrap;
   font-size: 20px;
   font-weight: bold;
   color: #3f3327;
+  order: 1;
 }
 
 .roleSwitch {
-  float: right;
   margin-right: 12px;
   padding: 3px;
   border: 2px solid #d0a66b;
   border-radius: 24px;
   background-color: #f8e8d0;
+  flex-shrink: 0;
+  order: 3;
 }
 
 .roleSwitch input {
@@ -301,7 +305,6 @@
 }
 
 .profileButton {
-  float: right;
   width: 38px;
   height: 38px;
   padding: 0;
@@ -310,6 +313,8 @@
   background-color: transparent;
   cursor: pointer;
   overflow: hidden;
+  flex-shrink: 0;
+  order: 6;
 }
 
 .profileIcon {
@@ -363,7 +368,6 @@
   }
 
   .systemTitle {
-    max-width: calc(100% - 310px);
     margin-left: 8px;
     font-size: 16px;
   }
@@ -389,7 +393,6 @@
 
 @media screen and (max-width: 560px) {
   .systemTitle {
-    max-width: calc(100% - 255px);
     font-size: 13px;
     color: transparent;
   }

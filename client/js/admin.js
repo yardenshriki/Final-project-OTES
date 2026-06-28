@@ -909,20 +909,18 @@ function getTodayString() {
     return today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
 }
 
-function getSelectedUserReportReasonText() {
-    var history = selectedAdminUser && selectedAdminUser.reportHistory ? selectedAdminUser.reportHistory : [];
-
-    if (history.length == 0) {
-        return "Multiple reports were filed against your account.";
-    }
-
-    return history.join("\n");
+function getWarningReasonDefaultText() {
+    return "User report requires admin attention.";
 }
 
-function getWarningEmailText() {
+function getWarningMailboxText(reason) {
+    var warningDate = getTodayString();
+    var cleanReason = reason && reason.trim() != "" ? reason.trim() : getWarningReasonDefaultText();
+
     return "Hello " + selectedAdminUser.name + ",\n\n" +
         "A warning was issued for your account.\n" +
-        "Reason and details:\n" + getSelectedUserReportReasonText() + "\n\n" +
+        "Date: " + warningDate + "\n" +
+        "Reason: " + cleanReason + "\n\n" +
         "Please resolve the reported issues. Continued exceptions may lead to account restriction or blocking.\n\n" +
         "OTES Admin Team";
 }
@@ -988,7 +986,7 @@ function openWarningEmailPage() {
     var previousWarning = selectedAdminUser.warningSent ? "A warning email was already sent on " + cleanAdminText(selectedAdminUser.warningDate) + "." : "No previous warning email was sent.";
     document.getElementById("warningExistingInfo").innerHTML = previousWarning;
     document.getElementById("warningUsername").value = selectedAdminUser.username;
-    document.getElementById("warningEmailText").value = getWarningEmailText();
+    document.getElementById("warningEmailText").value = getWarningReasonDefaultText();
     showAdminSection("adminWarningEmailSection");
 }
 
@@ -998,10 +996,11 @@ function sendWarningEmail() {
     }
 
     var warningTextElement = document.getElementById("warningEmailText");
-    var warningText = warningTextElement ? warningTextElement.value.trim() : "";
+    var warningReason = warningTextElement ? warningTextElement.value.trim() : "";
+    var warningText = getWarningMailboxText(warningReason);
 
-    if (warningText == "") {
-        warningText = getWarningEmailText();
+    if (warningReason == "") {
+        warningReason = getWarningReasonDefaultText();
     }
 
     if (selectedAdminUser.dbId == null || selectedAdminUser.dbId == "") {
@@ -1014,7 +1013,7 @@ function sendWarningEmail() {
     postAdminEndpoint("/notification", {
         user_id: selectedAdminUser.dbId,
         type: "report",
-        title: "Warning Email",
+        title: "Warning Email - " + getTodayString(),
         message: warningText
     })
         .then(function () {
