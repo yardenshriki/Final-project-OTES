@@ -179,7 +179,7 @@ function renderMailList() {
         return;
     }
 
-    for (var i = notifications.length - 1; i >= 0; i--) {
+    for (var i = 0; i < notifications.length; i++) {
         var className = "mailItem";
         if (!notifications[i].is_read) className += " mailItemUnread";
         mailList.innerHTML += createNotificationItem(notifications[i], className);

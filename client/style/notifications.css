@@ -1,6 +1,5 @@
 /* Mailbox and notification modals */
 .mailButton {
-  float: right;
   position: relative;
   width: 38px;
   height: 38px;
@@ -9,10 +8,11 @@
   border: none;
   background-color: transparent;
   cursor: pointer;
+  flex-shrink: 0;
+  order: 5;
 }
 
 .chatButton {
-  float: right;
   position: relative;
   width: 38px;
   height: 38px;
@@ -21,6 +21,8 @@
   border: none;
   background-color: transparent;
   cursor: pointer;
+  flex-shrink: 0;
+  order: 4;
 }
 
 .mailIcon {

@@ -86,7 +86,7 @@ function refreshSharedLayoutState() {
     if (visibleScreen != null && typeof showHeader == "function") {
         showHeader(visibleScreen.id);
     } else if (document.getElementById("appHeader") != null) {
-        document.getElementById("appHeader").style.display = "block";
+        document.getElementById("appHeader").style.display = "flex";
     }
 
     if (typeof markRole == "function") {

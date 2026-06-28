@@ -58,7 +58,7 @@ function showHeader(screenName) {
     if (screenName == "loginScreen" || screenName == "signupScreen" || screenName == "paymentScreen" || screenName == "termsScreen" || screenName == "successScreen") {
         document.getElementById("appHeader").style.display = "none";
     } else {
-        document.getElementById("appHeader").style.display = "block";
+        document.getElementById("appHeader").style.display = "flex";
     }
 }
 
