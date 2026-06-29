@@ -116,8 +116,19 @@ function openTaskImage() {
   if (imageSection == null) return;
   var imageData = imageSection.getAttribute("data-image");
   if (!imageData) return;
-  var win = window.open();
-  win.document.write('<img src="' + imageData + '" style="max-width:100%;height:auto">');
+
+  var previewWrap = document.getElementById("taskImagePreviewWrap");
+  var preview = document.getElementById("taskImagePreview");
+  var button = document.getElementById("taskImageButton");
+
+  if (previewWrap.style.display === "none") {
+    preview.src = imageData;
+    previewWrap.style.display = "block";
+    button.innerHTML = "Hide Image";
+  } else {
+    previewWrap.style.display = "none";
+    button.innerHTML = "View Image";
+  }
 }
 
 function renderTaskNotFound() {

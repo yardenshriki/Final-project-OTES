@@ -453,6 +453,46 @@
   color: #3f3327;
 }
 
+#taskImageSection {
+  margin-top: 18px;
+}
+
+#taskImageButton {
+  height: 36px;
+  padding: 0 18px;
+  border: 2px solid #d9b37c;
+  border-radius: 6px;
+  background-color: #fff8ed;
+  color: #3f3327;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#taskImageButton:hover,
+#taskImageButton:focus {
+  background-color: #f0d9b2;
+}
+
+#taskImagePreviewWrap {
+  margin-top: 14px;
+}
+
+#taskImagePreview {
+  display: block;
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  border: 2px solid #d9b37c;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 560px) {
+  #taskImagePreview {
+    max-width: 100%;
+  }
+}
+
 @media screen and (max-width: 900px) {
   .taskDetailsLayout,
   .performerProgressPanel {

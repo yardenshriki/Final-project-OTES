@@ -640,11 +640,19 @@
   }
 
   .profileSideColumn {
-    max-width: 360px;
+    max-width: 100%;
   }
 
   .profileFormActions {
     grid-template-columns: 1fr;
+  }
+
+  .profileCard {
+    text-align: left;
+  }
+
+  .profileAvatarWrap {
+    margin: 0 0 12px 0;
   }
 }
 
@@ -659,6 +667,7 @@
 
   .profileFormCard {
     padding: 20px;
+    width: 100%;
   }
 
   .profileTabs button {
@@ -672,5 +681,16 @@
 
   .profileHeaderLink span:last-child {
     display: none;
+  }
+
+  .profileStatsCard dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cancelTaskPanel,
+  .performerCancelTaskPanel {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
