@@ -772,10 +772,13 @@ function addTaskChatMessage(taskId, message) {
 
 function getVisibleChats() {
   var chats = getTaskChats();
+  var currentUserId = getCurrentChatUserId();
   var visibleChats = [];
 
   for (var i = 0; i < chats.length; i++) {
-    visibleChats.push(chats[i]);
+    if (chats[i].requesterId == currentUserId || chats[i].performerId == currentUserId) {
+      visibleChats.push(chats[i]);
+    }
   }
 
   return sortChatsByRecentActivity(visibleChats);
