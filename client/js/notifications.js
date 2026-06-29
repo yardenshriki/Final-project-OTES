@@ -505,16 +505,40 @@ async function downloadReceipt(notificationId, event) {
     }
 
     if (selectedNotification != null) {
-        var receiptText = "OTES Payment Receipt\n" +
-            "Task: " + (selectedNotification.task_title || "") + "\n" +
-            "Status: Payment transferred\n" +
-            "Date: " + (selectedNotification.created_at || "") + "\n";
-        var receiptFile = new Blob([receiptText], { type: "text/plain" });
-        var receiptLink = document.createElement("a");
-        receiptLink.href = URL.createObjectURL(receiptFile);
-        receiptLink.download = "receipt-" + (selectedNotification.task_id || notificationId) + ".txt";
-        receiptLink.click();
-        URL.revokeObjectURL(receiptLink.href);
+        var receiptWindow = window.open("", "_blank");
+        if (!receiptWindow) {
+            alert("Could not open receipt. Please allow popups and try again.");
+            return;
+        }
+        var n = selectedNotification;
+        var dateStr = n.created_at ? String(n.created_at).split("T")[0] : "";
+        var receiptNum = n.receipt_number || n.payment_id || n.task_id || notificationId;
+        receiptWindow.document.write(
+            "<!doctype html><html><head><title>Receipt #" + receiptNum + "</title>" +
+            "<style>" +
+            "body{font-family:Arial,sans-serif;padding:40px;color:#333;max-width:600px;margin:auto}" +
+            "h1{font-size:26px;color:#b5763a;border-bottom:2px solid #ead6b2;padding-bottom:12px}" +
+            ".logo{font-size:18px;font-weight:bold;color:#b5763a;margin-bottom:8px}" +
+            "table{width:100%;border-collapse:collapse;margin-top:20px}" +
+            "td{border-bottom:1px solid #ead6b2;padding:10px 8px}" +
+            "td:first-child{font-weight:700;background:#fff8ee;width:35%;color:#7a5c2e}" +
+            ".footer{margin-top:32px;font-size:12px;color:#999;text-align:center}" +
+            "@media print{button{display:none}}" +
+            "</style></head><body>" +
+            "<div class='logo'>OTES - Online Task Execution System</div>" +
+            "<h1>Payment Receipt</h1>" +
+            "<table>" +
+            "<tr><td>Receipt #</td><td>" + receiptNum + "</td></tr>" +
+            "<tr><td>Task</td><td>" + (n.task_title || "") + "</td></tr>" +
+            "<tr><td>Status</td><td>Payment transferred successfully</td></tr>" +
+            "<tr><td>Date</td><td>" + dateStr + "</td></tr>" +
+            "<tr><td>Details</td><td>" + (n.message || "") + "</td></tr>" +
+            "</table>" +
+            "<div class='footer'>This is an official payment receipt from OTES.</div>" +
+            "<script>window.onload=function(){window.print();};<\/script>" +
+            "</body></html>"
+        );
+        receiptWindow.document.close();
     }
 
     await refreshMailbox();
