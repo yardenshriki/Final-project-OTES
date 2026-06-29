@@ -21,6 +21,18 @@ function taskHasChatParticipants(task) {
   );
 }
 
+function isCurrentUserChatParticipant(taskOrChat) {
+  if (taskOrChat == null) {
+    return false;
+  }
+
+  var requesterId = taskOrChat.requesterId || getTaskRequesterId(taskOrChat);
+  var performerId = taskOrChat.performerId || getTaskPerformerId(taskOrChat);
+  var currentUserId = getCurrentChatUserId();
+
+  return requesterId == currentUserId || performerId == currentUserId;
+}
+
 function ensureChatLayout() {
   if (document.getElementById("chatDrawer") != null) {
     connectChatActions();
@@ -45,7 +57,10 @@ function getTaskChats() {
   var chats = [];
 
   for (var i = 0; i < tasks.length; i++) {
-    if (taskHasChatParticipants(tasks[i])) {
+    if (
+      taskHasChatParticipants(tasks[i]) &&
+      isCurrentUserChatParticipant(tasks[i])
+    ) {
       chats.push(createChatFromTask(tasks[i]));
     }
   }
@@ -462,12 +477,22 @@ function loadTaskMessages(taskId) {
     };
   }
 
-  if (task == null || taskHasChatParticipants(task) == false) {
+  if (
+    task == null ||
+    taskHasChatParticipants(task) == false ||
+    isCurrentUserChatParticipant(task) == false
+  ) {
     chatMessagesByTask[taskId] = [];
     return Promise.resolve([]);
   }
 
-  return fetch(chatApiUrl + "/task/" + taskId)
+  return fetch(
+    chatApiUrl +
+      "/task/" +
+      taskId +
+      "?userId=" +
+      encodeURIComponent(getCurrentChatUserId()),
+  )
     .then(parseServerJson)
     .then(function (messages) {
       var mappedMessages = [];
@@ -665,7 +690,12 @@ function getOtherChatUserName(chat) {
 
 function findTaskChat(taskId) {
   if (taskChatsCache[taskId] != null) {
-    return taskChatsCache[taskId];
+    if (isCurrentUserChatParticipant(taskChatsCache[taskId])) {
+      return taskChatsCache[taskId];
+    }
+
+    delete taskChatsCache[taskId];
+    delete chatMessagesByTask[taskId];
   }
 
   var chats = getTaskChats();
@@ -680,7 +710,10 @@ function findTaskChat(taskId) {
 }
 
 function createTaskChat(task) {
-  if (taskHasChatParticipants(task) == false) {
+  if (
+    taskHasChatParticipants(task) == false ||
+    isCurrentUserChatParticipant(task) == false
+  ) {
     return null;
   }
 
@@ -776,7 +809,11 @@ function getVisibleChats() {
   var visibleChats = [];
 
   for (var i = 0; i < chats.length; i++) {
-    if (chats[i].requesterId == currentUserId || chats[i].performerId == currentUserId) {
+    if (
+      isCurrentUserChatParticipant(chats[i]) &&
+      (chats[i].requesterId == currentUserId ||
+        chats[i].performerId == currentUserId)
+    ) {
       visibleChats.push(chats[i]);
     }
   }
@@ -871,6 +908,10 @@ function showChatListView() {
 }
 
 function openTaskChat(taskId) {
+  if (findTaskChat(taskId) == null) {
+    return;
+  }
+
   activeChatTaskId = taskId;
 
   var listView = document.getElementById("chatListView");

@@ -588,6 +588,26 @@ function getTaskElementDisplay(element) {
   return "block";
 }
 
+function takeTaskOnServer(taskId, performerId) {
+  return fetch(tasksApiUrl + "/" + taskId + "/take", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      performer_id: performerId,
+    }),
+  }).then(function (response) {
+    return response.json().then(function (data) {
+      if (response.status < 200 || response.status >= 300) {
+        throw new Error(data.message || "The task could not be accepted");
+      }
+
+      return data;
+    });
+  });
+}
+
 function connectTakeTaskButton(selectedTask) {
   var takeTaskButton = document.getElementById("performerTakeTaskButton");
   var taskChatButton = document.getElementById("taskChatButton");
@@ -617,18 +637,22 @@ function connectTakeTaskButton(selectedTask) {
   }
 
   takeTaskButton.onclick = function () {
-    selectedTask.performer_id = selectedTask.performer_id || getCurrentUserId(2);
-    selectedTask.requester_name = selectedTask.requester_name || getCurrentUserName("Requester");
-    selectedTask.performer_name = selectedTask.performer_name || getCurrentUserName("Performer");
-    selectedTask.work_status = "Task accepted";
-    updateTaskStateByWorkStatus(selectedTask);
+    var performerId = getCurrentUserId(2);
+    takeTaskButton.disabled = true;
+    takeTaskButton.innerHTML = "Taking task...";
 
-    if (typeof takeLocalTask == "function") {
-      takeLocalTask(selectedTask.id, selectedTask.requester_name, selectedTask.performer_name);
-    }
-
-    updateTaskOnServer(selectedTask)
+    takeTaskOnServer(selectedTask.id, performerId)
       .then(function () {
+        selectedTask.performer_id = performerId;
+        selectedTask.requester_name = selectedTask.requester_name || getCurrentUserName("Requester");
+        selectedTask.performer_name = getCurrentUserName("Performer");
+        selectedTask.work_status = "Task accepted";
+        updateTaskStateByWorkStatus(selectedTask);
+
+        if (typeof takeLocalTask == "function") {
+          takeLocalTask(selectedTask.id, selectedTask.requester_name, selectedTask.performer_name);
+        }
+
         if (typeof createTaskChat == "function") {
           createTaskChat(selectedTask);
         }
@@ -646,6 +670,11 @@ function connectTakeTaskButton(selectedTask) {
       })
       .catch(function (error) {
         console.log(error.message);
+        takeTaskButton.innerHTML = error.message;
+
+        setTimeout(function () {
+          window.location.href = "performer.html";
+        }, 1600);
       });
   };
 }

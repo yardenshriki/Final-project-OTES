@@ -86,20 +86,29 @@ function getLoggedInProfileUserId() {
 function loadProfileData(done) {
     var userId = getLoggedInProfileUserId();
     var userRequest = userId != null ? fetchProfileEndpoint("/users/" + userId) : fetchProfileEndpoint("/users");
+    var tasksRequest = fetchProfileEndpoint("/tasks").catch(function (error) {
+        console.log("Could not load profile tasks: " + error.message);
+        return [];
+    });
+    var paymentsRequest = fetchProfileEndpoint("/payment").catch(function (error) {
+        console.log("Could not load profile payments: " + error.message);
+        return [];
+    });
     var ratingsRequest = userId != null ? fetchProfileEndpoint("/rating/user/" + userId).catch(function () {
         return { averageRating: 0, totalRatings: 0, ratings: [] };
     }) : Promise.resolve({ averageRating: 0, totalRatings: 0, ratings: [] });
 
     Promise.all([
         userRequest,
-        fetchProfileEndpoint("/tasks"),
-        fetchProfileEndpoint("/payment"),
+        tasksRequest,
+        paymentsRequest,
         ratingsRequest
     ])
         .then(function (responses) {
             done(buildProfileDataFromServer(responses[0], responses[1], responses[2], responses[3]));
         })
-        .catch(function () {
+        .catch(function (error) {
+            console.log("Could not load profile user: " + error.message);
             done(getDefaultProfileData());
         });
 }
