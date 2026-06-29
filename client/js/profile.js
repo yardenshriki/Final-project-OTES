@@ -873,6 +873,9 @@ function closeProfileUpdatedPopup() {
     var popup = document.getElementById("profileUpdatedPopup");
 
     if (popup != null) {
+        if (document.activeElement != null && popup.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
         popup.style.display = "none";
         popup.setAttribute("aria-hidden", "true");
     }
