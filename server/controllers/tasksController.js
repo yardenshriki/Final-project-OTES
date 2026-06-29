@@ -14,6 +14,7 @@ function cleanTaskFromBody(body) {
     requesterId: body.requesterId || body.requester_id,
     performerId: body.performerId || body.performer_id || null,
     deadline: body.deadline || null,
+    imageData: body.imageData || body.image_data || null,
   };
 }
 
@@ -81,8 +82,8 @@ async function createTask(req, res) {
   try {
     const [result] = await db.execute(
       `INSERT INTO tasks
-      (title, description, location, difficulty, payment, additional_details, category, state, work_status, requester_id, performer_id, deadline)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (title, description, location, difficulty, payment, additional_details, category, state, work_status, requester_id, performer_id, deadline, image_data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         task.title,
         task.description,
@@ -96,6 +97,7 @@ async function createTask(req, res) {
         task.requesterId,
         task.performerId,
         task.deadline,
+        task.imageData,
       ],
     );
     res.status(201).json({

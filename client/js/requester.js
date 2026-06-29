@@ -56,7 +56,7 @@ function getCurrentRequesterTasks(tasks) {
   var currentRequesterTasks = [];
 
   for (var i = 0; i < tasks.length; i++) {
-    if (tasks[i].requester_id == requesterId) {
+    if (tasks[i].requester_id == requesterId && tasks[i].state !== "cancelled") {
       currentRequesterTasks.push(tasks[i]);
     }
   }
@@ -545,13 +545,31 @@ function checkTask() {
   }
 
   formatPayment();
-  createTaskOnServer(createTaskFromForm())
-    .then(function () {
-      window.location.href = "requester.html";
-    })
-    .catch(function (error) {
-      showMessage("taskMessage", error.message);
-    });
+
+  var task = createTaskFromForm();
+  var attachment = document.getElementById("taskAttachment");
+
+  function submitTask(taskData) {
+    createTaskOnServer(taskData)
+      .then(function () {
+        window.location.href = "requester.html";
+      })
+      .catch(function (error) {
+        showMessage("taskMessage", error.message);
+      });
+  }
+
+  if (attachment && attachment.files && attachment.files.length > 0) {
+    var file = attachment.files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      task.image_data = e.target.result;
+      submitTask(task);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    submitTask(task);
+  }
   return false;
 }
 
