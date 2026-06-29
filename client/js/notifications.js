@@ -535,7 +535,6 @@ async function downloadReceipt(notificationId, event) {
             "<tr><td>Details</td><td>" + (n.message || "") + "</td></tr>" +
             "</table>" +
             "<div class='footer'>This is an official payment receipt from OTES.</div>" +
-            "<script>window.onload=function(){window.print();};<\/script>" +
             "</body></html>"
         );
         receiptWindow.document.close();
