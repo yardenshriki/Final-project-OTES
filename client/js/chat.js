@@ -1,5 +1,6 @@
 ﻿//yarden shriki, lior zahavi
 var activeChatTaskId = null;
+var chatLoadingTaskId = null;
 var chatApiUrl = API_BASE_URL + "/api/chat";
 var chatTasksApiUrl = API_BASE_URL + "/api/tasks";
 var chatMessagesByTask = {};
@@ -594,7 +595,7 @@ function refreshChatUnreadState() {
       updateChatUnreadBadge();
       checkRequesterTaskCompletion();
 
-      if (activeChatTaskId != null) {
+      if (activeChatTaskId != null && activeChatTaskId !== chatLoadingTaskId) {
         renderChatConversation(activeChatTaskId);
       }
     });
@@ -887,7 +888,9 @@ function openTaskChat(taskId) {
     chatMessages.innerHTML = '<p class="chatLoadingText">Loading messages...</p>';
   }
 
+  chatLoadingTaskId = taskId;
   loadTaskMessages(taskId).then(function () {
+    chatLoadingTaskId = null;
     markTaskChatAsRead(taskId);
     renderChatConversation(taskId);
     renderChatList();
@@ -1090,7 +1093,6 @@ window.onload = function () {
   }
 
   ensureChatLayout();
-  setTimeout(refreshChatUnreadState, 250);
   startChatAutoRefresh();
 };
 
