@@ -51,6 +51,12 @@ function loadSharedLayout(done) {
 
         if (frameDocument != null && frameDocument.body != null) {
             layoutContainer.innerHTML = frameDocument.body.innerHTML;
+            var sharedFooter = document.getElementById("sharedAppFooter");
+            var page = document.getElementById("page");
+            if (sharedFooter != null && page != null) {
+                sharedFooter.parentNode.removeChild(sharedFooter);
+                page.appendChild(sharedFooter);
+            }
         }
 
         if (layoutFrame.parentNode != null) {
