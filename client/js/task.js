@@ -111,6 +111,15 @@ function goBack() {
   }
 }
 
+function openTaskImage() {
+  var imageSection = document.getElementById("taskImageSection");
+  if (imageSection == null) return;
+  var imageData = imageSection.getAttribute("data-image");
+  if (!imageData) return;
+  var win = window.open();
+  win.document.write('<img src="' + imageData + '" style="max-width:100%;height:auto">');
+}
+
 function renderTaskNotFound() {
   document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
   document.getElementById("taskDetailsDescription").innerHTML =
@@ -144,6 +153,16 @@ function renderTaskDetails(selectedTask) {
   document.getElementById("taskDetailsStatus").className = getStatusClass(
     selectedTask.state,
   );
+
+  var imageSection = document.getElementById("taskImageSection");
+  if (imageSection != null) {
+    if (selectedTask.image_data) {
+      imageSection.style.display = "block";
+      imageSection.setAttribute("data-image", selectedTask.image_data);
+    } else {
+      imageSection.style.display = "none";
+    }
+  }
 
   var requesterNameEl = document.getElementById("taskRequesterName");
   if (requesterNameEl != null) {

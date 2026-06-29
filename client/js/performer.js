@@ -188,13 +188,14 @@ function renderPerformerAvailableTasks() {
 
     var availableTasks = performerTasks.filter(function (task) {
         var matchesState = task.state == "open" && (task.performer_id == null || task.performer_id == "");
+        var isOwnTask = String(task.requester_id) == String(getCurrentUserId(0));
         var matchesSearch = task.taskTitle.toLowerCase().indexOf(searchText) != -1 || task.description.toLowerCase().indexOf(searchText) != -1;
         var matchesDifficulty = performerFilters.difficulty == "" || task.difficultyLevel == performerFilters.difficulty;
         var matchesLocation = performerFilters.location == "" || task.location.toLowerCase().indexOf(performerFilters.location.toLowerCase()) != -1;
         var matchesCategory = performerFilters.category == "" || task.categories == performerFilters.category;
         var matchesPrice = task.payment <= performerFilters.maxPrice;
 
-        return matchesState && matchesSearch && matchesDifficulty && matchesLocation && matchesCategory && matchesPrice;
+        return matchesState && !isOwnTask && matchesSearch && matchesDifficulty && matchesLocation && matchesCategory && matchesPrice;
     });
 
     availableTasks.sort(function (firstTask, secondTask) {

@@ -5,12 +5,14 @@
     <title>Profile - Online Tasks Execution System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/layout.css" />
     <link rel="stylesheet" href="style/notifications.css" />
     <link rel="stylesheet" href="style/profile.css" />
   </head>
 
   <body class="profilePageBody">
     <div id="page">
+      <div id="sharedLayout"></div>
       <header id="appHeader">
         <input
           type="button"
@@ -18,6 +20,7 @@
           class="menuButton"
           id="profileMenuButton"
           aria-label="Menu"
+          onclick="openMenu()"
         />
         <span class="systemTitle">Task Execution System</span>
 
