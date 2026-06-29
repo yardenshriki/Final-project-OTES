@@ -768,6 +768,39 @@ body:has(#adminHomeScreen) .systemBox.adminDashboard {
     display: none;
 }
 
+.adminRatingSummary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 12px 0 16px;
+}
+
+.adminRatingSummary div {
+    padding: 14px;
+    border-radius: 10px;
+    background: #fff2dc;
+}
+
+.adminRatingSummary span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #8a704e;
+}
+
+.adminRatingSummary strong {
+    font-size: 20px;
+}
+
+.adminUserRatingItem {
+    padding: 14px 0;
+    border-top: 1px solid #efd7b3;
+}
+
+.adminUserRatingItem p {
+    margin: 8px 0;
+}
+
 .adminFormPanel input[type="text"],
 .adminFormPanel input[type="number"],
 .adminFormPanel textarea,
@@ -2381,7 +2414,11 @@ body:has(#adminHomeScreen) .appFooter.adminFooter,
     align-items: center;
 }
 
-.adminFooter .footerSocials button {
+.adminFooter .footerSocials button,
+.adminFooter .footerSocials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 31px;
     height: 31px;
     border-radius: 50%;
@@ -2391,11 +2428,25 @@ body:has(#adminHomeScreen) .appFooter.adminFooter,
     font-size: 18px;
     font-weight: 800;
     line-height: 1;
+    text-decoration: none;
 }
 
 .paymentRatingDetails {
     grid-column: 1 / -1;
     width: 100%;
+}
+
+.paymentRatingItem {
+    padding: 14px 0;
+    border-bottom: 1px solid #efd7b3;
+}
+
+.paymentRatingItem:last-child {
+    border-bottom: 0;
+}
+
+.paymentRatingItem p {
+    margin: 8px 0;
 }
 
 @media screen and (max-width: 560px) {

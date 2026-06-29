@@ -39,7 +39,7 @@
                     <h2>New Reports Today</h2>
                     <form class="filterRow adminFilterRow" id="reportFilterForm" role="search">
                         <input type="text" id="reportSearch" placeholder="Search reports by user or description">
-                        <input type="button" value="Exception status" onclick="showAdminSection('adminAnomaliesSection')">
+                        <input type="button" value="Export to PDF" onclick="exportReportsPdf()">
                     </form>
                     <div class="adminTableWrap">
                         <table class="adminTable">
@@ -122,7 +122,6 @@
                             <button type="button" class="adminActionButton" onclick="openWarningEmailPage()">Send Warning Email</button>
                             <button type="button" class="adminActionButton" onclick="openRestrictionEdit()">Add User Restriction</button>
                             <button type="button" class="adminActionButton" onclick="showProfileInfo('payments')">Show Recent Payments</button>
-                            <button type="button" class="adminActionButton" onclick="showProfileInfo('chats')">Show Chats</button>
                         </div>
                         <div id="profileActionDetails" class="profileActionDetails"></div>
                     </div>
@@ -404,7 +403,7 @@
             <div class="footerSocials" aria-label="Social links">
                 <button type="button" aria-label="Facebook" data-tooltip="Facebook">f</button>
                 <button type="button" aria-label="Tumblr" data-tooltip="Tumblr">t</button>
-                <button type="button" aria-label="Help" data-tooltip="Help">?</button>
+                <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="instagramBtn" aria-label="Instagram" data-tooltip="Instagram"></a>
             </div>
         </footer>
     </div>

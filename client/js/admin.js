@@ -479,6 +479,9 @@ function normalizeAdminPaymentsFromServer(payments, tasks) {
 
         result.push({
             id: payments[i].id,
+            taskId: payments[i].task_id,
+            requesterId: payments[i].requester_id,
+            performerId: payments[i].performer_id,
             transactionId: transactionId,
             payer: payments[i].requester_name || "User " + payments[i].requester_id,
             payee: payments[i].performer_name || "User " + payments[i].performer_id,
@@ -738,6 +741,49 @@ function renderReports() {
     }
 }
 
+function exportReportsPdf() {
+    if (!adminData || !adminData.reports) {
+        return;
+    }
+
+    var searchInput = document.getElementById("reportSearch");
+    var search = searchInput == null ? "" : searchInput.value.toLowerCase();
+    var reports = adminData.reports.slice().sort(function (a, b) {
+        var statusDiff = getReportStatusRank(a.status) - getReportStatusRank(b.status);
+
+        if (statusDiff != 0) {
+            return statusDiff;
+        }
+
+        return new Date(b.date) - new Date(a.date);
+    });
+    var rows = "";
+
+    for (var i = 0; i < reports.length; i++) {
+        var reportText = (reports[i].username + reports[i].reporterName + reports[i].reportedUserName + reports[i].description + reports[i].type).toLowerCase();
+
+        if (reportText.indexOf(search) == -1) {
+            continue;
+        }
+
+        rows += "<tr><td>" + cleanAdminText(reports[i].date) + "</td><td>" + cleanAdminText(reports[i].reporterName) + "</td><td>" + cleanAdminText(reports[i].reportedUserName) + "</td><td>" + cleanAdminText(reports[i].type) + "</td><td>" + cleanAdminText(reports[i].description) + "</td><td>" + cleanAdminText(reports[i].status) + "</td></tr>";
+    }
+
+    if (rows == "") {
+        rows = "<tr><td colspan='6'>No reports found</td></tr>";
+    }
+
+    var reportWindow = window.open("", "_blank");
+
+    if (!reportWindow) {
+        alert("Reports PDF export could not open. Please allow popups and try again.");
+        return;
+    }
+
+    reportWindow.document.write("<!doctype html><html><head><title>New Reports Today</title><style>body{font-family:Arial,sans-serif;padding:32px;color:#4f3f2b}h1{font-size:28px}table{width:100%;border-collapse:collapse;margin-top:24px}th{background:#e6bf82;text-align:left}th,td{border-bottom:1px solid #ead6b2;padding:10px 8px;vertical-align:top}</style></head><body><h1>New Reports Today</h1><table><thead><tr><th>Date</th><th>Reporter</th><th>Reported User</th><th>Report Type</th><th>Description</th><th>Status</th></tr></thead><tbody>" + rows + "</tbody></table><script>window.onload=function(){window.print();};<\/script></body></html>");
+    reportWindow.document.close();
+}
+
 function getReportUserLink(userId, userName) {
     if (userId == null || userId == "") {
         return cleanAdminText(userName || "Unknown user");
@@ -867,8 +913,13 @@ function openAdminUser(index, backSection) {
 
     showAdminSection("adminUserProfileSection");
 }
-function showProfileInfo(type) {
+async function showProfileInfo(type) {
     if (!selectedAdminUser) {
+        return;
+    }
+
+    if (type == "ratings") {
+        showAdminUserRatingHistory();
         return;
     }
 
@@ -878,15 +929,11 @@ function showProfileInfo(type) {
     if (type == "tasks") {
         title = "Task History";
         items = selectedAdminUser.tasks || [];
-    } else if (type == "ratings") {
-        title = "Rating History";
-        items = selectedAdminUser.ratings || [];
     } else if (type == "payments") {
         title = "Recent Payments";
         items = selectedAdminUser.payments || [];
     } else {
-        title = "Chats";
-        items = ["No chat records are available from the server yet"];
+        return;
     }
 
     var html = "<h3>" + cleanAdminText(title) + "</h3>";
@@ -894,6 +941,72 @@ function showProfileInfo(type) {
         html += "<p>" + cleanAdminText(items[i]) + "</p>";
     }
     document.getElementById("profileActionDetails").innerHTML = html;
+}
+
+async function showAdminUserRatingHistory() {
+    var details = document.getElementById("profileActionDetails");
+
+    if (details == null || !selectedAdminUser) {
+        return;
+    }
+
+    var userId = selectedAdminUser.dbId || selectedAdminUser.idNumber;
+
+    if (userId == null || userId == "") {
+        details.innerHTML = "<h3>Rating History</h3><p>No saved rating details for this user yet.</p>";
+        return;
+    }
+
+    details.innerHTML = "<h3>Rating History</h3><p>Loading user ratings...</p>";
+
+    try {
+        var ratingData = await fetchAdminEndpoint("/rating/user/" + userId);
+        var ratings = adminArray(ratingData.ratings);
+        var averageRating = Number(ratingData.averageRating || 0);
+        var totalRatings = Number(ratingData.totalRatings || ratings.length || 0);
+
+        if (ratings.length == 0) {
+            details.innerHTML = "<h3>Rating History</h3><p>No saved rating details for this user yet.</p>";
+            return;
+        }
+
+        var html = "<h3>Rating History</h3>" +
+            "<div class='adminRatingSummary'>" +
+            "<div><span>Average Rating</span><strong>" + cleanAdminText(averageRating.toFixed(1)) + " / 5</strong></div>" +
+            "<div><span>Total Reviews</span><strong>" + cleanAdminText(totalRatings) + "</strong></div>" +
+            "</div>";
+
+        for (var i = 0; i < ratings.length; i++) {
+            html += buildAdminUserRatingHtml(ratings[i]);
+        }
+
+        details.innerHTML = html;
+    } catch (error) {
+        details.innerHTML = "<h3>Rating History</h3><p>Rating details could not be loaded.</p>";
+    }
+}
+
+function buildAdminRatingStars(ratingValue) {
+    var value = Number(ratingValue || 0);
+    var stars = "";
+
+    for (var i = 1; i <= 5; i++) {
+        stars += i <= value ? "&#9733;" : "&#9734;";
+    }
+
+    return stars;
+}
+
+function buildAdminUserRatingHtml(rating) {
+    var ratingValue = Number(rating.rating || 0);
+
+    return "<div class='adminUserRatingItem'>" +
+        "<p><strong>Task:</strong> " + cleanAdminText(rating.task_title || "Task " + rating.task_id) + "</p>" +
+        "<p><strong>Requester:</strong> " + cleanAdminText(rating.requester_name || "Unknown requester") + "</p>" +
+        "<p><strong>Rating:</strong> " + buildAdminRatingStars(ratingValue) + " (" + cleanAdminText(ratingValue) + "/5)</p>" +
+        "<p><strong>Review:</strong> " + cleanAdminText(rating.feedback || "No written review was added.") + "</p>" +
+        "<p><strong>Date:</strong> " + cleanAdminText(formatAdminDateValue(rating.created_at)) + "</p>" +
+        "</div>";
 }
 function renderSmallList(elementId, items) {
     var element = document.getElementById(elementId);
@@ -1232,47 +1345,68 @@ function exportPaymentReceiptPdf() {
     receiptWindow.document.close();
 }
 
-function viewPaymentTaskRating() {
-    if (!selectedAdminPayment || !adminData || !adminData.users) {
+async function viewPaymentTaskRating() {
+    if (!selectedAdminPayment) {
         return;
     }
 
     var details = document.getElementById("paymentRatingDetails");
-    var names = [selectedAdminPayment.payer, selectedAdminPayment.payee];
-    var taskIndex = findAdminTaskByName(selectedAdminPayment.taskName);
 
-    if (taskIndex != -1) {
-        var task = adminData.taskLogs[taskIndex];
-        names.push(task.requester);
-        names.push(task.performer);
+    if (details == null) {
+        return;
     }
 
-    var ratingLines = [];
-
-    for (var i = 0; i < adminData.users.length; i++) {
-        var user = adminData.users[i];
-
-        if (names.indexOf(user.name) == -1 || !user.ratings || user.ratings.length == 0) {
-            continue;
-        }
-
-        for (var j = 0; j < user.ratings.length; j++) {
-            ratingLines.push(cleanAdminText(user.name) + ": " + cleanAdminText(user.ratings[j]));
-        }
-    }
-
-    if (ratingLines.length == 0) {
+    if (!selectedAdminPayment.taskId || !selectedAdminPayment.performerId) {
         details.innerHTML = "<h3>Task Rating</h3><p>No saved rating details for this task yet.</p>";
         return;
     }
 
-    var html = "<h3>Task Rating</h3>";
+    details.innerHTML = "<h3>Task Rating</h3><p>Loading task rating...</p>";
 
-    for (var k = 0; k < ratingLines.length; k++) {
-        html += "<p>" + ratingLines[k] + "</p>";
+    try {
+        var ratingData = await fetchAdminEndpoint("/rating/user/" + selectedAdminPayment.performerId);
+        var ratings = adminArray(ratingData.ratings);
+        var taskRatings = [];
+
+        for (var i = 0; i < ratings.length; i++) {
+            if (String(ratings[i].task_id) == String(selectedAdminPayment.taskId)) {
+                taskRatings.push(ratings[i]);
+            }
+        }
+
+        if (taskRatings.length == 0) {
+            details.innerHTML = "<h3>Task Rating</h3><p>No saved rating details for this task yet.</p>";
+            return;
+        }
+
+        var html = "<h3>Task Rating</h3>";
+
+        for (var j = 0; j < taskRatings.length; j++) {
+            html += buildPaymentTaskRatingHtml(taskRatings[j]);
+        }
+
+        details.innerHTML = html;
+    } catch (error) {
+        details.innerHTML = "<h3>Task Rating</h3><p>Rating details could not be loaded.</p>";
+    }
+}
+
+function buildPaymentTaskRatingHtml(rating) {
+    var ratingValue = Number(rating.rating || 0);
+    var stars = "";
+
+    for (var i = 1; i <= 5; i++) {
+        stars += i <= ratingValue ? "&#9733;" : "&#9734;";
     }
 
-    details.innerHTML = html;
+    return "<div class='paymentRatingItem'>" +
+        "<p><strong>Task:</strong> " + cleanAdminText(rating.task_title || selectedAdminPayment.taskName) + "</p>" +
+        "<p><strong>Requester:</strong> " + cleanAdminText(rating.requester_name || selectedAdminPayment.payer) + "</p>" +
+        "<p><strong>Performer:</strong> " + cleanAdminText(rating.performer_name || selectedAdminPayment.payee) + "</p>" +
+        "<p><strong>Rating:</strong> " + stars + " (" + cleanAdminText(ratingValue) + "/5)</p>" +
+        "<p><strong>Review:</strong> " + cleanAdminText(rating.feedback || "No written review was added.") + "</p>" +
+        "<p><strong>Date:</strong> " + cleanAdminText(formatAdminDateValue(rating.created_at)) + "</p>" +
+        "</div>";
 }
 
 function getTaskStatusClass(status) {
