@@ -418,14 +418,39 @@ function renderProfile() {
     setProfileText("profileEmail", currentProfile.email);
     setProfileText("profileRating", currentProfile.rating);
     setProfileText("profileRatingCount", currentProfile.ratingCount);
-    setProfileText("profileBio", currentProfile.bio);
-    setProfileText("profileSkills", currentProfile.skills);
+    renderProfileBio(currentProfile.bio);
+    renderProfileSkillTags(currentProfile.skills);
     setProfileText("completedTasksCount", currentProfile.completedTasks);
     setProfileText("activeTasksCount", currentProfile.activeTasks);
     setProfileText("earningsAmount", "$" + currentProfile.earnings);
     renderProfileImage("profileImage", "profileInitials", currentProfile);
     renderTaskHistory();
     renderReviews();
+}
+
+function renderProfileBio(bio) {
+    var element = document.getElementById("profileBio");
+    if (element == null) return;
+    if (bio == null || bio.trim() == "") {
+        element.innerHTML = '<span class="profileEmptyHint">No bio added yet</span>';
+    } else {
+        element.innerText = bio;
+    }
+}
+
+function renderProfileSkillTags(skillsText) {
+    var element = document.getElementById("profileSkills");
+    if (element == null) return;
+    var skills = getProfileSkillsArray(skillsText);
+    if (skills.length == 0) {
+        element.innerHTML = '<span class="profileEmptyHint">No skills added yet</span>';
+        return;
+    }
+    var html = "";
+    for (var i = 0; i < skills.length; i++) {
+        html += '<span class="profileSkillTag">' + cleanProfileText(skills[i]) + '</span>';
+    }
+    element.innerHTML = html;
 }
 
 function setProfileText(id, text) {
