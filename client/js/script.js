@@ -121,6 +121,24 @@ function showScreen(screenName) {
 
 }
 
+function showLoading() {
+    var overlay = document.getElementById("pageLoadingOverlay");
+    if (overlay == null) {
+        overlay = document.createElement("div");
+        overlay.id = "pageLoadingOverlay";
+        overlay.innerHTML = '<div class="loadingSpinner"></div><p class="loadingText">Loading...</p>';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = "flex";
+}
+
+function hideLoading() {
+    var overlay = document.getElementById("pageLoadingOverlay");
+    if (overlay != null) {
+        overlay.style.display = "none";
+    }
+}
+
 function showMessage(messageName, text) {
     document.getElementById(messageName).innerHTML = text;
 }
