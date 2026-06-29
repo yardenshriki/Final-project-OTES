@@ -1,4 +1,5 @@
 //yarden shriki, lior zahavi
+var taskPageFirstLoad = true;
 var taskProgressSteps = [
   "Task accepted",
   "On my way",
@@ -41,6 +42,10 @@ function loadTaskPageFromServer(taskId, shouldRenderNotFound) {
     return;
   }
 
+  if (taskPageFirstLoad) {
+    showLoading();
+  }
+
   fetch(tasksApiUrl + "/" + taskId)
     .then(function (response) {
       if (response.status >= 200 && response.status < 300) {
@@ -57,6 +62,10 @@ function loadTaskPageFromServer(taskId, shouldRenderNotFound) {
       }
       renderTaskDetails(task);
       connectTaskPageActions(task);
+      if (taskPageFirstLoad) {
+        taskPageFirstLoad = false;
+        hideLoading();
+      }
     })
     .catch(function () {
       var selectedTask = findTaskById(taskId);
@@ -64,11 +73,13 @@ function loadTaskPageFromServer(taskId, shouldRenderNotFound) {
       if (selectedTask != null) {
         renderTaskDetails(selectedTask);
         connectTaskPageActions(selectedTask);
-        return;
+      } else if (shouldRenderNotFound == true) {
+        renderTaskNotFound();
       }
 
-      if (shouldRenderNotFound == true) {
-        renderTaskNotFound();
+      if (taskPageFirstLoad) {
+        taskPageFirstLoad = false;
+        hideLoading();
       }
     });
 }

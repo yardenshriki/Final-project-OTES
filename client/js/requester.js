@@ -4,6 +4,7 @@ var selectedTaskState = "all";
 var tasksApiUrl = API_BASE_URL + "/api/tasks";
 var requesterRefreshTimer = null;
 var requesterRefreshIntervalMs = 6000;
+var requesterFirstLoad = true;
 
 function scrollToAllTasks() {
   closeMenu();
@@ -15,6 +16,10 @@ function scrollToAllTasks() {
 }
 
 function loadRequesterTasks() {
+  if (requesterFirstLoad) {
+    showLoading();
+  }
+
   fetch(tasksApiUrl)
     .then(function (response) {
       if (response.status === 200) {
@@ -35,9 +40,19 @@ function loadRequesterTasks() {
       if (typeof onChatTasksLoaded == "function") {
         onChatTasksLoaded();
       }
+      if (requesterFirstLoad) {
+        requesterFirstLoad = false;
+        if (document.getElementById("taskDetailsTitle") == null) {
+          hideLoading();
+        }
+      }
     })
     .catch(function (error) {
       console.log(error.message);
+      if (requesterFirstLoad) {
+        requesterFirstLoad = false;
+        hideLoading();
+      }
     });
 }
 

@@ -1928,3 +1928,44 @@ hr {
 .profileIcon.profileIconEmpty::after {
   display: none;
 }
+
+#pageLoadingOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: #faead3;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.loadingSpinner {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #e3be84;
+  border-top-color: #3f3327;
+  border-radius: 50%;
+  animation: spinLoading 0.75s linear infinite;
+}
+
+@keyframes spinLoading {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: #7c6a55;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.chatLoadingText {
+  padding: 24px;
+  text-align: center;
+  color: #7c6a55;
+  font-size: 14px;
+  font-style: italic;
+}

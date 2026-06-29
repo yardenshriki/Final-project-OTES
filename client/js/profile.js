@@ -274,6 +274,7 @@ function getDefaultProfileData() {
 
 function initializeProfile() {
     markProfileRole();
+    showLoading();
 
     loadProfileData(function (data) {
         profileData = data;
@@ -281,6 +282,7 @@ function initializeProfile() {
         renderProfile();
         fillEditForm();
         fillCardForm();
+        hideLoading();
     });
 }
 

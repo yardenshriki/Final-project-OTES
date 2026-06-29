@@ -4,6 +4,7 @@ var tasksApiUrl = API_BASE_URL + "/api/tasks";
 var sortNewestFirst = true;
 var performerRefreshTimer = null;
 var performerRefreshIntervalMs = 6000;
+var performerFirstLoad = true;
 var performerFilters = {
     difficulty: "",
     location: "",
@@ -12,6 +13,10 @@ var performerFilters = {
 };
 
 function loadPerformerTasks() {
+    if (performerFirstLoad) {
+        showLoading();
+    }
+
     fetch(tasksApiUrl)
         .then(function (response) {
             if (response.status < 200 || response.status >= 300) {
@@ -33,6 +38,10 @@ function loadPerformerTasks() {
             if (typeof onChatTasksLoaded == "function") {
                 onChatTasksLoaded();
             }
+            if (performerFirstLoad) {
+                performerFirstLoad = false;
+                hideLoading();
+            }
         })
         .catch(function (error) {
             console.log(error.message);
@@ -41,6 +50,10 @@ function loadPerformerTasks() {
             renderPerformerActiveTasks();
             renderPerformerAvailableTasks();
             connectPerformerActions();
+            if (performerFirstLoad) {
+                performerFirstLoad = false;
+                hideLoading();
+            }
         });
 }
 

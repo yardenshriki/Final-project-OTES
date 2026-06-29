@@ -833,14 +833,16 @@ function renderChatList() {
   updateChatUnreadBadge();
 }
 
-function openChatDrawer() {
+function openChatDrawer(skipRefresh) {
   if (document.getElementById("chatDrawer") == null) {
     ensureChatLayout();
-    setTimeout(openChatDrawer, 200);
+    setTimeout(function () { openChatDrawer(skipRefresh); }, 200);
     return;
   }
 
-  refreshChatUnreadState();
+  if (skipRefresh !== true) {
+    refreshChatUnreadState();
+  }
   document.getElementById("chatOverlay").style.display = "block";
   document.getElementById("chatDrawer").style.display = "block";
 }
@@ -878,7 +880,12 @@ function openTaskChat(taskId) {
     conversationView.style.display = "block";
   }
 
-  openChatDrawer();
+  openChatDrawer(true);
+
+  var chatMessages = document.getElementById("chatMessages");
+  if (chatMessages != null) {
+    chatMessages.innerHTML = '<p class="chatLoadingText">Loading messages...</p>';
+  }
 
   loadTaskMessages(taskId).then(function () {
     markTaskChatAsRead(taskId);
