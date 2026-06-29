@@ -10,6 +10,8 @@ function cleanUserFromBody(body) {
     phoneNumber: body.phoneNumber || body.phone_number || null,
     gender: body.gender || null,
     profilePicture: body.profilePicture || body.profile_picture || null,
+    bio: body.bio == null ? null : body.bio,
+    skills: body.skills == null ? null : body.skills,
     role: body.role || getRoleFromUsername(body.username),
   };
 }
@@ -31,7 +33,7 @@ async function getAllUsers(req, res) {
   try {
     const [users] = await db.execute(
       `SELECT id, full_name, username, email, birth_date, phone_number,
-        gender, profile_picture, created_at, role
+        gender, profile_picture, bio, skills, created_at, role
       FROM users`,
     );
 
@@ -48,7 +50,7 @@ async function getUserById(req, res) {
   try {
     const [users] = await db.execute(
       `SELECT id, full_name, username, email, birth_date, phone_number,
-        gender, profile_picture, created_at, role
+        gender, profile_picture, bio, skills, created_at, role
       FROM users
       WHERE id = ?`,
       [req.params.id],
@@ -83,8 +85,8 @@ async function createUser(req, res) {
   try {
     const [result] = await db.execute(
       `INSERT INTO users
-      (full_name, username, email, password, birth_date, phone_number, gender, profile_picture, role)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (full_name, username, email, password, birth_date, phone_number, gender, profile_picture, bio, skills, role)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user.fullName,
         user.username,
@@ -94,6 +96,8 @@ async function createUser(req, res) {
         user.phoneNumber,
         user.gender,
         user.profilePicture,
+        user.bio,
+        user.skills,
         user.role,
       ],
     );
@@ -177,12 +181,14 @@ async function updateUser(req, res) {
       user.phoneNumber,
       user.gender,
       user.profilePicture,
+      user.bio,
+      user.skills,
       user.role,
     ];
 
     let query = `UPDATE users
       SET full_name = ?, username = ?, email = ?, birth_date = ?, phone_number = ?,
-        gender = ?, profile_picture = ?, role = ?`;
+        gender = ?, profile_picture = ?, bio = ?, skills = ?, role = ?`;
 
     if (user.password) {
       query += ", password = ?";

@@ -272,19 +272,23 @@ async function takeTask(req, res) {
     const [result] = await db.execute(
       `UPDATE tasks
       SET performer_id = ?, state = ?, work_status = ?
-      WHERE id = ? AND state = ? AND performer_id IS NULL`,
+      WHERE id = ?
+        AND state = ?
+        AND performer_id IS NULL
+        AND requester_id <> ?`,
       [
         selectedPerformerId,
         "in-progress",
         "Task accepted",
         req.params.id,
         "open",
+        selectedPerformerId,
       ],
     );
 
     if (result.affectedRows == 0) {
-      res.status(400).json({
-        message: "Task is not available",
+      res.status(409).json({
+        message: "This task is no longer available",
       });
       return;
     }
