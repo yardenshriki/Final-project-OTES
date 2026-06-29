@@ -125,8 +125,13 @@ function goBack() {
 function openTaskImage() {
   var imageSection = document.getElementById("taskImageSection");
   if (imageSection == null) return;
-  var imageData = imageSection.getAttribute("data-image");
-  if (!imageData) return;
+  var imageData = getValidTaskImageData(
+    imageSection.getAttribute("data-image"),
+  );
+  if (imageData == "") {
+    hideTaskImageSection();
+    return;
+  }
 
   var previewWrap = document.getElementById("taskImagePreviewWrap");
   var preview = document.getElementById("taskImagePreview");
@@ -142,6 +147,68 @@ function openTaskImage() {
   }
 }
 
+function getValidTaskImageData(imageData) {
+  if (imageData == null) {
+    return "";
+  }
+
+  var normalizedImageData = String(imageData).trim();
+  var invalidValues = ["", "null", "undefined"];
+
+  if (invalidValues.indexOf(normalizedImageData.toLowerCase()) != -1) {
+    return "";
+  }
+
+  if (normalizedImageData.indexOf("data:image/") != 0) {
+    return "";
+  }
+
+  return normalizedImageData;
+}
+
+function hideTaskImageSection() {
+  var imageSection = document.getElementById("taskImageSection");
+  var previewWrap = document.getElementById("taskImagePreviewWrap");
+  var preview = document.getElementById("taskImagePreview");
+  var button = document.getElementById("taskImageButton");
+
+  if (imageSection != null) {
+    imageSection.style.display = "none";
+    imageSection.removeAttribute("data-image");
+  }
+
+  if (previewWrap != null) {
+    previewWrap.style.display = "none";
+  }
+
+  if (preview != null) {
+    preview.removeAttribute("src");
+  }
+
+  if (button != null) {
+    button.innerHTML = "View Image";
+  }
+}
+
+function renderTaskImage(imageData) {
+  var imageSection = document.getElementById("taskImageSection");
+  var validImageData = getValidTaskImageData(imageData);
+
+  hideTaskImageSection();
+
+  if (imageSection == null || validImageData == "") {
+    return;
+  }
+
+  var imageLoader = new Image();
+  imageLoader.onload = function () {
+    imageSection.setAttribute("data-image", validImageData);
+    imageSection.style.display = "block";
+  };
+  imageLoader.onerror = hideTaskImageSection;
+  imageLoader.src = validImageData;
+}
+
 function renderTaskNotFound() {
   document.getElementById("taskDetailsTitle").innerHTML = "Task not found";
   document.getElementById("taskDetailsDescription").innerHTML =
@@ -149,19 +216,35 @@ function renderTaskNotFound() {
 }
 
 function formatDisplayDate(dateValue) {
-  if (dateValue == null || dateValue == "") {
+  if (
+    dateValue == null ||
+    dateValue == "" ||
+    String(dateValue).toLowerCase() == "null"
+  ) {
     return "";
   }
   return String(dateValue).split("T")[0];
 }
 
 function renderTaskDetails(selectedTask) {
+  var additionalDetails = selectedTask.additional_details;
+  if (
+    additionalDetails == null ||
+    String(additionalDetails).toLowerCase() == "null"
+  ) {
+    additionalDetails = "";
+  }
+
+  var description = selectedTask.description || "";
+  if (additionalDetails != "") {
+    description += "<br><br>" + additionalDetails;
+  }
+
   var taskFields = {
     taskDetailsTitle: selectedTask.title,
     taskDetailsStatus: selectedTask.state,
     taskDetailsPosted: "Posted on " + formatDisplayDate(selectedTask.created_at),
-    taskDetailsDescription:
-      selectedTask.description + "<br><br>" + selectedTask.additional_details,
+    taskDetailsDescription: description,
     taskDetailsPayment: "$" + selectedTask.payment,
     taskDetailsCategory: selectedTask.category,
     taskDetailsDifficulty: selectedTask.difficulty,
@@ -176,15 +259,7 @@ function renderTaskDetails(selectedTask) {
     selectedTask.state,
   );
 
-  var imageSection = document.getElementById("taskImageSection");
-  if (imageSection != null) {
-    if (selectedTask.image_data) {
-      imageSection.style.display = "block";
-      imageSection.setAttribute("data-image", selectedTask.image_data);
-    } else {
-      imageSection.style.display = "none";
-    }
-  }
+  renderTaskImage(selectedTask.image_data);
 
   var requesterNameEl = document.getElementById("taskRequesterName");
   if (requesterNameEl != null) {

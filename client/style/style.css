@@ -201,6 +201,11 @@
   text-align: center;
 }
 
+#page > .screen {
+  padding-bottom: clamp(28px, 4vw, 56px);
+  box-sizing: border-box;
+}
+
 #loginScreen {
   display: block;
 }

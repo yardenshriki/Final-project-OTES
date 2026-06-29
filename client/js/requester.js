@@ -576,10 +576,24 @@ function checkTask() {
 
   if (attachment && attachment.files && attachment.files.length > 0) {
     var file = attachment.files[0];
+
+    if (file.type == null || file.type.indexOf("image/") != 0) {
+      showMessage("taskMessage", "Please upload a valid image file");
+      return false;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      showMessage("taskMessage", "Image size must not exceed 10MB");
+      return false;
+    }
+
     var reader = new FileReader();
     reader.onload = function (e) {
       task.image_data = e.target.result;
       submitTask(task);
+    };
+    reader.onerror = function () {
+      showMessage("taskMessage", "The image could not be read. Please choose another image");
     };
     reader.readAsDataURL(file);
   } else {
